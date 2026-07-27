@@ -1,0 +1,84 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+public class EnemyHealth : MonoBehaviour
+{
+    public enum DeathAction { Destroy, FallOver, Revive }
+
+    [Header("Health Settings")]
+    public float maxHealth = 100f;
+    private float currentHealth;
+
+    [Header("UI Settings")]
+    public Image healthBarFill; // ใส่ Image ของ Health
+    public Transform healthCanvas; // ใส่ Canvas ให้หันเข้ากล้อง
+
+    [Header("Death Settings")]
+    public DeathAction onDeath;
+
+    private bool isDead = false;
+
+    private void Start()
+    {
+        currentHealth = maxHealth;
+        UpdateHealthBar();
+    }
+    private void LateUpdate()
+    {
+        if(healthCanvas != null && Camera.main != null)
+        {
+            healthCanvas.LookAt(healthCanvas.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
+        }
+    }
+    public void TakeDamage(float amount)
+    {
+        if (isDead) return;
+
+        currentHealth -= amount;
+
+        if (currentHealth < 0) currentHealth = 0;
+
+        UpdateHealthBar();
+
+        if (currentHealth == 0)
+        {
+            Die();
+        }
+    }
+    private void UpdateHealthBar()
+    {
+        if (healthBarFill != null)
+        {
+            // Fill Amount รับค่าตั้งแต่ 0 ถึง 1 เท่านั้น เลยต้องเอา เลือดปัจจุบัน / เลือดสูงสุด
+            healthBarFill.fillAmount = currentHealth / maxHealth;
+        }
+    }
+    private void Die()
+    {
+        isDead = true;
+
+        switch (onDeath)
+        {
+            case DeathAction.Destroy:
+                // ทำให้หายไปจากฉาก
+                Destroy(gameObject);
+                break;
+
+            case DeathAction.FallOver:
+                // หมุน Capsule ให้นอนลง 90 องศาแนวแกน X
+                transform.rotation = Quaternion.Euler(90f, transform.eulerAngles.y, transform.eulerAngles.z);
+
+                // ปิดหลอดเลือด
+                if (healthCanvas != null) healthCanvas.gameObject.SetActive(false);
+                break;
+
+            case DeathAction.Revive:
+                // ชุบชีวิต กลับมาเลือดเต็ม 100 เหมือนเดิม
+                isDead = false;
+                currentHealth = maxHealth;
+                UpdateHealthBar();
+                Debug.Log("Enemy Revived!");
+                break;
+        }
+    }
+}
