@@ -27,7 +27,6 @@ public class GunAction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // ยิงได้ต่อเมื่อ: 1. ถูกถืออยู่ 2. กดคลิกซ้าย 3. ถึงเวลายิงได้ตาม Fire Rate
         if (isHeld && Input.GetButton("Fire1") && Time.time > nextFireTime)
         {
             nextFireTime = Time.time + fireRate;

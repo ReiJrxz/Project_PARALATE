@@ -34,9 +34,13 @@ public class EnemyHealth : MonoBehaviour
     {
         if (isDead) return;
 
+        Debug.Log("<color=yellow>รับดาเมจมา: " + amount + " เลือดก่อนโดนฟันคือ: " + currentHealth + "</color>");
+
         currentHealth -= amount;
 
         if (currentHealth < 0) currentHealth = 0;
+
+        Debug.Log("<color=green>เลือดหลังโดนฟันเหลือ: " + currentHealth + "</color>");
 
         UpdateHealthBar();
 

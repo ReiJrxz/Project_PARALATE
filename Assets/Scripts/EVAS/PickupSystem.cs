@@ -49,28 +49,26 @@ public class PickupSystem : MonoBehaviour
     {
         heldItem = item;
 
-        // ปิดฟิสิกส์เพื่อไม่ให้ของตกลงพื้น
         Rigidbody rb = item.GetComponent<Rigidbody>();
         if (rb != null)
             rb.isKinematic = true;
 
-        // ปิด Collider เพื่อไม่ให้ของดันตัวละครเรากระเด็น
         Collider coll = item.GetComponent<Collider>();
         if (coll != null)
             coll.enabled = false;
 
-        // ย้ายของมาเป็นลูกของ PickUp (ให้อยู่ด้านข้าง)
         item.transform.SetParent(PickUp);
 
-        // รีเซ็ตตำแหน่งและการหมุนให้ตรงกับ PickUp เป๊ะๆ
         item.transform.localPosition = holdPositionOffset;
         item.transform.localEulerAngles = holdRotationOffset;
 
         GunAction gun = item.GetComponent<GunAction>();
         if (gun != null)
-        {
-            gun.isHeld = true; // บอกปืนว่าถูกถือแล้ว
-        }
+            gun.isHeld = true;
+
+        KnifeAction knife = item.GetComponent<KnifeAction>();
+        if(knife != null )
+            knife.isHeld = true;
     }
 
     /*void DropItem()
