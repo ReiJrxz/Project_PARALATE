@@ -1,5 +1,7 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(PlayerInput))]
 public class PickupSystem : MonoBehaviour
 {
     [Header("Pickup Settings")]
@@ -13,15 +15,25 @@ public class PickupSystem : MonoBehaviour
     private GameObject heldItem;
     private GameObject gunItem;
     private GameObject knifeItem;
+    private PlayerInput playerInput;
+    private InputAction interactAction;
+    private InputAction switchWeaponAction;
+
+    void Awake()
+    {
+        playerInput = GetComponent<PlayerInput>();
+        interactAction = playerInput.actions["Interact"];
+        switchWeaponAction = playerInput.actions["SwitchWeapon"];
+    }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (interactAction.WasPressedThisFrame())
         {
             TryPickup();
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
+        if (switchWeaponAction.WasPressedThisFrame())
         {
             SwitchWeapon();
         }
@@ -132,7 +144,7 @@ public class PickupSystem : MonoBehaviour
 
         GunAction gun = item.GetComponent<GunAction>();
         if (gun != null)
-            gun.isHeld = held;
+            gun.SetHeld(held);
 
         KnifeAction knife = item.GetComponent<KnifeAction>();
         if (knife != null)

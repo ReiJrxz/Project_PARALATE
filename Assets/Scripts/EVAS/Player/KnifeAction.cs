@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.InputSystem;
 
 public class KnifeAction : MonoBehaviour
 {
@@ -17,21 +18,47 @@ public class KnifeAction : MonoBehaviour
     [Header("State")]
     public bool isHeld = false;
 
+    [Header("Input Actions")]
+    public InputActionReference attackAction;
+
     [Header("Player Reference")]
     public Transform playerTransform;
 
     private float nextAttackTime;
     private bool isAssassinating = false;
+    private PlayerInput playerInput;
+    private InputAction resolvedAttackAction;
 
     void Update()
     {
-        if (isHeld && Input.GetButtonDown("Fire1") && Time.time > nextAttackTime && !isAssassinating)
+        ResolveAttackAction();
+
+        if (isHeld && resolvedAttackAction != null && resolvedAttackAction.WasPressedThisFrame() && Time.time > nextAttackTime && !isAssassinating)
         {
             nextAttackTime = Time.time + attackRate;
             Attack();
             Debug.Log("Atack");
         }
     }
+
+    void ResolveAttackAction()
+    {
+        if (attackAction != null)
+        {
+            resolvedAttackAction = attackAction.action;
+            return;
+        }
+
+        if (resolvedAttackAction != null)
+            return;
+
+        playerInput = GetComponentInParent<PlayerInput>();
+        if (playerInput == null)
+            return;
+
+        resolvedAttackAction = playerInput.actions["Fire"];
+    }
+
     void Attack()
     {
         Transform attackTransform = playerTransform != null ? playerTransform : transform;

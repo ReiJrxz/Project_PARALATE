@@ -33,6 +33,21 @@ public class GunAction : MonoBehaviour
         mainCam = Camera.main;
     }
 
+    private void OnDisable()
+    {
+        SetCrosshairVisible(false);
+        Cursor.visible = true;
+    }
+
+    public void SetHeld(bool held)
+    {
+        isHeld = held;
+        SetCrosshairVisible(held);
+
+        if (!held)
+            Cursor.visible = true;
+    }
+
     void Update()
     {
         HandleCrosshair();
@@ -50,7 +65,7 @@ public class GunAction : MonoBehaviour
         if (crosshairUI != null)
         {
             // เปิด/ปิด UI เป้าเล็งตามสถานะการถือปืน
-            crosshairUI.gameObject.SetActive(isHeld);
+            SetCrosshairVisible(isHeld);
 
             if (isHeld)
             {
@@ -66,6 +81,12 @@ public class GunAction : MonoBehaviour
                 Cursor.visible = true; // โชว์เมาส์ปกติเมื่อเก็บปืน
             }
         }
+    }
+
+    void SetCrosshairVisible(bool visible)
+    {
+        if (crosshairUI != null && crosshairUI.gameObject.activeSelf != visible)
+            crosshairUI.gameObject.SetActive(visible);
     }
 
     void Shoot()
