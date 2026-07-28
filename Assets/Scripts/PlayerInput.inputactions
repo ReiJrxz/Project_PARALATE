@@ -61,6 +61,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "UnequipWeapon",
+                    "type": "Button",
+                    "id": "f569066f-00b7-43be-9460-d89ab8720e71",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Hurdle",
                     "type": "Button",
                     "id": "0eb87cf0-8b72-4d55-aeda-d0f184ccf40c",
@@ -243,6 +252,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "SwitchWeapon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "33922eb6-90bf-49e2-a8ad-a282d33b66b8",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "UnequipWeapon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "71d0eceb-2ac9-4025-a733-de6aecadffbd",
+                    "path": "<Keyboard>/numpad2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "UnequipWeapon",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

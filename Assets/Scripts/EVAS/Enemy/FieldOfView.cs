@@ -61,26 +61,33 @@ public class FieldOfView : MonoBehaviour
     }
     private void FieldOfViewCheck()
     {
+        canSeePlayer = false;
+
         Collider[] rangeChecks = Physics.OverlapSphere(transform.position, radius, targetMask);
-
-        if (rangeChecks.Length != 0)
+        for (int i = 0; i < rangeChecks.Length; i++)
         {
-            Transform target = rangeChecks[0].transform;
-            Vector3 directionToTarget = (target.position - transform.position).normalized;
-
-            if (Vector3.Angle(transform.forward, directionToTarget) < angle / 2)
+            if (IsTargetInVisionCone(rangeChecks[i].transform))
             {
-                float distanceToTarget = Vector3.Distance(transform.position, target.position);
-                if (!Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstructionMask))
-                    canSeePlayer = true;
-                else
-                    canSeePlayer = false;
+                canSeePlayer = true;
+                return;
             }
-            else
-                canSeePlayer = false;
         }
-        else if (canSeePlayer)
-            canSeePlayer = false;
+    }
+
+    public bool IsTargetInVisionCone(Transform target)
+    {
+        if (target == null)
+            return false;
+
+        Vector3 directionToTarget = (target.position - transform.position).normalized;
+        if (Vector3.Angle(transform.forward, directionToTarget) >= angle / 2)
+            return false;
+
+        float distanceToTarget = Vector3.Distance(transform.position, target.position);
+        if (distanceToTarget > radius)
+            return false;
+
+        return !Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstructionMask);
     }
 
     private void CreateConeVisual()

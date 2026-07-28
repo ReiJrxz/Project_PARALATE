@@ -35,6 +35,9 @@ public class TopDownPlayerController : MonoBehaviour
 
     private bool isVaulting = false; // ตัวแปรเช็คว่ากำลังกระโดดข้ามอยู่หรือไม่
 
+    private bool isMovementLocked = false;
+    public bool IsMovementLocked => isMovementLocked;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -51,11 +54,16 @@ public class TopDownPlayerController : MonoBehaviour
     void Update()
     {
         // ถ้ากำลังปีนข้ามอยู่ จะไม่รับคำสั่งเดินและหันหน้า
-        if (isVaulting) return;
+        if (isVaulting || isMovementLocked) return;
 
         HandleMovement();
         HandleRotation();
         HandleVault();
+    }
+
+    public void SetMovementLocked(bool locked)
+    {
+        isMovementLocked = locked;
     }
 
     void HandleMovement()

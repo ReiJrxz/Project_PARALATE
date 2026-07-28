@@ -13,7 +13,7 @@ public class KnifeAction : MonoBehaviour
     public Vector3 raycastOffset = new Vector3(0f, 1f, 0f); // X=ซ้ายขวา, Y=ขึ้นลง, Z=หน้าหลัง
 
     [Header("Assassin Settings")]
-    public float backstabDelay = 2f;
+    public float backstabDelay = 2f; // Delay ตอนฆ่าด้วยมือมีด (วินาที)
 
     [Header("State")]
     public bool isHeld = false;
@@ -28,6 +28,7 @@ public class KnifeAction : MonoBehaviour
     private bool isAssassinating = false;
     private PlayerInput playerInput;
     private InputAction resolvedAttackAction;
+    private TopDownPlayerController movementController;
 
     void Update()
     {
@@ -84,7 +85,7 @@ public class KnifeAction : MonoBehaviour
             EnemyHealth enemy = hit.collider.GetComponentInParent<EnemyHealth>();
             if (enemy != null)
             {
-                if (IsBehindEnemy(enemy.transform))
+                if (CanAssassinate(enemy))
                 {
                     StartCoroutine(AssassinationSequence(enemy));
                 }
@@ -101,17 +102,18 @@ public class KnifeAction : MonoBehaviour
         }
 
     }
-    bool IsBehindEnemy(Transform enemyTransform)
+    bool CanAssassinate(EnemyHealth enemy)
     {
+        FieldOfView fieldOfView = enemy.GetComponent<FieldOfView>();
         Transform attackTransform = playerTransform != null ? playerTransform : transform;
-        Vector3 dirToPlayer = (attackTransform.position - enemyTransform.position).normalized;
-        float positionDot = Vector3.Dot(enemyTransform.forward, dirToPlayer);
-        return positionDot < -0.5f;
+
+        return fieldOfView == null || !fieldOfView.IsTargetInVisionCone(attackTransform);
     }
     IEnumerator AssassinationSequence(EnemyHealth enemy)
     {
         isAssassinating = true;
-        Debug.Log("กำลังลอบสังหาร... รอ 2 วินาที");
+        SetPlayerMovementLocked(true);
+        Debug.Log("กำลังลอบสังหารด้วยมีด... รอ 2 วินาที");
 
         yield return new WaitForSeconds(backstabDelay);
 
@@ -121,6 +123,16 @@ public class KnifeAction : MonoBehaviour
             Debug.Log("ลอบสังหารสำเร็จ!");
         }
 
+        SetPlayerMovementLocked(false);
         isAssassinating = false;
+    }
+
+    void SetPlayerMovementLocked(bool locked)
+    {
+        if (movementController == null && playerTransform != null)
+            movementController = playerTransform.GetComponent<TopDownPlayerController>();
+
+        if (movementController != null)
+            movementController.SetMovementLocked(locked);
     }
 }

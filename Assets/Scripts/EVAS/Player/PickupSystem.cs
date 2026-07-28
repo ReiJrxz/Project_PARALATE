@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 [RequireComponent(typeof(PlayerInput))]
 public class PickupSystem : MonoBehaviour
@@ -12,22 +13,40 @@ public class PickupSystem : MonoBehaviour
     public Vector3 holdPositionOffset;
     public Vector3 holdRotationOffset;
 
+    [Header("Unarmed Assassination")]
+    public float unarmedAttackRange = 2f;
+    public float unarmedKillDelay = 5f; // Delay ตอนฆ่าด้วยมือเปล่า (วินาที)
+    public Vector3 unarmedRaycastOffset = new Vector3(0f, 1f, 0f);
+
     private GameObject heldItem;
     private GameObject gunItem;
     private GameObject knifeItem;
     private PlayerInput playerInput;
     private InputAction interactAction;
     private InputAction switchWeaponAction;
+    private InputAction unequipWeaponAction;
+    private InputAction attackAction;
+    private TopDownPlayerController movementController;
+    private bool isUnarmedAssassinating = false;
 
     void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
         interactAction = playerInput.actions["Interact"];
         switchWeaponAction = playerInput.actions["SwitchWeapon"];
+        unequipWeaponAction = playerInput.actions["UnequipWeapon"];
+        attackAction = playerInput.actions["Fire"];
+        movementController = GetComponent<TopDownPlayerController>();
     }
 
     void Update()
     {
+        if (movementController != null && movementController.IsMovementLocked)
+            return;
+
+        if (isUnarmedAssassinating)
+            return;
+
         if (interactAction.WasPressedThisFrame())
         {
             TryPickup();
@@ -36,6 +55,16 @@ public class PickupSystem : MonoBehaviour
         if (switchWeaponAction.WasPressedThisFrame())
         {
             SwitchWeapon();
+        }
+
+        if (unequipWeaponAction.WasPressedThisFrame())
+        {
+            UnequipWeapon();
+        }
+
+        if (heldItem == null && attackAction.WasPressedThisFrame())
+        {
+            TryUnarmedAssassination();
         }
     }
 
@@ -118,10 +147,37 @@ public class PickupSystem : MonoBehaviour
 
     void SwitchWeapon()
     {
-        if (gunItem == null || knifeItem == null)
+        if (gunItem == null && knifeItem == null)
             return;
 
-        EquipWeapon(heldItem == gunItem ? knifeItem : gunItem);
+        if (heldItem == null)
+        {
+            EquipWeapon(GetPreferredWeapon());
+            return;
+        }
+
+        if (gunItem != null && knifeItem != null)
+        {
+            EquipWeapon(heldItem == gunItem ? knifeItem : gunItem);
+            return;
+        }
+
+        EquipWeapon(GetPreferredWeapon());
+    }
+
+    void UnequipWeapon()
+    {
+        SetWeaponHeld(gunItem, false);
+        SetWeaponHeld(knifeItem, false);
+        heldItem = null;
+    }
+
+    GameObject GetPreferredWeapon()
+    {
+        if (gunItem != null)
+            return gunItem;
+
+        return knifeItem;
     }
 
     void EquipWeapon(GameObject item)
@@ -151,5 +207,58 @@ public class PickupSystem : MonoBehaviour
             knife.isHeld = held;
 
         item.SetActive(held);
+    }
+
+    void TryUnarmedAssassination()
+    {
+        Vector3 attackOrigin = transform.position
+                               + (transform.right * unarmedRaycastOffset.x)
+                               + (transform.up * unarmedRaycastOffset.y)
+                               + (transform.forward * unarmedRaycastOffset.z);
+
+        Debug.DrawRay(attackOrigin, transform.forward * unarmedAttackRange, Color.magenta, 2f);
+
+        if (!Physics.Raycast(attackOrigin, transform.forward, out RaycastHit hit, unarmedAttackRange))
+            return;
+
+        EnemyHealth enemy = hit.collider.GetComponentInParent<EnemyHealth>();
+        if (enemy == null || !CanAssassinate(enemy))
+            return;
+
+        StartCoroutine(UnarmedAssassinationSequence(enemy));
+    }
+
+    bool CanAssassinate(EnemyHealth enemy)
+    {
+        FieldOfView fieldOfView = enemy.GetComponent<FieldOfView>();
+        return fieldOfView == null || !fieldOfView.IsTargetInVisionCone(transform);
+    }
+
+    IEnumerator UnarmedAssassinationSequence(EnemyHealth enemy)
+    {
+        isUnarmedAssassinating = true;
+        SetPlayerMovementLocked(true);
+
+        Debug.Log("กำลังลอบสังหารด้วยมีด... รอ 5 วินาที");
+
+        yield return new WaitForSeconds(unarmedKillDelay);
+
+        if (enemy != null)
+        {
+            enemy.TakeDamage(9999f);
+            Debug.Log("ลอบสังหารสำเร็จ!");
+        }
+        
+        SetPlayerMovementLocked(false);
+        isUnarmedAssassinating = false;
+    }
+
+    void SetPlayerMovementLocked(bool locked)
+    {
+        if (movementController == null)
+            movementController = GetComponent<TopDownPlayerController>();
+
+        if (movementController != null)
+            movementController.SetMovementLocked(locked);
     }
 }
