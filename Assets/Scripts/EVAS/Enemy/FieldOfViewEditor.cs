@@ -4,6 +4,7 @@ using UnityEditor;
 [CustomEditor(typeof(FieldOfView))]
 public class FieldOfViewEditor : Editor
 {
+    // ฟังก์ชันสำหรับวาด Gizmos ใน Scene View
     private void OnSceneGUI()
     {
         FieldOfView fov = (FieldOfView)target;
@@ -23,6 +24,7 @@ public class FieldOfViewEditor : Editor
             Handles.DrawLine(fov.transform.position, fov.playerRef.transform.position);
         }
     }
+    // ฟังก์ชันสำหรับคำนวณทิศทางจากมุม
     private Vector3 DirectionFromAngle(float eulerY, float angleInDegress)
     {
         angleInDegress += eulerY;

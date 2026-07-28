@@ -59,7 +59,7 @@ public class KnifeAction : MonoBehaviour
 
         resolvedAttackAction = playerInput.actions["Fire"];
     }
-
+    // ฟังก์ชันสำหรับการโจมตีด้วยมีด
     void Attack()
     {
         Transform attackTransform = playerTransform != null ? playerTransform : transform;
@@ -102,6 +102,7 @@ public class KnifeAction : MonoBehaviour
         }
 
     }
+    // ฟังก์ชันตรวจสอบว่าผู้เล่นสามารถลอบสังหารศัตรูได้หรือไม่
     bool CanAssassinate(EnemyHealth enemy)
     {
         FieldOfView fieldOfView = enemy.GetComponent<FieldOfView>();
@@ -109,6 +110,7 @@ public class KnifeAction : MonoBehaviour
 
         return fieldOfView == null || !fieldOfView.IsTargetInVisionCone(attackTransform);
     }
+    // ฟังก์ชันสำหรับลอบสังหารศัตรู
     IEnumerator AssassinationSequence(EnemyHealth enemy)
     {
         isAssassinating = true;
@@ -126,7 +128,7 @@ public class KnifeAction : MonoBehaviour
         SetPlayerMovementLocked(false);
         isAssassinating = false;
     }
-
+    // ฟังก์ชันสำหรับล็อกหรือปลดล็อกการเคลื่อนที่ของผู้เล่น
     void SetPlayerMovementLocked(bool locked)
     {
         if (movementController == null && playerTransform != null)

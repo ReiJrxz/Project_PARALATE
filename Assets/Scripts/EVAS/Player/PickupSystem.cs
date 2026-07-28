@@ -38,7 +38,6 @@ public class PickupSystem : MonoBehaviour
         attackAction = playerInput.actions["Fire"];
         movementController = GetComponent<TopDownPlayerController>();
     }
-
     void Update()
     {
         if (movementController != null && movementController.IsMovementLocked)
@@ -67,7 +66,7 @@ public class PickupSystem : MonoBehaviour
             TryUnarmedAssassination();
         }
     }
-
+    // ฟังก์ชันสำหรับตรวจสอบและเก็บไอเท็ม
     void TryPickup()
     {
         Ray ray = new Ray(transform.position, transform.forward);
@@ -83,7 +82,7 @@ public class PickupSystem : MonoBehaviour
             }
         }
     }
-
+    // ฟังก์ชันสำหรับเก็บไอเท็ม
     void PickUpObject(GameObject item)
     {
         if (item == null)
@@ -131,7 +130,7 @@ public class PickupSystem : MonoBehaviour
         EquipWeapon(item);
         Debug.Log("Equipped: " + item.name);
     }
-
+    // ฟังก์ชันสำหรับหาตัว root ของอาวุธ (Gun หรือ Knife)
     GameObject GetWeaponRoot(GameObject item)
     {
         GunAction gun = item.GetComponentInParent<GunAction>();
@@ -144,7 +143,7 @@ public class PickupSystem : MonoBehaviour
 
         return item;
     }
-
+    // ฟังก์ชันสำหรับสลับอาวุธ
     void SwitchWeapon()
     {
         if (gunItem == null && knifeItem == null)
@@ -164,14 +163,14 @@ public class PickupSystem : MonoBehaviour
 
         EquipWeapon(GetPreferredWeapon());
     }
-
+    // ฟังก์ชันสำหรับปลดอาวุธ
     void UnequipWeapon()
     {
         SetWeaponHeld(gunItem, false);
         SetWeaponHeld(knifeItem, false);
         heldItem = null;
     }
-
+    // ฟังก์ชันสำหรับหาว่าอาวุธที่ควรถือคืออะไร (Gun > Knife)
     GameObject GetPreferredWeapon()
     {
         if (gunItem != null)
@@ -179,7 +178,7 @@ public class PickupSystem : MonoBehaviour
 
         return knifeItem;
     }
-
+    // ฟังก์ชันสำหรับสวมอาวุธ
     void EquipWeapon(GameObject item)
     {
         if (item == null)
@@ -192,7 +191,7 @@ public class PickupSystem : MonoBehaviour
         heldItem.SetActive(true);
         SetWeaponHeld(heldItem, true);
     }
-
+    // ฟังก์ชันสำหรับตั้งค่าอาวุธว่าเป็น held หรือไม่
     void SetWeaponHeld(GameObject item, bool held)
     {
         if (item == null)
@@ -208,7 +207,7 @@ public class PickupSystem : MonoBehaviour
 
         item.SetActive(held);
     }
-
+    // ฟังก์ชันสำหรับพยายามลอบสังหารด้วยมือเปล่า
     void TryUnarmedAssassination()
     {
         Vector3 attackOrigin = transform.position
@@ -227,13 +226,13 @@ public class PickupSystem : MonoBehaviour
 
         StartCoroutine(UnarmedAssassinationSequence(enemy));
     }
-
+    // ฟังก์ชันสำหรับตรวจสอบว่าผู้เล่นสามารถลอบสังหารศัตรูได้หรือไม่
     bool CanAssassinate(EnemyHealth enemy)
     {
         FieldOfView fieldOfView = enemy.GetComponent<FieldOfView>();
         return fieldOfView == null || !fieldOfView.IsTargetInVisionCone(transform);
     }
-
+    // Coroutine สำหรับลอบสังหารด้วยมือเปล่า
     IEnumerator UnarmedAssassinationSequence(EnemyHealth enemy)
     {
         isKnockout = true;
@@ -252,7 +251,7 @@ public class PickupSystem : MonoBehaviour
         SetPlayerMovementLocked(false);
         isKnockout = false;
     }
-
+    // ฟังก์ชันสำหรับล็อกหรือปลดล็อกการเคลื่อนที่ของผู้เล่น
     void SetPlayerMovementLocked(bool locked)
     {
         if (movementController == null)

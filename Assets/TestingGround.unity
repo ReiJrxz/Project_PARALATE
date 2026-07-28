@@ -2408,6 +2408,16 @@ MonoBehaviour:
   showDebugLine: 1
   fireAction: {fileID: -3566526748847213536, guid: 3bdf035a2b3eac841b3fdc702c70b4a7, type: 3}
   pointerAction: {fileID: -5535721034145073497, guid: 3bdf035a2b3eac841b3fdc702c70b4a7, type: 3}
+  aimAction: {fileID: 0}
+  enableScope: 1
+  normalFieldOfView: 50
+  scopedFieldOfView: 25
+  scopeZoomSpeed: 12
+  hideCrosshairWhileScoped: 0
+  enableScopeCameraOffset: 1
+  scopedCameraOffset: {x: 0, y: -5, z: 5}
+  enableScopeCameraAngle: 1
+  scopedTiltOffset: -10
 --- !u!1 &344457205
 GameObject:
   m_ObjectHideFlags: 0
@@ -2445,7 +2455,7 @@ MonoBehaviour:
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: 0, y: 10, z: -10}
+  FollowOffset: {x: 0, y: 9.999993, z: -9.999996}
 --- !u!114 &344457208
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3584,9 +3594,9 @@ MonoBehaviour:
     m_Bits: 0
   holdPositionOffset: {x: 0, y: 0, z: 0}
   holdRotationOffset: {x: 0, y: 90, z: 0}
-  unarmedAttackRange: 2
-  unarmedKillDelay: 5
-  unarmedRaycastOffset: {x: 0, y: 1, z: 0}
+  KnockoutRange: 2
+  KnockoutKillDelay: 5
+  KnockoutRaycastOffset: {x: 0, y: 1, z: 0}
 --- !u!43 &744716780
 Mesh:
   m_ObjectHideFlags: 0
@@ -9087,7 +9097,7 @@ MonoBehaviour:
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: 0, y: 0, z: -10}
+  FollowOffset: {x: 0, y: -0.0000005739398, z: -9.999996}
 --- !u!114 &1262977317
 MonoBehaviour:
   m_ObjectHideFlags: 0
