@@ -1993,8 +1993,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
   Priority:
-    Enabled: 0
-    m_Value: 0
+    Enabled: 1
+    m_Value: 100
   OutputChannel: 1
   StandbyUpdate: 2
   m_StreamingVersion: 20241001
@@ -2785,6 +2785,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraZone
   virtualCamera: {fileID: 344457208}
+  activePriority: 100
+  inactivePriority: 0
 --- !u!1 &676184443
 GameObject:
   m_ObjectHideFlags: 0
@@ -2867,6 +2869,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraZone
   virtualCamera: {fileID: 1262977317}
+  activePriority: 100
+  inactivePriority: 0
 --- !u!1 &688142571
 GameObject:
   m_ObjectHideFlags: 0
@@ -8576,8 +8580,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
   Priority:
-    Enabled: 0
-    m_Value: 0
+    Enabled: 1
+    m_Value: 80
   OutputChannel: 1
   StandbyUpdate: 2
   m_StreamingVersion: 20241001
@@ -8615,7 +8619,7 @@ Transform:
   m_GameObject: {fileID: 1262977314}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5381733, y: -0, z: -0, w: 0.8428342}
-  m_LocalPosition: {x: -0.038, y: 0.743, z: -0.41}
+  m_LocalPosition: {x: -0.038, y: 0.743, z: -0.4679}
   m_LocalScale: {x: 0.022817623, y: 0.039980654, z: 0.028451258}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11512,7 +11516,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: b8e78032f8af0954784d1fe9e5a09187, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

@@ -3,33 +3,28 @@ using Unity.Cinemachine;
 
 public class CameraZone : MonoBehaviour
 {
-    [Header("กล้องตรง Section นี้")]
+    [Header("กล้องประจำโซนนี้")]
     public CinemachineCamera virtualCamera;
 
-    private void Start()
-    {
-        // เริ่มเกมมา ให้ Priority ต่ำไว้ก่อน
-        virtualCamera.Priority = 0;
-    }
+    [Header("ตั้งค่า Priority")]
+    public int activePriority = 100; // ค่าตอนเดินเข้าห้อง
+    public int inactivePriority = 0; // ค่าตอนเดินออกห้อง
 
     private void OnTriggerEnter(Collider other)
     {
-        // เมื่อ Player เดินเข้ามาในขอบเขต (Trigger) นี้
         if (other.CompareTag("Player"))
         {
-            // ดันค่า Priority ให้สูงกว่ากล้องอื่น 
-            // Cinemachine จะทำการ Blend ย้ายกล้องมาให้แบบเนียนๆ
-            virtualCamera.Priority = 10;
+            // เปลี่ยนจาก 10 เป็นตัวแปร activePriority
+            virtualCamera.Priority = activePriority;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        // เมื่อ Player เดินออกจากโซนนี้
         if (other.CompareTag("Player"))
         {
-            // ลด Priority กลับลงไป
-            virtualCamera.Priority = 0;
+            // เปลี่ยนจาก 0 เป็นตัวแปร inactivePriority
+            virtualCamera.Priority = inactivePriority;
         }
     }
 }
