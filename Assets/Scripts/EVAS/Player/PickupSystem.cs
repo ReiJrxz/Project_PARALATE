@@ -13,10 +13,10 @@ public class PickupSystem : MonoBehaviour
     public Vector3 holdPositionOffset;
     public Vector3 holdRotationOffset;
 
-    [Header("Unarmed Assassination")]
-    public float unarmedAttackRange = 2f;
-    public float unarmedKillDelay = 5f; // Delay ตอนฆ่าด้วยมือเปล่า (วินาที)
-    public Vector3 unarmedRaycastOffset = new Vector3(0f, 1f, 0f);
+    [Header("Knockout")]
+    public float KnockoutRange = 2f;
+    public float KnockoutKillDelay = 5f; // Delay ตอนฆ่าด้วยมือเปล่า (วินาที)
+    public Vector3 KnockoutRaycastOffset = new Vector3(0f, 1f, 0f);
 
     private GameObject heldItem;
     private GameObject gunItem;
@@ -27,7 +27,7 @@ public class PickupSystem : MonoBehaviour
     private InputAction unequipWeaponAction;
     private InputAction attackAction;
     private TopDownPlayerController movementController;
-    private bool isUnarmedAssassinating = false;
+    private bool isKnockout = false;
 
     void Awake()
     {
@@ -44,7 +44,7 @@ public class PickupSystem : MonoBehaviour
         if (movementController != null && movementController.IsMovementLocked)
             return;
 
-        if (isUnarmedAssassinating)
+        if (isKnockout)
             return;
 
         if (interactAction.WasPressedThisFrame())
@@ -212,13 +212,13 @@ public class PickupSystem : MonoBehaviour
     void TryUnarmedAssassination()
     {
         Vector3 attackOrigin = transform.position
-                               + (transform.right * unarmedRaycastOffset.x)
-                               + (transform.up * unarmedRaycastOffset.y)
-                               + (transform.forward * unarmedRaycastOffset.z);
+                               + (transform.right * KnockoutRaycastOffset.x)
+                               + (transform.up * KnockoutRaycastOffset.y)
+                               + (transform.forward * KnockoutRaycastOffset.z);
 
-        Debug.DrawRay(attackOrigin, transform.forward * unarmedAttackRange, Color.magenta, 2f);
+        Debug.DrawRay(attackOrigin, transform.forward * KnockoutRange, Color.magenta, 2f);
 
-        if (!Physics.Raycast(attackOrigin, transform.forward, out RaycastHit hit, unarmedAttackRange))
+        if (!Physics.Raycast(attackOrigin, transform.forward, out RaycastHit hit, KnockoutRange))
             return;
 
         EnemyHealth enemy = hit.collider.GetComponentInParent<EnemyHealth>();
@@ -236,12 +236,12 @@ public class PickupSystem : MonoBehaviour
 
     IEnumerator UnarmedAssassinationSequence(EnemyHealth enemy)
     {
-        isUnarmedAssassinating = true;
+        isKnockout = true;
         SetPlayerMovementLocked(true);
 
         Debug.Log("กำลังลอบสังหารด้วยมีด... รอ 5 วินาที");
 
-        yield return new WaitForSeconds(unarmedKillDelay);
+        yield return new WaitForSeconds(KnockoutKillDelay);
 
         if (enemy != null)
         {
@@ -250,7 +250,7 @@ public class PickupSystem : MonoBehaviour
         }
         
         SetPlayerMovementLocked(false);
-        isUnarmedAssassinating = false;
+        isKnockout = false;
     }
 
     void SetPlayerMovementLocked(bool locked)
