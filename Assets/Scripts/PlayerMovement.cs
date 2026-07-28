@@ -36,6 +36,7 @@ public class TopDownPlayerController : MonoBehaviour
     private bool isVaulting = false; // ตัวแปรเช็คว่ากำลังกระโดดข้ามอยู่หรือไม่
 
     private bool isMovementLocked = false;
+    private float movementSpeedMultiplier = 1f;
     public bool IsMovementLocked => isMovementLocked;
 
     void Start()
@@ -66,6 +67,11 @@ public class TopDownPlayerController : MonoBehaviour
         isMovementLocked = locked;
     }
 
+    public void SetMovementSpeedMultiplier(float multiplier)
+    {
+        movementSpeedMultiplier = Mathf.Max(0f, multiplier);
+    }
+
     void HandleMovement()
     {
         Vector2 moveInput = moveAction.ReadValue<Vector2>();
@@ -80,6 +86,8 @@ public class TopDownPlayerController : MonoBehaviour
         {
             currentSpeed = sprintSpeed;
         }
+
+        currentSpeed *= movementSpeedMultiplier;
 
         if (direction.magnitude >= 0.1f)
         {

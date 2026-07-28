@@ -1,28 +1,41 @@
 using UnityEngine;
 using System.Collections;
 using Unity.Cinemachine;
-using UnityEngine.InputSystem; // ต้องใช้สำหรับ New Input System
+using UnityEngine.InputSystem;
+using TMPro;
+using System;
 
 [RequireComponent(typeof(LineRenderer))]
 public class GunAction : MonoBehaviour
 {
     [Header("Gun Settings")]
     public Transform firePoint;
-    public float range = 100f; // ระยะยิงสูงสุดของปืน
-    public float damage = 10f; // ความแรงของปืน
-    public float fireRate = 0.1f; // ความเร็วในการยิง (วินาทีต่อการยิงหนึ่งครั้ง)
+    public float range = 100f;
+    public float damage = 10f;
+    public float fireRate = 0.1f;
+
+    [Header("Ammo & Reload")]
+    public int magazineSize = 30;
+    public float reloadDuration = 5f;
+    [Range(0f, 1f)]
+    public float reloadMovementSpeedMultiplier = 0.5f;
+    public bool autoReloadWhenEmpty = true;
 
     [Header("Crosshair & UI")]
-    public RectTransform crosshairUI; // ลาก UI เป้าเล็งมาใส่ช่องนี้
+    public RectTransform crosshairUI;
+    public event Action<int, int> OnAmmoChanged;
+    public event Action<bool> OnReloadStatusChanged;
+    public event Action<bool> OnHeldChanged;
 
     [Header("Debug Settings")]
     public bool isHeld = false; // สถานะการถือปืน
     public bool showDebugLine = true; // เปิด/ปิด debug line ของกระสุน
 
     [Header("Input Actions")]
-    public InputActionReference fireAction; // ลาก Action ของการยิงปืนมาใส่ช่องนี้
-    public InputActionReference pointerAction; // ลาก Action ของ Pointer Position มาใส่ช่องนี้
-    public InputActionReference aimAction; // ลาก Action ของการเล็ง (Scope) มาใส่ช่องนี้
+    public InputActionReference fireAction;
+    public InputActionReference pointerAction;
+    public InputActionReference aimAction;
+    public InputActionReference reloadAction;
 
     [Header("Scope Settings")]
     public bool enableScope = true; //เปิด/ปิด scope
@@ -40,8 +53,18 @@ public class GunAction : MonoBehaviour
     public bool enableScopeCameraAngle = true; //เปิด/ปิด การขยับองศากล้อง
     public float scopedTiltOffset = 10f; //ปรับองศาบนล่างของกล้องเมื่อซูม (ค่าบวก = เงยขึ้น, ค่าลบ = ก้มลง)
 
-    private LineRenderer laserLine; // ตัวแปรสำหรับ LineRenderer ของกระสุน
-    private float nextFireTime; // ตัวแปรสำหรับควบคุมความเร็วในการยิง
+    private LineRenderer laserLine;
+    private float nextFireTime;
+
+    [SerializeField] private int currentAmmo;
+    private bool isReloading;
+    private Coroutine reloadCoroutine;
+    private TopDownPlayerController movementController;
+    private InputAction resolvedReloadAction;
+
+    public bool IsReloading => isReloading;
+    public int CurrentAmmo => currentAmmo;
+    public int MagazineSize => magazineSize;
 
     private Camera mainCam;
     private CinemachineCamera[] virtualCameras;
@@ -60,27 +83,33 @@ public class GunAction : MonoBehaviour
         laserLine.enabled = false;
         mainCam = Camera.main;
         virtualCameras = FindObjectsByType<CinemachineCamera>(FindObjectsInactive.Include);
+        movementController = GetComponentInParent<TopDownPlayerController>();
 
         if (mainCam != null)
             normalFieldOfView = mainCam.fieldOfView;
 
+        currentAmmo = magazineSize;
         CacheCameraOffsets();
     }
-    // เมื่อปืนถูกปิดใช้งาน (เช่น เก็บปืน) ให้รีเซ็ตสถานะทั้งหมด
     private void OnDisable()
     {
+        CancelReload();
         SetScoped(false, true);
         SetCrosshairVisible(false);
         Cursor.visible = true;
     }
-    // ฟังก์ชันนี้ใช้เพื่อเปลี่ยนสถานะการถือปืนจากภายนอกสคริปต์
     public void SetHeld(bool held)
     {
         isHeld = held;
         SetCrosshairVisible(held);
+        OnHeldChanged?.Invoke(held);
+
+        if (held)
+            UpdateAmmoUI();
 
         if (!held)
         {
+            CancelReload();
             SetScoped(false, true);
             Cursor.visible = true;
         }
@@ -89,13 +118,107 @@ public class GunAction : MonoBehaviour
     {
         HandleScope();
         HandleCrosshair();
+        HandleReload();
 
-        // ใช้ IsPressed() ของ New Input System แทน Input.GetButton เดิม
-        if (isHeld && fireAction.action.IsPressed() && Time.time > nextFireTime)
+        if (isHeld && !isReloading && currentAmmo > 0
+            && fireAction.action.IsPressed() && Time.time > nextFireTime)
         {
             nextFireTime = Time.time + fireRate;
             Shoot();
         }
+    }
+
+    void HandleReload()
+    {
+        if (!isHeld || isReloading)
+            return;
+
+        if (currentAmmo >= magazineSize)
+            return;
+
+        ResolveReloadAction();
+
+        if (resolvedReloadAction != null && resolvedReloadAction.WasPressedThisFrame())
+            StartReload();
+    }
+
+    void ResolveReloadAction()
+    {
+        if (reloadAction != null)
+        {
+            resolvedReloadAction = reloadAction.action;
+            return;
+        }
+
+        if (resolvedReloadAction != null)
+            return;
+
+        PlayerInput playerInput = GetComponentInParent<PlayerInput>();
+        if (playerInput == null)
+            return;
+
+        resolvedReloadAction = playerInput.actions["Reload"];
+    }
+
+    public void StartReload()
+    {
+        if (!isHeld || isReloading || currentAmmo >= magazineSize)
+            return;
+
+        if (reloadCoroutine != null)
+            StopCoroutine(reloadCoroutine);
+
+        reloadCoroutine = StartCoroutine(ReloadRoutine());
+    }
+
+    void CancelReload()
+    {
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            reloadCoroutine = null;
+        }
+
+        if (!isReloading)
+            return;
+
+        isReloading = false;
+        SetReloadMovementSpeed(false);
+        OnReloadStatusChanged?.Invoke(false);
+    }
+
+    IEnumerator ReloadRoutine()
+    {
+        isReloading = true;
+        OnReloadStatusChanged?.Invoke(true);
+        SetReloadMovementSpeed(true);
+
+        yield return new WaitForSeconds(reloadDuration);
+
+        currentAmmo = magazineSize;
+        isReloading = false;
+        SetReloadMovementSpeed(false);
+        reloadCoroutine = null;
+
+        OnReloadStatusChanged?.Invoke(false);
+        UpdateAmmoUI();
+    }
+
+    void SetReloadMovementSpeed(bool reloading)
+    {
+        if (movementController == null)
+            movementController = GetComponentInParent<TopDownPlayerController>();
+
+        if (movementController == null)
+            return;
+
+        movementController.SetMovementSpeedMultiplier(
+            reloading ? reloadMovementSpeedMultiplier : 1f);
+    }
+
+    void UpdateAmmoUI()
+    {
+        OnAmmoChanged?.Invoke(currentAmmo, magazineSize);
     }
     // ฟังก์ชันนี้ใช้จัดการ UI เป้าเล็งและเคอร์เซอร์เมาส์
     void HandleCrosshair()
@@ -247,9 +370,14 @@ public class GunAction : MonoBehaviour
         if (crosshairUI != null && crosshairUI.gameObject.activeSelf != visible)
             crosshairUI.gameObject.SetActive(visible);
     }
-    // ฟังก์ชันนี้ใช้ยิงกระสุนและตรวจสอบการชนของ Raycast
     void Shoot()
     {
+        if (currentAmmo <= 0 || isReloading)
+            return;
+
+        currentAmmo--;
+        UpdateAmmoUI();
+
         if (showDebugLine) StartCoroutine(ShotEffect());
 
         laserLine.SetPosition(0, firePoint.position);
@@ -288,6 +416,9 @@ public class GunAction : MonoBehaviour
         {
             laserLine.SetPosition(1, firePoint.position + (shootDirection * range));
         }
+
+        if (currentAmmo <= 0 && autoReloadWhenEmpty)
+            StartReload();
     }
     // ฟังก์ชันนี้ใช้แสดงเอฟเฟกต์การยิงกระสุน (เปิด LineRenderer ชั่วคราว)
     private IEnumerator ShotEffect()
