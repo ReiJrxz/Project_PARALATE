@@ -66,7 +66,6 @@ public class PickupSystem : MonoBehaviour
             TryUnarmedAssassination();
         }
     }
-    // ฟังก์ชันสำหรับตรวจสอบและเก็บไอเท็ม
     void TryPickup()
     {
         Ray ray = new Ray(transform.position, transform.forward);

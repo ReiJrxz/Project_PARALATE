@@ -53,6 +53,11 @@ public class GunAction : MonoBehaviour
     public bool enableScopeCameraAngle = true; //เปิด/ปิด การขยับองศากล้อง
     public float scopedTiltOffset = 10f; //ปรับองศาบนล่างของกล้องเมื่อซูม (ค่าบวก = เงยขึ้น, ค่าลบ = ก้มลง)
 
+    [Header("Dynamic Look Ahead (Scope)")]
+    public bool enableDynamicLook = true; // เปิด/ปิดให้กล้องขยับตามเมาส์เวลาซูม
+    public float maxLookOffsetX = 5f; // ระยะเลื่อนกล้องสูงสุดแกน X (ซ้าย-ขวา)
+    public float maxLookOffsetZ = 5f; // ระยะเลื่อนกล้องสูงสุดแกน Z (หน้า-หลัง สำหรับ Top-Down)
+
     private LineRenderer laserLine;
     private float nextFireTime;
 
@@ -286,7 +291,33 @@ public class GunAction : MonoBehaviour
 
                 if (enableScopeCameraOffset)
                 {
-                    Vector3 desiredOffset = baseOffsets[i] + (scoped ? scopedCameraOffset : Vector3.zero);
+                    // --- ส่วนที่เพิ่มเข้ามาใหม่: คำนวณการขยับกล้องตามเมาส์ ---
+                    Vector3 dynamicLookOffset = Vector3.zero;
+
+                    if (scoped && enableDynamicLook)
+                    {
+                        // 1. ดึงตำแหน่งเมาส์บนจอ
+                        Vector2 mouseScreenPos = pointerAction.action.ReadValue<Vector2>();
+
+                        // 2. หาจุดกึ่งกลางหน้าจอ
+                        Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
+
+                        // 3. หาว่าเมาส์อยู่ห่างจากตรงกลางกี่เปอร์เซ็นต์ (ได้ค่า -1 ถึง 1)
+                        float normalizedX = (mouseScreenPos.x - screenCenter.x) / screenCenter.x;
+                        float normalizedY = (mouseScreenPos.y - screenCenter.y) / screenCenter.y;
+
+                        // 4. จำกัดขอบเขตกันเมาส์หลุดจอ
+                        normalizedX = Mathf.Clamp(normalizedX, -1f, 1f);
+                        normalizedY = Mathf.Clamp(normalizedY, -1f, 1f);
+
+                        // 5. แปลงเป็นระยะทางในโลก 3D (แกน X ซ้ายขวา, แกน Z หน้าหลัง)
+                        dynamicLookOffset = new Vector3(normalizedX * maxLookOffsetX, 0f, normalizedY * maxLookOffsetZ);
+                    }
+
+                    // เอาค่า Base + Offset ตอนซูม + Offset จากเมาส์
+                    Vector3 desiredOffset = baseOffsets[i] + (scoped ? scopedCameraOffset : Vector3.zero) + dynamicLookOffset;
+                    // --------------------------------------------------
+
                     float desiredTilt = baseTilts[i] + (scoped ? scopedTiltOffset : 0f);
 
                     if (positionComposers[i] != null)
