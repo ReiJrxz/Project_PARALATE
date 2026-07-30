@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class EnemyHealth : MonoBehaviour
 {
@@ -17,6 +18,12 @@ public class EnemyHealth : MonoBehaviour
     public DeathAction onDeath;
 
     private bool isDead = false;
+    private bool isStunned = false;
+    private Quaternion standingRotation;
+    private Coroutine knockOutRoutine;
+
+    public bool IsDead => isDead;
+    public bool IsStunned => isStunned;
 
     private void Start()
     {
@@ -30,9 +37,43 @@ public class EnemyHealth : MonoBehaviour
             healthCanvas.LookAt(healthCanvas.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
         }
     }
+    public void KnockOut(float stunDuration)
+    {
+        if (isDead || isStunned)
+            return;
+
+        if (knockOutRoutine != null)
+            StopCoroutine(knockOutRoutine);
+
+        knockOutRoutine = StartCoroutine(KnockOutRoutine(stunDuration));
+    }
+
+    IEnumerator KnockOutRoutine(float stunDuration)
+    {
+        isStunned = true;
+        standingRotation = transform.rotation;
+        transform.rotation = Quaternion.Euler(90f, transform.eulerAngles.y, transform.eulerAngles.z);
+
+        if (healthCanvas != null)
+            healthCanvas.gameObject.SetActive(false);
+
+        yield return new WaitForSeconds(stunDuration);
+
+        if (!isDead)
+        {
+            isStunned = false;
+            transform.rotation = standingRotation;
+
+            if (healthCanvas != null)
+                healthCanvas.gameObject.SetActive(true);
+        }
+
+        knockOutRoutine = null;
+    }
+
     public void TakeDamage(float amount)
     {
-        if (isDead) return;
+        if (isDead || isStunned) return;
 
         Debug.Log("<color=yellow>รับดาเมจมา: " + amount + " เลือดก่อนโดนฟันคือ: " + currentHealth + "</color>");
 

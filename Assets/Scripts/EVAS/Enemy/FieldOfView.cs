@@ -64,6 +64,10 @@ public class FieldOfView : MonoBehaviour
     {
         canSeePlayer = false;
 
+        EnemyHealth enemyHealth = GetComponent<EnemyHealth>();
+        if (enemyHealth != null && (enemyHealth.IsStunned || enemyHealth.IsDead))
+            return;
+
         Collider[] rangeChecks = Physics.OverlapSphere(transform.position, radius, targetMask);
         for (int i = 0; i < rangeChecks.Length; i++)
         {
