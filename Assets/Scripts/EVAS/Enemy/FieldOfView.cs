@@ -59,7 +59,7 @@ public class FieldOfView : MonoBehaviour
             FieldOfViewCheck();
         }
     }
-    // ฟังก์ชันตรวจสอบว่าศัตรูสามารถมองเห็นผู้เล่นได้หรือไม่
+    // ๏ฟฝัง๏ฟฝ๏ฟฝัน๏ฟฝ๏ฟฝวจ๏ฟฝอบ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝัต๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝรถ๏ฟฝอง๏ฟฝ๏ฟฝ็นผ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
     private void FieldOfViewCheck()
     {
         canSeePlayer = false;
@@ -78,7 +78,7 @@ public class FieldOfView : MonoBehaviour
             }
         }
     }
-    // ฟังก์ชันตรวจสอบว่าตำแหน่งเป้าหมายอยู่ในมุมมองของศัตรูหรือไม่
+    // ๏ฟฝัง๏ฟฝ๏ฟฝัน๏ฟฝ๏ฟฝวจ๏ฟฝอบ๏ฟฝ๏ฟฝาต๏ฟฝ๏ฟฝหน๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝอง๏ฟฝอง๏ฟฝัต๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
     public bool IsTargetInVisionCone(Transform target)
     {
         if (target == null)
@@ -94,7 +94,7 @@ public class FieldOfView : MonoBehaviour
 
         return !Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstructionMask);
     }
-    // ฟังก์ชันสร้าง Visual ของ Vision Cone
+    // ๏ฟฝัง๏ฟฝ๏ฟฝัน๏ฟฝ๏ฟฝ๏ฟฝาง Visual ๏ฟฝอง Vision Cone
     private void CreateConeVisual()
     {
         coneVisual = new GameObject("VisionConeVisual");
@@ -119,7 +119,7 @@ public class FieldOfView : MonoBehaviour
         coneMaterial.renderQueue = 3000;
         coneRenderer.material = coneMaterial;
     }
-    // ฟังก์ชันอัปเดต Visual ของ Vision Cone
+    // ๏ฟฝัง๏ฟฝ๏ฟฝัน๏ฟฝัปเดต Visual ๏ฟฝอง Vision Cone
     private void UpdateConeVisual()
     {
         if (coneVisual == null)
@@ -167,7 +167,7 @@ public class FieldOfView : MonoBehaviour
 
         SetConeColor(canSeePlayer ? spottedColor : searchingColor);
     }
-    // ฟังก์ชันตรวจสอบและสร้างอาร์เรย์สำหรับ Mesh ของ Vision Cone
+    // ๏ฟฝัง๏ฟฝ๏ฟฝัน๏ฟฝ๏ฟฝวจ๏ฟฝอบ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝาง๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝับ Mesh ๏ฟฝอง Vision Cone
     private void EnsureMeshArrays(int segmentCount)
     {
         int vertexCount = segmentCount + 2;
@@ -179,7 +179,7 @@ public class FieldOfView : MonoBehaviour
         if (coneTriangles == null || coneTriangles.Length != triangleCount)
             coneTriangles = new int[triangleCount];
     }
-    // ฟังก์ชันตั้งค่าสีของ Vision Cone
+    // ๏ฟฝัง๏ฟฝ๏ฟฝัน๏ฟฝ๏ฟฝ้งค๏ฟฝ๏ฟฝ๏ฟฝีของ Vision Cone
     private void SetConeColor(Color color)
     {
         if (coneMaterial == null)
@@ -191,7 +191,7 @@ public class FieldOfView : MonoBehaviour
         if (coneMaterial.HasProperty("_BaseColor"))
             coneMaterial.SetColor("_BaseColor", color);
     }
-    // ฟังก์ชันคำนวณทิศทางจากมุม
+    // ๏ฟฝัง๏ฟฝ๏ฟฝัน๏ฟฝำนวณ๏ฟฝ๏ฟฝศทาง๏ฟฝาก๏ฟฝ๏ฟฝ๏ฟฝ
     private Vector3 DirectionFromAngle(float angleInDegrees)
     {
         return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0f, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
