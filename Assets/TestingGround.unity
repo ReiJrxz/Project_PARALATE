@@ -3761,8 +3761,8 @@ MonoBehaviour:
   actionRaycastOffset: {x: 0, y: 1, z: 0}
   killDelayWithoutKnife: 5
   killDelayWithKnife: 2
-  knockoutHoldDuration: 3
-  knockoutStunDuration: 10
+  knockoutHoldDuration: 4
+  knockoutStunDuration: 60
 --- !u!43 &744716780
 Mesh:
   m_ObjectHideFlags: 0
