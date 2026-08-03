@@ -1,7 +1,5 @@
 using UnityEngine;
-using System.Collections;
 using UnityEngine.InputSystem;
-
 public class KnifeAction : MonoBehaviour
 {
     [Header("Knife Settings")]
@@ -11,9 +9,6 @@ public class KnifeAction : MonoBehaviour
 
     [Header("Raycast Settings")]
     public Vector3 raycastOffset = new Vector3(0f, 1f, 0f); // X=ซ้ายขวา, Y=ขึ้นลง, Z=หน้าหลัง
-
-    [Header("Assassin Settings")]
-    public float backstabDelay = 2f; // Delay ตอนฆ่าด้วยมือมีด (วินาที)
 
     [Header("State")]
     public bool isHeld = false;
@@ -25,16 +20,13 @@ public class KnifeAction : MonoBehaviour
     public Transform playerTransform;
 
     private float nextAttackTime;
-    private bool isAssassinating = false;
     private PlayerInput playerInput;
     private InputAction resolvedAttackAction;
-    private TopDownPlayerController movementController;
-
     void Update()
     {
         ResolveAttackAction();
 
-        if (isHeld && resolvedAttackAction != null && resolvedAttackAction.WasPressedThisFrame() && Time.time > nextAttackTime && !isAssassinating)
+        if (isHeld && resolvedAttackAction != null && resolvedAttackAction.WasPressedThisFrame() && Time.time > nextAttackTime)
         {
             nextAttackTime = Time.time + attackRate;
             Attack();
@@ -85,15 +77,8 @@ public class KnifeAction : MonoBehaviour
             EnemyHealth enemy = hit.collider.GetComponentInParent<EnemyHealth>();
             if (enemy != null)
             {
-                if (CanAssassinate(enemy))
-                {
-                    StartCoroutine(AssassinationSequence(enemy));
-                }
-                else
-                {
-                    enemy.TakeDamage(damage);
-                    Debug.Log("ฟันปกติเข้าที่ศัตรู!");
-                }
+                enemy.TakeDamage(damage);
+                Debug.Log("ฟันปกติเข้าที่ศัตรู!");
             }
         }
         else
@@ -101,40 +86,5 @@ public class KnifeAction : MonoBehaviour
             Debug.Log("Raycast ไม่ชนอะไรเลยในระยะ");
         }
 
-    }
-    // ฟังก์ชันตรวจสอบว่าผู้เล่นสามารถลอบสังหารศัตรูได้หรือไม่
-    bool CanAssassinate(EnemyHealth enemy)
-    {
-        FieldOfView fieldOfView = enemy.GetComponent<FieldOfView>();
-        Transform attackTransform = playerTransform != null ? playerTransform : transform;
-
-        return fieldOfView == null || !fieldOfView.IsTargetInVisionCone(attackTransform);
-    }
-    // ฟังก์ชันสำหรับลอบสังหารศัตรู
-    IEnumerator AssassinationSequence(EnemyHealth enemy)
-    {
-        isAssassinating = true;
-        SetPlayerMovementLocked(true);
-        Debug.Log("กำลังลอบสังหารด้วยมีด... รอ 2 วินาที");
-
-        yield return new WaitForSeconds(backstabDelay);
-
-        if (enemy != null)
-        {
-            enemy.TakeDamage(9999f);
-            Debug.Log("ลอบสังหารสำเร็จ!");
-        }
-
-        SetPlayerMovementLocked(false);
-        isAssassinating = false;
-    }
-    // ฟังก์ชันสำหรับล็อกหรือปลดล็อกการเคลื่อนที่ของผู้เล่น
-    void SetPlayerMovementLocked(bool locked)
-    {
-        if (movementController == null && playerTransform != null)
-            movementController = playerTransform.GetComponent<TopDownPlayerController>();
-
-        if (movementController != null)
-            movementController.SetMovementLocked(locked);
     }
 }
