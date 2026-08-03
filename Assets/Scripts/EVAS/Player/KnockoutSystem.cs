@@ -21,9 +21,8 @@ public class KnockoutSystem : MonoBehaviour
     public float killDelayWithoutKnife = 5f;
     public float killDelayWithKnife = 2f;
 
-    [Header("Knockout Delays (Ctrl)")]
-    public float knockoutDelayWithoutKnife = 5f;
-    public float knockoutDelayWithKnife = 3f;
+    [Header("Knockout Hold (Ctrl)")]
+    public float knockoutHoldDuration = 3f;
 
     [Header("Knockout Stun Duration")]
     public float knockoutStunDuration = 10f;
@@ -34,8 +33,12 @@ public class KnockoutSystem : MonoBehaviour
     private TopDownPlayerController movementController;
     private PickupSystem pickupSystem;
     private bool isPerformingAction;
+    private bool isHoldingKnockout;
+    private float knockoutHoldTimer;
+    private EnemyHealth knockoutTarget;
+    private StealthActionType currentKnockoutType;
 
-    public bool IsKnockout => isPerformingAction;
+    public bool IsKnockout => isPerformingAction || isHoldingKnockout;
 
     void Awake()
     {
@@ -48,23 +51,99 @@ public class KnockoutSystem : MonoBehaviour
 
     void Update()
     {
-        if (movementController != null && movementController.IsMovementLocked)
+        if (movementController != null && movementController.IsMovementLocked && !isHoldingKnockout)
             return;
 
         if (isPerformingAction)
             return;
 
         if (killAction.WasPressedThisFrame())
-            TryStealthAction(StealthActionType.KillWithoutKnife, StealthActionType.KillWithKnife);
+            TryKill();
 
-        if (knockOutAction.WasPressedThisFrame())
-            TryStealthAction(StealthActionType.KnockoutWithoutKnife, StealthActionType.KnockoutWithKnife);
+        HandleKnockoutHold();
     }
 
-    void TryStealthAction(StealthActionType withoutKnifeType, StealthActionType withKnifeType)
+    void TryKill()
     {
+        if (!TryGetTarget(out EnemyHealth enemy))
+            return;
+
         bool hasKnife = pickupSystem != null && pickupSystem.HasKnifeEquipped;
-        StealthActionType actionType = hasKnife ? withKnifeType : withoutKnifeType;
+        StealthActionType actionType = hasKnife
+            ? StealthActionType.KillWithKnife
+            : StealthActionType.KillWithoutKnife;
+
+        StartCoroutine(KillSequence(enemy, actionType));
+    }
+
+    void HandleKnockoutHold()
+    {
+        if (knockOutAction.WasPressedThisFrame() && !isHoldingKnockout)
+        {
+            if (!TryGetTarget(out EnemyHealth enemy))
+                return;
+
+            bool hasKnife = pickupSystem != null && pickupSystem.HasKnifeEquipped;
+            isHoldingKnockout = true;
+            knockoutHoldTimer = 0f;
+            knockoutTarget = enemy;
+            currentKnockoutType = hasKnife
+                ? StealthActionType.KnockoutWithKnife
+                : StealthActionType.KnockoutWithoutKnife;
+
+            SetPlayerMovementLocked(true);
+            Debug.Log(GetKnockoutHoldStartMessage(currentKnockoutType, knockoutHoldDuration));
+        }
+
+        if (!isHoldingKnockout)
+            return;
+
+        if (!knockOutAction.IsPressed())
+        {
+            CancelKnockoutHold("ปล่อย Ctrl ก่อนครบเวลา — ศัตรูไม่สลบ");
+            return;
+        }
+
+        if (!IsTargetStillValid(knockoutTarget))
+        {
+            CancelKnockoutHold("เป้าหมายไม่ถูกต้อง — ยกเลิกการรัดคอ");
+            return;
+        }
+
+        knockoutHoldTimer += Time.deltaTime;
+
+        if (knockoutHoldTimer >= knockoutHoldDuration)
+            CompleteKnockout();
+    }
+
+    void CompleteKnockout()
+    {
+        if (knockoutTarget != null)
+        {
+            knockoutTarget.KnockOut(knockoutStunDuration);
+            Debug.Log(GetKnockoutSuccessMessage(currentKnockoutType));
+        }
+
+        ResetKnockoutHold();
+    }
+
+    void CancelKnockoutHold(string reason)
+    {
+        Debug.Log(reason);
+        ResetKnockoutHold();
+    }
+
+    void ResetKnockoutHold()
+    {
+        isHoldingKnockout = false;
+        knockoutHoldTimer = 0f;
+        knockoutTarget = null;
+        SetPlayerMovementLocked(false);
+    }
+
+    bool TryGetTarget(out EnemyHealth enemy)
+    {
+        enemy = null;
 
         Vector3 attackOrigin = transform.position
                                + (transform.right * actionRaycastOffset.x)
@@ -74,13 +153,18 @@ public class KnockoutSystem : MonoBehaviour
         Debug.DrawRay(attackOrigin, transform.forward * actionRange, Color.magenta, 2f);
 
         if (!Physics.Raycast(attackOrigin, transform.forward, out RaycastHit hit, actionRange))
-            return;
+            return false;
 
-        EnemyHealth enemy = hit.collider.GetComponentInParent<EnemyHealth>();
+        enemy = hit.collider.GetComponentInParent<EnemyHealth>();
+        return enemy != null && CanTarget(enemy);
+    }
+
+    bool IsTargetStillValid(EnemyHealth enemy)
+    {
         if (enemy == null || !CanTarget(enemy))
-            return;
+            return false;
 
-        StartCoroutine(StealthActionSequence(enemy, actionType));
+        return TryGetTarget(out EnemyHealth currentTarget) && currentTarget == enemy;
     }
 
     bool CanTarget(EnemyHealth enemy)
@@ -92,68 +176,41 @@ public class KnockoutSystem : MonoBehaviour
         return fieldOfView == null || !fieldOfView.IsTargetInVisionCone(transform);
     }
 
-    IEnumerator StealthActionSequence(EnemyHealth enemy, StealthActionType actionType)
+    IEnumerator KillSequence(EnemyHealth enemy, StealthActionType actionType)
     {
         isPerformingAction = true;
         SetPlayerMovementLocked(true);
 
-        float delay = GetActionDelay(actionType);
-        Debug.Log(GetActionStartMessage(actionType, delay));
+        float delay = actionType == StealthActionType.KillWithKnife
+            ? killDelayWithKnife
+            : killDelayWithoutKnife;
+
+        Debug.Log(GetKillStartMessage(actionType, delay));
 
         yield return new WaitForSeconds(delay);
 
         if (enemy != null)
         {
-            if (IsKillAction(actionType))
-            {
-                enemy.TakeDamage(9999f);
-                Debug.Log(GetKillSuccessMessage(actionType));
-            }
-            else
-            {
-                enemy.KnockOut(knockoutStunDuration);
-                Debug.Log(GetChokeSuccessMessage(actionType));
-            }
+            enemy.TakeDamage(9999f);
+            Debug.Log(GetKillSuccessMessage(actionType));
         }
 
         SetPlayerMovementLocked(false);
         isPerformingAction = false;
     }
 
-    static bool IsKillAction(StealthActionType actionType)
+    static string GetKillStartMessage(StealthActionType actionType, float delay)
     {
-        return actionType == StealthActionType.KillWithoutKnife
-               || actionType == StealthActionType.KillWithKnife;
+        return actionType == StealthActionType.KillWithKnife
+            ? $"กำลังฆ่าด้วยมีด... รอ {delay} วินาที"
+            : $"กำลังฆ่าโดยไม่ใช้มีด... รอ {delay} วินาที";
     }
 
-    float GetActionDelay(StealthActionType actionType)
+    static string GetKnockoutHoldStartMessage(StealthActionType actionType, float holdDuration)
     {
-        switch (actionType)
-        {
-            case StealthActionType.KillWithKnife:
-                return killDelayWithKnife;
-            case StealthActionType.KillWithoutKnife:
-                return killDelayWithoutKnife;
-            case StealthActionType.KnockoutWithKnife:
-                return knockoutDelayWithKnife;
-            default:
-                return knockoutDelayWithoutKnife;
-        }
-    }
-
-    static string GetActionStartMessage(StealthActionType actionType, float delay)
-    {
-        switch (actionType)
-        {
-            case StealthActionType.KillWithKnife:
-                return $"กำลังฆ่าด้วยมีด... รอ {delay} วินาที";
-            case StealthActionType.KillWithoutKnife:
-                return $"กำลังฆ่าโดยไม่ใช้มีด... รอ {delay} วินาที";
-            case StealthActionType.KnockoutWithKnife:
-                return $"กำลังรัดคอด้วยมีด... รอ {delay} วินาที";
-            default:
-                return $"กำลังรัดคอ... รอ {delay} วินาที";
-        }
+        return actionType == StealthActionType.KnockoutWithKnife
+            ? $"กำลังรัดคอด้วยมีด... กด Ctrl ค้าง {holdDuration} วินาที"
+            : $"กำลังรัดคอ... กด Ctrl ค้าง {holdDuration} วินาที";
     }
 
     static string GetKillSuccessMessage(StealthActionType actionType)
@@ -163,7 +220,7 @@ public class KnockoutSystem : MonoBehaviour
             : "ฆ่าโดยไม่ใช้มีดสำเร็จ!";
     }
 
-    static string GetChokeSuccessMessage(StealthActionType actionType)
+    static string GetKnockoutSuccessMessage(StealthActionType actionType)
     {
         return actionType == StealthActionType.KnockoutWithKnife
             ? "รัดคอด้วยมีดสำเร็จ! ศัตรูสลบ"
