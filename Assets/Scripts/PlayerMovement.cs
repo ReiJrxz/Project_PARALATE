@@ -23,6 +23,15 @@ public class TopDownPlayerController : MonoBehaviour
     public float lowRayHeight = 0.2f;
     public float highRayHeight = 1.0f;
 
+    [Header("Animation (อนิเมชั่น)")]
+    public Animator animator;
+
+    [Header("Ladder Settings (ปีนบันได)")]
+    public float climbUpSpeed = 3f;
+    public float climbDownSpeed = 6f;
+    public float topExitOffset = 1.5f;
+    public LayerMask ladderLayer;
+
     private CharacterController controller;
     private Camera mainCamera;
     private PlayerInput playerInput;
@@ -35,13 +44,16 @@ public class TopDownPlayerController : MonoBehaviour
 
     private bool isVaulting = false;
     private bool isMovementLocked = false;
+    private bool isClimbing = false;
     private float movementSpeedMultiplier = 1f;
 
-    // สวิตช์ความจำสำหรับสถานะต่างๆ
     private bool isCrouching = false;
     private bool isSprinting = false;
 
+    private float climbCooldown = 0f;
+
     public bool IsMovementLocked => isMovementLocked;
+    public bool IsClimbing => isClimbing;
 
     void Start()
     {
@@ -55,64 +67,56 @@ public class TopDownPlayerController : MonoBehaviour
         pointerAction = playerInput.actions["PointerPosition"];
         hurdleAction = playerInput.actions["Hurdle"];
 
-        // 1. ผูก Event เข้ากับ Action ต่างๆ (Subscribe)
         crouchAction.performed += OnCrouch;
-
         sprintAction.performed += OnSprintStart;
         sprintAction.canceled += OnSprintStop;
-
         hurdleAction.performed += OnVault;
     }
 
-    // 2. ยกเลิก Event เมื่อ Object ถูกทำลาย ป้องกันอาการ Memory Leak 
     private void OnDestroy()
     {
         if (crouchAction != null) crouchAction.performed -= OnCrouch;
-
         if (sprintAction != null)
         {
             sprintAction.performed -= OnSprintStart;
             sprintAction.canceled -= OnSprintStop;
         }
-
         if (hurdleAction != null) hurdleAction.performed -= OnVault;
     }
 
-    // ==========================================
-    // กลุ่มฟังก์ชันรับ Event จาก Input System
-    // ==========================================
-
     private void OnCrouch(InputAction.CallbackContext context)
     {
-        isCrouching = !isCrouching; // ทำงานแบบ Tap สลับสวิตช์ย่อ/ยืน
+        isCrouching = !isCrouching;
     }
 
     private void OnSprintStart(InputAction.CallbackContext context)
     {
-        isSprinting = true; // ผู้เล่นเริ่มกดปุ่มวิ่งค้างไว้ (Hold)
+        isSprinting = true;
     }
 
     private void OnSprintStop(InputAction.CallbackContext context)
     {
-        isSprinting = false; // ผู้เล่นปล่อยปุ่มวิ่ง (Release)
+        isSprinting = false;
     }
 
     private void OnVault(InputAction.CallbackContext context)
     {
-        // ถ้ากำลังปีนอยู่ หรือโดนล็อกห้ามขยับ จะไม่ให้กระโดดซ้ำ
-        if (isVaulting || isMovementLocked) return;
+        if (isVaulting || isMovementLocked || isClimbing) return;
         AttemptVault();
     }
 
-    // ==========================================
-    // ลอจิกหลักของเกม
-    // ==========================================
-
     void Update()
     {
+        if (climbCooldown > 0f) climbCooldown -= Time.deltaTime;
+
         if (isVaulting || isMovementLocked) return;
 
-        // ในนี้จะเหลือแค่อะไรที่ต้องขยับตามเฟรมตลอดเวลา
+        if (isClimbing)
+        {
+            HandleClimbing();
+            return;
+        }
+
         HandleMovement();
         HandleRotation();
     }
@@ -133,7 +137,6 @@ public class TopDownPlayerController : MonoBehaviour
         Vector3 direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
         float currentSpeed = walkSpeed;
 
-        // 3. ใช้ค่าจากตัวแปรสวิตช์โดยตรง โดยไม่ต้องสนใจเรื่องปุ่มกดแล้ว
         if (isCrouching)
         {
             currentSpeed = crouchSpeed;
@@ -150,8 +153,12 @@ public class TopDownPlayerController : MonoBehaviour
             controller.Move(direction * currentSpeed * Time.deltaTime);
         }
 
-        // แรงโน้มถ่วง
         controller.Move(new Vector3(0, -9.81f * Time.deltaTime, 0));
+
+        if (animator != null)
+        {
+            animator.SetFloat("Speed", direction.magnitude * walkSpeed);
+        }
     }
 
     void HandleRotation()
@@ -247,5 +254,127 @@ public class TopDownPlayerController : MonoBehaviour
             Gizmos.DrawRay(testLandingOrigin, Vector3.down * highRayHeight);
             Gizmos.DrawSphere(testLandingSpot, 0.1f);
         }
+    }
+
+    public void StartClimbing(Vector3 lookDirection, Transform startPoint)
+    {
+        if (isClimbing)
+        {
+            StopClimbing();
+            return;
+        }
+
+        if (climbCooldown > 0f) return;
+
+        isClimbing = true;
+        transform.rotation = Quaternion.LookRotation(lookDirection);
+
+        if (animator != null)
+        {
+            animator.SetBool("IsClimbing", true);
+        }
+
+        if (startPoint != null)
+        {
+            StartCoroutine(SmoothClimbEntryRoutine(startPoint.position));
+        }
+    }
+
+    IEnumerator SmoothClimbEntryRoutine(Vector3 targetPos)
+    {
+        isMovementLocked = true;
+        controller.enabled = false;
+
+        Vector3 startPos = transform.position;
+        float timePassed = 0f;
+        float duration = 0.35f; // ทำให้จังหวะโดนดูดช้าลง สมูทขึ้น ไม่ฉุกละหุก
+
+        while (timePassed < 1f)
+        {
+            timePassed += Time.deltaTime / duration;
+            transform.position = Vector3.Lerp(startPos, targetPos, timePassed);
+            yield return null;
+        }
+
+        transform.position = targetPos;
+        controller.enabled = true;
+        isMovementLocked = false;
+    }
+
+    void HandleClimbing()
+    {
+        Vector2 moveInput = moveAction.ReadValue<Vector2>();
+        float currentClimbSpeed = moveInput.y < 0 ? climbDownSpeed : climbUpSpeed;
+
+        Vector3 climbDirection = new Vector3(0f, moveInput.y, 0f);
+
+        controller.Move(climbDirection * currentClimbSpeed * Time.deltaTime);
+
+        if (animator != null)
+        {
+            animator.SetFloat("ClimbSpeed", moveInput.y);
+        }
+
+        CheckLadderExit(moveInput.y);
+    }
+
+    void CheckLadderExit(float verticalInput)
+    {
+        // บีบให้สั้นลง (0.15f) ต้องเหยียบลงดินจริงๆ ถึงจะยอมปล่อยมือ ป้องกันบั๊กปล่อยมือกลางอากาศ
+        bool isAtBottom = Physics.Raycast(transform.position + (Vector3.up * 0.1f), Vector3.down, 0.15f, ~ladderLayer, QueryTriggerInteraction.Ignore);
+
+        if (verticalInput < 0 && isAtBottom)
+        {
+            StopClimbing();
+            return;
+        }
+
+        if (verticalInput > 0)
+        {
+            Vector3 rayOrigin = transform.position + (Vector3.up * highRayHeight);
+
+            if (!Physics.Raycast(rayOrigin, transform.forward, 1.2f, ladderLayer, QueryTriggerInteraction.Ignore))
+            {
+                StartCoroutine(LadderTopExitRoutine());
+            }
+        }
+    }
+
+    void StopClimbing()
+    {
+        isClimbing = false;
+        climbCooldown = 0.5f;
+
+        if (animator != null)
+        {
+            animator.SetBool("IsClimbing", false);
+            animator.SetFloat("ClimbSpeed", 0f);
+        }
+    }
+
+    IEnumerator LadderTopExitRoutine()
+    {
+        isMovementLocked = true;
+
+        if (animator != null) animator.SetTrigger("ClimbTopExit");
+        controller.enabled = false;
+
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = transform.position + (Vector3.up * 1.2f) + (transform.forward * topExitOffset);
+
+        float timePassed = 0f;
+        float duration = 0.5f;
+
+        while (timePassed < 1f)
+        {
+            timePassed += Time.deltaTime / duration;
+            transform.position = Vector3.Lerp(startPos, targetPos, timePassed);
+            yield return null;
+        }
+
+        transform.position = targetPos;
+        controller.enabled = true;
+        StopClimbing();
+        isMovementLocked = false;
     }
 }
