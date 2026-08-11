@@ -19,6 +19,11 @@ public class EnemyController : MonoBehaviour
     private NavMeshAgent agent;
     private int currentWaypointIndex;
     private bool isWaiting;
+    private bool isMovementLocked;
+    private bool wasWaitingWhenMovementLocked;
+    private bool updateRotationBeforePatrolWait;
+    private bool updateRotationBeforeMovementLock;
+    private Coroutine waitPatrolCoroutine;
 
     private void Awake()
     {
@@ -38,26 +43,67 @@ public class EnemyController : MonoBehaviour
     private void Patrol()
     {
         if(Waypoints.Length == 0) return;
+        if(isMovementLocked) return;
         if(isWaiting) return;
         if(!agent.pathPending && agent.remainingDistance < stopAtDistance)
         {
-            StartCoroutine(WaitPatrolPoint());
+            waitPatrolCoroutine = StartCoroutine(WaitPatrolPoint());
         }
+    }
+
+    public void SetMovementLocked(bool locked)
+    {
+        if (isMovementLocked == locked)
+            return;
+
+        isMovementLocked = locked;
+
+        if (locked)
+        {
+            wasWaitingWhenMovementLocked = isWaiting;
+            updateRotationBeforeMovementLock = isWaiting
+                ? updateRotationBeforePatrolWait
+                : agent.updateRotation;
+            StopPatrolWait();
+            agent.isStopped = true;
+            agent.updateRotation = false;
+            return;
+        }
+
+        agent.updateRotation = updateRotationBeforeMovementLock;
+        agent.isStopped = false;
+
+        if (wasWaitingWhenMovementLocked)
+            GotoNextWaypoint();
+
+        wasWaitingWhenMovementLocked = false;
     }
 
     private IEnumerator WaitPatrolPoint()
     {
         isWaiting = true;
         agent.isStopped = true;
-        bool originalUpdateRotation = agent.updateRotation;
+        updateRotationBeforePatrolWait = agent.updateRotation;
         agent.updateRotation = false;
 
         yield return new WaitForSeconds(patrolWaitsTime);
         yield return LookAround();
 
-        agent.updateRotation = originalUpdateRotation;
+        agent.updateRotation = updateRotationBeforePatrolWait;
         agent.isStopped = false;
         GotoNextWaypoint();
+        isWaiting = false;
+        waitPatrolCoroutine = null;
+    }
+
+    private void StopPatrolWait()
+    {
+        if (waitPatrolCoroutine != null)
+        {
+            StopCoroutine(waitPatrolCoroutine);
+            waitPatrolCoroutine = null;
+        }
+
         isWaiting = false;
     }
 

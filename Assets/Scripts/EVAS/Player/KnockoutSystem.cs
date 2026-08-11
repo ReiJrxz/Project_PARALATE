@@ -91,6 +91,7 @@ public class KnockoutSystem : MonoBehaviour
                 ? StealthActionType.KnockoutWithKnife
                 : StealthActionType.KnockoutWithoutKnife;
 
+            SetEnemyMovementLocked(knockoutTarget, true);
             SetPlayerMovementLocked(true);
             Debug.Log(GetKnockoutHoldStartMessage(currentKnockoutType, knockoutHoldDuration));
         }
@@ -124,17 +125,20 @@ public class KnockoutSystem : MonoBehaviour
             Debug.Log(GetKnockoutSuccessMessage(currentKnockoutType));
         }
 
-        ResetKnockoutHold();
+        ResetKnockoutHold(false);
     }
 
     void CancelKnockoutHold(string reason)
     {
         Debug.Log(reason);
-        ResetKnockoutHold();
+        ResetKnockoutHold(true);
     }
 
-    void ResetKnockoutHold()
+    void ResetKnockoutHold(bool unlockTarget = true)
     {
+        if (unlockTarget)
+            SetEnemyMovementLocked(knockoutTarget, false);
+
         isHoldingKnockout = false;
         knockoutHoldTimer = 0f;
         knockoutTarget = null;
@@ -180,6 +184,7 @@ public class KnockoutSystem : MonoBehaviour
     {
         isPerformingAction = true;
         SetPlayerMovementLocked(true);
+        SetEnemyMovementLocked(enemy, true);
 
         float delay = actionType == StealthActionType.KillWithKnife
             ? killDelayWithKnife
@@ -194,6 +199,9 @@ public class KnockoutSystem : MonoBehaviour
             enemy.TakeDamage(9999f);
             Debug.Log(GetKillSuccessMessage(actionType));
         }
+
+        if (enemy != null && !enemy.IsDead)
+            SetEnemyMovementLocked(enemy, false);
 
         SetPlayerMovementLocked(false);
         isPerformingAction = false;
@@ -234,5 +242,15 @@ public class KnockoutSystem : MonoBehaviour
 
         if (movementController != null)
             movementController.SetMovementLocked(locked);
+    }
+
+    static void SetEnemyMovementLocked(EnemyHealth enemy, bool locked)
+    {
+        if (enemy == null)
+            return;
+
+        EnemyController enemyController = enemy.GetComponent<EnemyController>();
+        if (enemyController != null)
+            enemyController.SetMovementLocked(locked);
     }
 }
