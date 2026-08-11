@@ -15,7 +15,10 @@ public class InteractUIManager : MonoBehaviour
         if (Instance == null)
             Instance = this;
         else
+        {
             Destroy(gameObject);
+            return;
+        }
 
         // ปิด UI ไว้ตอนเริ่มเกม
         HideInteract();
@@ -24,13 +27,21 @@ public class InteractUIManager : MonoBehaviour
     // ฟังก์ชันสำหรับให้สิ่งของต่างๆ สั่งให้โชว์ข้อความ
     public void ShowInteract(string message)
     {
-        interactText.text = "[E] " + message;
-        interactPanel.SetActive(true);
+        if (interactText != null)
+            interactText.text = "[E] " + message;
+        else
+            Debug.LogWarning("InteractUIManager is missing interactText.", this);
+
+        if (interactPanel != null)
+            interactPanel.SetActive(true);
+        else
+            Debug.LogWarning("InteractUIManager is missing interactPanel.", this);
     }
 
     // ฟังก์ชันสั่งซ่อน
     public void HideInteract()
     {
-        interactPanel.SetActive(false);
+        if (interactPanel != null)
+            interactPanel.SetActive(false);
     }
 }
