@@ -13726,7 +13726,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 199a837a363a43b438665a6a2a88a745, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  Waypoints:
+  waypoints:
   - {fileID: 577477951}
   - {fileID: 150192329}
   - {fileID: 1062013085}
@@ -13736,11 +13736,13 @@ MonoBehaviour:
   - {fileID: 1208031607}
   - {fileID: 582795227}
   - {fileID: 217740202}
-  patrolWaitsTime: 2
+  patrolWaitTime: 2
   stopAtDistance: 0.5
   lookAngle: 60
   lookTurnSpeed: 180
   lookHoldTime: 0.4
+  chaseSpeed: 5
+  returnToPatrolAfterLostSightTime: 3
 --- !u!43 &2044587113
 Mesh:
   m_ObjectHideFlags: 0

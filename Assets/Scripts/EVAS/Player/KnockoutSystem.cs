@@ -130,8 +130,11 @@ public class KnockoutSystem : MonoBehaviour
 
     void CancelKnockoutHold(string reason)
     {
+        EnemyHealth failedTarget = knockoutTarget;
+
         Debug.Log(reason);
         ResetKnockoutHold(true);
+        StartEnemyChase(failedTarget, 3f);
     }
 
     void ResetKnockoutHold(bool unlockTarget = true)
@@ -252,5 +255,15 @@ public class KnockoutSystem : MonoBehaviour
         EnemyController enemyController = enemy.GetComponent<EnemyController>();
         if (enemyController != null)
             enemyController.SetMovementLocked(locked);
+    }
+
+    static void StartEnemyChase(EnemyHealth enemy, float minimumChaseTime)
+    {
+        if (enemy == null || enemy.IsDead || enemy.IsStunned)
+            return;
+
+        EnemyController enemyController = enemy.GetComponent<EnemyController>();
+        if (enemyController != null)
+            enemyController.StartChase(minimumChaseTime);
     }
 }
