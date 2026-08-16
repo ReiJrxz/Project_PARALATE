@@ -21,12 +21,14 @@ public class EnemyHealth : MonoBehaviour
     private bool isStunned = false;
     private Quaternion standingRotation;
     private Coroutine knockOutRoutine;
+    private EnemyController enemyController;
 
     public bool IsDead => isDead;
     public bool IsStunned => isStunned;
 
     private void Start()
     {
+        enemyController = GetComponent<EnemyController>();
         currentHealth = maxHealth;
         UpdateHealthBar();
     }
@@ -51,6 +53,7 @@ public class EnemyHealth : MonoBehaviour
     IEnumerator KnockOutRoutine(float stunDuration)
     {
         isStunned = true;
+        SetMovementLocked(true);
         standingRotation = transform.rotation;
         transform.rotation = Quaternion.Euler(90f, transform.eulerAngles.y, transform.eulerAngles.z);
 
@@ -63,6 +66,7 @@ public class EnemyHealth : MonoBehaviour
         {
             isStunned = false;
             transform.rotation = standingRotation;
+            SetMovementLocked(false);
 
             if (healthCanvas != null)
                 healthCanvas.gameObject.SetActive(true);
@@ -101,6 +105,7 @@ public class EnemyHealth : MonoBehaviour
     private void Die()
     {
         isDead = true;
+        SetMovementLocked(true);
 
         switch (onDeath)
         {
@@ -120,10 +125,20 @@ public class EnemyHealth : MonoBehaviour
             case DeathAction.Revive:
                 // ชุบชีวิต กลับมาเลือดเต็ม 100 เหมือนเดิม
                 isDead = false;
+                SetMovementLocked(false);
                 currentHealth = maxHealth;
                 UpdateHealthBar();
                 Debug.Log("Enemy Revived!");
                 break;
         }
+    }
+
+    private void SetMovementLocked(bool locked)
+    {
+        if (enemyController == null)
+            enemyController = GetComponent<EnemyController>();
+
+        if (enemyController != null)
+            enemyController.SetMovementLocked(locked);
     }
 }
