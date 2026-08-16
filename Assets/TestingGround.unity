@@ -7805,7 +7805,7 @@ GameObject:
   m_Component:
   - component: {fileID: 789378562}
   m_Layer: 0
-  m_Name: Enemy (1)
+  m_Name: EnemyRoom1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11668,13 +11668,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 891693479}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 614d22049f794d1499cb422cb8de16bf, type: 3}
+  m_Script: {fileID: 11500000, guid: 199a837a363a43b438665a6a2a88a745, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyRoaming
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyController
   waypoints:
   - {fileID: 1043071235}
   - {fileID: 419243231}
-  waitTimeAtWaypoint: 2
+  patrolWaitTime: 2
+  stopAtDistance: 0.5
+  lookAngle: 60
+  lookTurnSpeed: 180
+  lookHoldTime: 0.4
+  chaseSpeed: 5
+  returnToPatrolAfterLostSightTime: 3
 --- !u!1 &908774527
 GameObject:
   m_ObjectHideFlags: 0
@@ -15392,7 +15398,7 @@ GameObject:
   - component: {fileID: 1344467451}
   - component: {fileID: 1344467450}
   - component: {fileID: 1344467456}
-  - component: {fileID: 1344467455}
+  - component: {fileID: 1344467457}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -15539,21 +15545,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1344467448}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &1344467455
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1344467448}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 614d22049f794d1499cb422cb8de16bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyRoaming
-  waypoints:
-  - {fileID: 944263645}
-  waitTimeAtWaypoint: 2
 --- !u!195 &1344467456
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -15576,6 +15567,26 @@ NavMeshAgent:
   m_BaseOffset: 0.9999995
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &1344467457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1344467448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 199a837a363a43b438665a6a2a88a745, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyController
+  waypoints: []
+  patrolWaitTime: 2
+  stopAtDistance: 0.5
+  lookAngle: 60
+  lookTurnSpeed: 180
+  lookHoldTime: 0.4
+  chaseSpeed: 5
+  returnToPatrolAfterLostSightTime: 3
 --- !u!1 &1414369735
 GameObject:
   m_ObjectHideFlags: 0
@@ -19569,7 +19580,7 @@ Transform:
   m_GameObject: {fileID: 1955354433}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.0061763935, y: -0.5122834, z: 0.002680383}
+  m_LocalPosition: {x: -0.0061763935, y: -0.507, z: 0.002680383}
   m_LocalScale: {x: 0.022533255, y: 0.04123868, z: 0.028282335}
   m_ConstrainProportionsScale: 0
   m_Children: []
