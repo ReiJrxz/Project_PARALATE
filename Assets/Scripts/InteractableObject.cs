@@ -15,16 +15,10 @@ public class InteractableObject : MonoBehaviour
 
     void Update()
     {
-        if (!canInteract)
-            return;
-
-        if (interactAction == null || interactAction.action == null)
-            return;
-
-        if (interactAction.action.WasPressedThisFrame())
+        if (canInteract && interactAction.action.WasPressedThisFrame())
         {
             // เมื่อกดปุ่ม สั่งให้ UnityEvent ทำงานตามที่ตั้งค่าไว้ใน Inspector
-            onInteract?.Invoke();
+            onInteract.Invoke();
 
             // (Optional) หากต้องการให้กดได้แค่ครั้งเดียว แล้วของชิ้นนั้นพังหรือเปิดค้างไปเลย
             // gameObject.GetComponent<Collider>().enabled = false;
@@ -38,10 +32,7 @@ public class InteractableObject : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             canInteract = true;
-            if (InteractUIManager.Instance != null)
-                InteractUIManager.Instance.ShowInteract(interactMessage);
-            else
-                Debug.LogWarning("InteractableObject could not show interact UI because no InteractUIManager exists in the scene.", this);
+            InteractUIManager.Instance.ShowInteract(interactMessage);
         }
     }
 
@@ -50,8 +41,7 @@ public class InteractableObject : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             canInteract = false;
-            if (InteractUIManager.Instance != null)
-                InteractUIManager.Instance.HideInteract();
+            InteractUIManager.Instance.HideInteract();
         }
     }
 }
