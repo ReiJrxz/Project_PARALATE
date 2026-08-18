@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine; // 1. เพิ่ม Library ของ Cinemachine
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInput))]
@@ -13,6 +14,16 @@ public class TopDownPlayerController : MonoBehaviour
 
     [Header("Rotation Settings")]
     public float rotationSpeed = 15f;
+
+    [Header("Aim & Armed Settings")]
+    public bool isArmed = false;
+    public float cameraZoomSpeed = 10f;
+    private float normalFOV = 50f;
+    private float aimFOV = 40f;
+
+    // 2. เพิ่มช่องให้ใส่กล้อง Cinemachine
+    [Header("Cinemachine Camera")]
+    public CinemachineCamera virtualCamera;
 
     [Header("Vault Settings (ปีนข้ามสิ่งกีดขวาง)")]
     public float vaultDistance = 2f;
@@ -41,6 +52,7 @@ public class TopDownPlayerController : MonoBehaviour
     private InputAction crouchAction;
     private InputAction pointerAction;
     private InputAction hurdleAction;
+    private InputAction aimAction;
 
     private bool isVaulting = false;
     private bool isMovementLocked = false;
@@ -49,6 +61,7 @@ public class TopDownPlayerController : MonoBehaviour
 
     private bool isCrouching = false;
     private bool isSprinting = false;
+    private bool isAiming = false;
 
     private float climbCooldown = 0f;
 
@@ -66,11 +79,23 @@ public class TopDownPlayerController : MonoBehaviour
         crouchAction = playerInput.actions["Crouch"];
         pointerAction = playerInput.actions["PointerPosition"];
         hurdleAction = playerInput.actions["Hurdle"];
+        aimAction = playerInput.actions["Aiming"];
 
         crouchAction.performed += OnCrouch;
         sprintAction.performed += OnSprintStart;
         sprintAction.canceled += OnSprintStop;
         hurdleAction.performed += OnVault;
+
+        // 3. ดึงค่า FOV จาก Cinemachine แทน
+        if (virtualCamera != null)
+        {
+            normalFOV = virtualCamera.Lens.FieldOfView;
+            aimFOV = normalFOV * 0.8f;
+        }
+
+        // 4. บังคับซ่อนเมาส์ตั้งแต่เริ่ม และ "ขังเมาส์" ไว้ในกรอบหน้าต่างเกม
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Confined;
     }
 
     private void OnDestroy()
@@ -115,6 +140,18 @@ public class TopDownPlayerController : MonoBehaviour
         {
             HandleClimbing();
             return;
+        }
+
+        if (aimAction != null)
+        {
+            isAiming = aimAction.IsPressed();
+        }
+
+        // 5. ปรับให้ซูมผ่านกล้อง Cinemachine แทน MainCamera
+        if (!isArmed && virtualCamera != null)
+        {
+            float targetFOV = isAiming ? aimFOV : normalFOV;
+            virtualCamera.Lens.FieldOfView = Mathf.Lerp(virtualCamera.Lens.FieldOfView, targetFOV, cameraZoomSpeed * Time.deltaTime);
         }
 
         HandleMovement();
@@ -163,26 +200,38 @@ public class TopDownPlayerController : MonoBehaviour
 
     void HandleRotation()
     {
-        Vector2 mousePos = pointerAction.ReadValue<Vector2>();
-        Ray ray = mainCamera.ScreenPointToRay(mousePos);
-
-        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-        float rayDistance;
-
-        if (groundPlane.Raycast(ray, out rayDistance))
+        if (isAiming || isArmed)
         {
-            Vector3 point = ray.GetPoint(rayDistance);
-            Vector3 lookTarget = new Vector3(point.x, transform.position.y, point.z);
+            Vector2 mousePos = pointerAction.ReadValue<Vector2>();
+            Ray ray = mainCamera.ScreenPointToRay(mousePos);
+            Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+            float rayDistance;
 
-            Quaternion targetRotation = Quaternion.LookRotation(lookTarget - transform.position);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            if (groundPlane.Raycast(ray, out rayDistance))
+            {
+                Vector3 point = ray.GetPoint(rayDistance);
+                Vector3 lookTarget = new Vector3(point.x, transform.position.y, point.z);
+
+                Quaternion targetRotation = Quaternion.LookRotation(lookTarget - transform.position);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
+        }
+        else
+        {
+            Vector2 moveInput = moveAction.ReadValue<Vector2>();
+            Vector3 direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+
+            if (direction.magnitude >= 0.1f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
         }
     }
 
     void AttemptVault()
     {
         Vector3 horizontalForward = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
-
         Vector3 lowRayOrigin = transform.position + (Vector3.up * lowRayHeight);
         Vector3 highRayOrigin = transform.position + (Vector3.up * highRayHeight);
 
@@ -204,10 +253,6 @@ public class TopDownPlayerController : MonoBehaviour
             {
                 transform.rotation = Quaternion.LookRotation(vaultDirection);
                 StartCoroutine(VaultRoutine(landingSpot));
-            }
-            else
-            {
-                Debug.Log("ข้ามไม่ได้: กำแพงหนาเกินไป หรือไม่มีที่ลง!");
             }
         }
     }
@@ -235,6 +280,109 @@ public class TopDownPlayerController : MonoBehaviour
         isVaulting = false;
     }
 
+    public void StartClimbing(Vector3 lookDirection, Transform startPoint)
+    {
+        if (isClimbing) { StopClimbing(); return; }
+        if (climbCooldown > 0f) return;
+
+        isClimbing = true;
+        transform.rotation = Quaternion.LookRotation(lookDirection);
+
+        if (animator != null) animator.SetBool("IsClimbing", true);
+        if (startPoint != null) StartCoroutine(SmoothClimbEntryRoutine(startPoint.position));
+    }
+
+    IEnumerator SmoothClimbEntryRoutine(Vector3 targetPos)
+    {
+        isMovementLocked = true;
+        controller.enabled = false;
+
+        Vector3 startPos = transform.position;
+        float timePassed = 0f;
+        float duration = 0.35f;
+
+        while (timePassed < 1f)
+        {
+            timePassed += Time.deltaTime / duration;
+            transform.position = Vector3.Lerp(startPos, targetPos, timePassed);
+            yield return null;
+        }
+
+        transform.position = targetPos;
+        controller.enabled = true;
+        isMovementLocked = false;
+    }
+
+    void HandleClimbing()
+    {
+        Vector2 moveInput = moveAction.ReadValue<Vector2>();
+        float currentClimbSpeed = moveInput.y < 0 ? climbDownSpeed : climbUpSpeed;
+        Vector3 climbDirection = new Vector3(0f, moveInput.y, 0f);
+
+        controller.Move(climbDirection * currentClimbSpeed * Time.deltaTime);
+
+        if (animator != null) animator.SetFloat("ClimbSpeed", moveInput.y);
+
+        CheckLadderExit(moveInput.y, moveInput.x);
+    }
+
+    void CheckLadderExit(float verticalInput, float horizontalInput)
+    {
+        bool isAtBottom = controller.isGrounded || Physics.Raycast(transform.position + (Vector3.up * 0.1f), Vector3.down, 0.4f, ~ladderLayer, QueryTriggerInteraction.Ignore);
+
+        if (isAtBottom)
+        {
+            if (verticalInput < 0 || Mathf.Abs(horizontalInput) > 0.1f)
+            {
+                StopClimbing();
+                return;
+            }
+        }
+
+        if (verticalInput > 0)
+        {
+            Vector3 rayOrigin = transform.position + (Vector3.up * highRayHeight);
+            if (!Physics.Raycast(rayOrigin, transform.forward, 1.2f, ladderLayer, QueryTriggerInteraction.Ignore))
+            {
+                StartCoroutine(LadderTopExitRoutine());
+            }
+        }
+    }
+
+    void StopClimbing()
+    {
+        isClimbing = false;
+        climbCooldown = 0.5f;
+        if (animator != null)
+        {
+            animator.SetBool("IsClimbing", false);
+            animator.SetFloat("ClimbSpeed", 0f);
+        }
+    }
+
+    IEnumerator LadderTopExitRoutine()
+    {
+        isMovementLocked = true;
+        if (animator != null) animator.SetTrigger("ClimbTopExit");
+        controller.enabled = false;
+
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = transform.position + (Vector3.up * 1.2f) + (transform.forward * topExitOffset);
+        float timePassed = 0f;
+        float duration = 0.5f;
+
+        while (timePassed < 1f)
+        {
+            timePassed += Time.deltaTime / duration;
+            transform.position = Vector3.Lerp(startPos, targetPos, timePassed);
+            yield return null;
+        }
+
+        transform.position = targetPos;
+        controller.enabled = true;
+        StopClimbing();
+        isMovementLocked = false;
+    }
     private void OnDrawGizmos()
     {
         Vector3 horizontalForward = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
@@ -254,127 +402,5 @@ public class TopDownPlayerController : MonoBehaviour
             Gizmos.DrawRay(testLandingOrigin, Vector3.down * highRayHeight);
             Gizmos.DrawSphere(testLandingSpot, 0.1f);
         }
-    }
-
-    public void StartClimbing(Vector3 lookDirection, Transform startPoint)
-    {
-        if (isClimbing)
-        {
-            StopClimbing();
-            return;
-        }
-
-        if (climbCooldown > 0f) return;
-
-        isClimbing = true;
-        transform.rotation = Quaternion.LookRotation(lookDirection);
-
-        if (animator != null)
-        {
-            animator.SetBool("IsClimbing", true);
-        }
-
-        if (startPoint != null)
-        {
-            StartCoroutine(SmoothClimbEntryRoutine(startPoint.position));
-        }
-    }
-
-    IEnumerator SmoothClimbEntryRoutine(Vector3 targetPos)
-    {
-        isMovementLocked = true;
-        controller.enabled = false;
-
-        Vector3 startPos = transform.position;
-        float timePassed = 0f;
-        float duration = 0.35f; // ทำให้จังหวะโดนดูดช้าลง สมูทขึ้น ไม่ฉุกละหุก
-
-        while (timePassed < 1f)
-        {
-            timePassed += Time.deltaTime / duration;
-            transform.position = Vector3.Lerp(startPos, targetPos, timePassed);
-            yield return null;
-        }
-
-        transform.position = targetPos;
-        controller.enabled = true;
-        isMovementLocked = false;
-    }
-
-    void HandleClimbing()
-    {
-        Vector2 moveInput = moveAction.ReadValue<Vector2>();
-        float currentClimbSpeed = moveInput.y < 0 ? climbDownSpeed : climbUpSpeed;
-
-        Vector3 climbDirection = new Vector3(0f, moveInput.y, 0f);
-
-        controller.Move(climbDirection * currentClimbSpeed * Time.deltaTime);
-
-        if (animator != null)
-        {
-            animator.SetFloat("ClimbSpeed", moveInput.y);
-        }
-
-        CheckLadderExit(moveInput.y);
-    }
-
-    void CheckLadderExit(float verticalInput)
-    {
-        // บีบให้สั้นลง (0.15f) ต้องเหยียบลงดินจริงๆ ถึงจะยอมปล่อยมือ ป้องกันบั๊กปล่อยมือกลางอากาศ
-        bool isAtBottom = Physics.Raycast(transform.position + (Vector3.up * 0.1f), Vector3.down, 0.15f, ~ladderLayer, QueryTriggerInteraction.Ignore);
-
-        if (verticalInput < 0 && isAtBottom)
-        {
-            StopClimbing();
-            return;
-        }
-
-        if (verticalInput > 0)
-        {
-            Vector3 rayOrigin = transform.position + (Vector3.up * highRayHeight);
-
-            if (!Physics.Raycast(rayOrigin, transform.forward, 1.2f, ladderLayer, QueryTriggerInteraction.Ignore))
-            {
-                StartCoroutine(LadderTopExitRoutine());
-            }
-        }
-    }
-
-    void StopClimbing()
-    {
-        isClimbing = false;
-        climbCooldown = 0.5f;
-
-        if (animator != null)
-        {
-            animator.SetBool("IsClimbing", false);
-            animator.SetFloat("ClimbSpeed", 0f);
-        }
-    }
-
-    IEnumerator LadderTopExitRoutine()
-    {
-        isMovementLocked = true;
-
-        if (animator != null) animator.SetTrigger("ClimbTopExit");
-        controller.enabled = false;
-
-        Vector3 startPos = transform.position;
-        Vector3 targetPos = transform.position + (Vector3.up * 1.2f) + (transform.forward * topExitOffset);
-
-        float timePassed = 0f;
-        float duration = 0.5f;
-
-        while (timePassed < 1f)
-        {
-            timePassed += Time.deltaTime / duration;
-            transform.position = Vector3.Lerp(startPos, targetPos, timePassed);
-            yield return null;
-        }
-
-        transform.position = targetPos;
-        controller.enabled = true;
-        StopClimbing();
-        isMovementLocked = false;
     }
 }
