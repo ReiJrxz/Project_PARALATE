@@ -7,6 +7,10 @@ using Unity.Cinemachine; // 1. เพิ่ม Library ของ Cinemachine
 [RequireComponent(typeof(PlayerInput))]
 public class TopDownPlayerController : MonoBehaviour
 {
+    [Header("Movement Type")]
+    [Tooltip("ติ๊กถูกสำหรับ Isometric/Third-Person, เอาออกสำหรับ Top-Down เดิม")]
+    public bool useCameraRelativeMovement = false;
+
     [Header("Movement Speeds")]
     public float walkSpeed = 5f;
     public float sprintSpeed = 8f;
@@ -171,17 +175,28 @@ public class TopDownPlayerController : MonoBehaviour
     void HandleMovement()
     {
         Vector2 moveInput = moveAction.ReadValue<Vector2>();
-        Vector3 direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+        Vector3 direction = Vector3.zero;
+
+        // เช็คสวิตช์ว่าเราจะเดินแบบไหน?
+        if (useCameraRelativeMovement)
+        {
+            // แบบที่ 1: เดินอิงตามกล้อง (เหมาะกับ Isometric / Third-Person)
+            Vector3 cameraForward = mainCamera.transform.forward;
+            Vector3 cameraRight = mainCamera.transform.right;
+            cameraForward.y = 0f;
+            cameraRight.y = 0f;
+            direction = (cameraForward.normalized * moveInput.y + cameraRight.normalized * moveInput.x).normalized;
+        }
+        else
+        {
+            // แบบที่ 2: เดินอิงตามแกนโลก (โลจิกเดิมของคุณ เหมาะกับ Top-Down แนวตั้งฉาก)
+            direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+        }
+
         float currentSpeed = walkSpeed;
 
-        if (isCrouching)
-        {
-            currentSpeed = crouchSpeed;
-        }
-        else if (isSprinting)
-        {
-            currentSpeed = sprintSpeed;
-        }
+        if (isCrouching) currentSpeed = crouchSpeed;
+        else if (isSprinting) currentSpeed = sprintSpeed;
 
         currentSpeed *= movementSpeedMultiplier;
 
@@ -205,9 +220,8 @@ public class TopDownPlayerController : MonoBehaviour
             Vector2 mousePos = pointerAction.ReadValue<Vector2>();
             Ray ray = mainCamera.ScreenPointToRay(mousePos);
             Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-            float rayDistance;
 
-            if (groundPlane.Raycast(ray, out rayDistance))
+            if (groundPlane.Raycast(ray, out float rayDistance))
             {
                 Vector3 point = ray.GetPoint(rayDistance);
                 Vector3 lookTarget = new Vector3(point.x, transform.position.y, point.z);
@@ -219,7 +233,21 @@ public class TopDownPlayerController : MonoBehaviour
         else
         {
             Vector2 moveInput = moveAction.ReadValue<Vector2>();
-            Vector3 direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+            Vector3 direction = Vector3.zero;
+
+            // สลับโลจิกการหันหน้าให้ตรงกับโหมดการเดิน
+            if (useCameraRelativeMovement)
+            {
+                Vector3 cameraForward = mainCamera.transform.forward;
+                Vector3 cameraRight = mainCamera.transform.right;
+                cameraForward.y = 0f;
+                cameraRight.y = 0f;
+                direction = (cameraForward.normalized * moveInput.y + cameraRight.normalized * moveInput.x).normalized;
+            }
+            else
+            {
+                direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+            }
 
             if (direction.magnitude >= 0.1f)
             {
