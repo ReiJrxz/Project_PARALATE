@@ -108,13 +108,13 @@ public class TopDownPlayerController : MonoBehaviour
             originalCenter = controller.center;
         }
 
-        moveAction = playerInput.actions.FindAction("Movement");
-        sprintAction = playerInput.actions.FindAction("Sprint");
-        crouchAction = playerInput.actions.FindAction("Crouch");
-        pointerAction = playerInput.actions.FindAction("PointerPosition");
-        hurdleAction = playerInput.actions.FindAction("Hurdle");
-        aimAction = playerInput.actions.FindAction("Aiming");
-        whistleAction = playerInput.actions.FindAction("Whistle");
+        moveAction = playerInput.actions["Movement"];
+        sprintAction = playerInput.actions["Sprint"];
+        crouchAction = playerInput.actions["Crouch"];
+        pointerAction = playerInput.actions["PointerPosition"];
+        hurdleAction = playerInput.actions["Hurdle"];
+        aimAction = playerInput.actions["Aiming"];
+        whistleAction = playerInput.actions["Whistle"];
 
         if (crouchAction != null) crouchAction.performed += OnCrouch;
         if (sprintAction != null)
@@ -211,20 +211,14 @@ public class TopDownPlayerController : MonoBehaviour
 
     void HandleCrouchPhysicality()
     {
-        // หากปิดสวิตช์อยู่ ตัวละครจะไม่หดแคปซูลฟิสิกส์ (ป้องกันการเดินติดพื้น)
         if (!enablePhysicalCrouch) return;
 
-        float targetHeight = isCrouching ? crouchHeight : originalHeight;
-        float currentHeight = controller.height;
+        Vector3 targetScale = transform.localScale;
 
-        if (Mathf.Abs(currentHeight - targetHeight) > 0.01f)
-        {
-            controller.height = Mathf.Lerp(currentHeight, targetHeight, crouchTransitionSpeed * Time.deltaTime);
+        float targetYScale = isCrouching ? (crouchHeight / originalHeight) : 1f;
+        targetScale.y = targetYScale;
 
-            // คำนวณ Center ให้สัมพันธ์กับความสูงที่เปลี่ยนไปอย่างระมัดระวัง
-            float heightDifference = originalHeight - controller.height;
-            controller.center = originalCenter - new Vector3(0, heightDifference / 2f, 0);
-        }
+        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, crouchTransitionSpeed * Time.deltaTime);
     }
 
     void EmitNoise(float radius)
