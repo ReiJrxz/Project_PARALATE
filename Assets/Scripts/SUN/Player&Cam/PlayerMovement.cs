@@ -1,10 +1,11 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Unity.Cinemachine; // 1. เพิ่ม Library ของ Cinemachine
+using Unity.Cinemachine;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInput))]
+[RequireComponent(typeof(AudioSource))]
 public class TopDownPlayerController : MonoBehaviour
 {
     [Header("Movement Type")]
@@ -25,7 +26,6 @@ public class TopDownPlayerController : MonoBehaviour
     private float normalFOV = 50f;
     private float aimFOV = 40f;
 
-    // 2. เพิ่มช่องให้ใส่กล้อง Cinemachine
     [Header("Cinemachine Camera")]
     public CinemachineCamera virtualCamera;
 
@@ -37,6 +37,25 @@ public class TopDownPlayerController : MonoBehaviour
     public float raycastDistance = 1f;
     public float lowRayHeight = 0.2f;
     public float highRayHeight = 1.0f;
+
+    [Header("Crouch Physical Settings (การย่อตัว)")]
+    [Tooltip("เปิดเพื่อหดขนาดแคปซูลฟิสิกส์ตอนนั่ง (ถ้าเปิดแล้วเดินไม่ไปให้ปิดไว้)")]
+    public bool enablePhysicalCrouch = false;
+    public float crouchHeight = 1f;
+    public float crouchTransitionSpeed = 10f;
+    private float originalHeight;
+    private Vector3 originalCenter;
+
+    [Header("Audio & Stealth (ระบบเสียง)")]
+    public AudioSource audioSource;
+    public AudioClip footstepClip;
+    public AudioClip whistleClip;
+    public float footstepInterval = 0.5f;
+
+    public float walkNoiseRadius = 7f;
+    public float sprintNoiseRadius = 15f;
+    public float whistleNoiseRadius = 20f;
+    public LayerMask enemyLayer;
 
     [Header("Animation (อนิเมชั่น)")]
     public Animator animator;
@@ -57,6 +76,7 @@ public class TopDownPlayerController : MonoBehaviour
     private InputAction pointerAction;
     private InputAction hurdleAction;
     private InputAction aimAction;
+    private InputAction whistleAction;
 
     private bool isVaulting = false;
     private bool isMovementLocked = false;
@@ -68,6 +88,7 @@ public class TopDownPlayerController : MonoBehaviour
     private bool isAiming = false;
 
     private float climbCooldown = 0f;
+    private float nextFootstepTime = 0f;
 
     public bool IsMovementLocked => isMovementLocked;
     public bool IsClimbing => isClimbing;
@@ -78,26 +99,38 @@ public class TopDownPlayerController : MonoBehaviour
         mainCamera = Camera.main;
         playerInput = GetComponent<PlayerInput>();
 
-        moveAction = playerInput.actions["Movement"];
-        sprintAction = playerInput.actions["Sprint"];
-        crouchAction = playerInput.actions["Crouch"];
-        pointerAction = playerInput.actions["PointerPosition"];
-        hurdleAction = playerInput.actions["Hurdle"];
-        aimAction = playerInput.actions["Aiming"];
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
 
-        crouchAction.performed += OnCrouch;
-        sprintAction.performed += OnSprintStart;
-        sprintAction.canceled += OnSprintStop;
-        hurdleAction.performed += OnVault;
+        // จำขนาดแคปซูลดั้งเดิมไว้ ป้องกันปัญหาจมพื้น
+        if (controller != null)
+        {
+            originalHeight = controller.height;
+            originalCenter = controller.center;
+        }
 
-        // 3. ดึงค่า FOV จาก Cinemachine แทน
+        moveAction = playerInput.actions.FindAction("Movement");
+        sprintAction = playerInput.actions.FindAction("Sprint");
+        crouchAction = playerInput.actions.FindAction("Crouch");
+        pointerAction = playerInput.actions.FindAction("PointerPosition");
+        hurdleAction = playerInput.actions.FindAction("Hurdle");
+        aimAction = playerInput.actions.FindAction("Aiming");
+        whistleAction = playerInput.actions.FindAction("Whistle");
+
+        if (crouchAction != null) crouchAction.performed += OnCrouch;
+        if (sprintAction != null)
+        {
+            sprintAction.performed += OnSprintStart;
+            sprintAction.canceled += OnSprintStop;
+        }
+        if (hurdleAction != null) hurdleAction.performed += OnVault;
+        if (whistleAction != null) whistleAction.performed += OnWhistle;
+
         if (virtualCamera != null)
         {
             normalFOV = virtualCamera.Lens.FieldOfView;
             aimFOV = normalFOV * 0.8f;
         }
 
-        // 4. บังคับซ่อนเมาส์ตั้งแต่เริ่ม และ "ขังเมาส์" ไว้ในกรอบหน้าต่างเกม
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Confined;
     }
@@ -111,6 +144,7 @@ public class TopDownPlayerController : MonoBehaviour
             sprintAction.canceled -= OnSprintStop;
         }
         if (hurdleAction != null) hurdleAction.performed -= OnVault;
+        if (whistleAction != null) whistleAction.performed -= OnWhistle;
     }
 
     private void OnCrouch(InputAction.CallbackContext context)
@@ -134,30 +168,33 @@ public class TopDownPlayerController : MonoBehaviour
         AttemptVault();
     }
 
+    private void OnWhistle(InputAction.CallbackContext context)
+    {
+        if (isVaulting || isMovementLocked) return;
+
+        if (audioSource != null && whistleClip != null)
+        {
+            audioSource.PlayOneShot(whistleClip);
+        }
+        EmitNoise(whistleNoiseRadius);
+        Debug.Log("เป่าปากล่อศัตรู! รัศมี: " + whistleNoiseRadius);
+    }
+
     void Update()
     {
         if (climbCooldown > 0f) climbCooldown -= Time.deltaTime;
-
         if (isVaulting || isMovementLocked) return;
+        if (isClimbing) { HandleClimbing(); return; }
 
-        if (isClimbing)
-        {
-            HandleClimbing();
-            return;
-        }
+        if (aimAction != null) isAiming = aimAction.IsPressed();
 
-        if (aimAction != null)
-        {
-            isAiming = aimAction.IsPressed();
-        }
-
-        // 5. ปรับให้ซูมผ่านกล้อง Cinemachine แทน MainCamera
         if (!isArmed && virtualCamera != null)
         {
             float targetFOV = isAiming ? aimFOV : normalFOV;
             virtualCamera.Lens.FieldOfView = Mathf.Lerp(virtualCamera.Lens.FieldOfView, targetFOV, cameraZoomSpeed * Time.deltaTime);
         }
 
+        HandleCrouchPhysicality();
         HandleMovement();
         HandleRotation();
     }
@@ -172,15 +209,39 @@ public class TopDownPlayerController : MonoBehaviour
         movementSpeedMultiplier = Mathf.Max(0f, multiplier);
     }
 
+    void HandleCrouchPhysicality()
+    {
+        // หากปิดสวิตช์อยู่ ตัวละครจะไม่หดแคปซูลฟิสิกส์ (ป้องกันการเดินติดพื้น)
+        if (!enablePhysicalCrouch) return;
+
+        float targetHeight = isCrouching ? crouchHeight : originalHeight;
+        float currentHeight = controller.height;
+
+        if (Mathf.Abs(currentHeight - targetHeight) > 0.01f)
+        {
+            controller.height = Mathf.Lerp(currentHeight, targetHeight, crouchTransitionSpeed * Time.deltaTime);
+
+            // คำนวณ Center ให้สัมพันธ์กับความสูงที่เปลี่ยนไปอย่างระมัดระวัง
+            float heightDifference = originalHeight - controller.height;
+            controller.center = originalCenter - new Vector3(0, heightDifference / 2f, 0);
+        }
+    }
+
+    void EmitNoise(float radius)
+    {
+        Collider[] enemiesInEarshot = Physics.OverlapSphere(transform.position, radius, enemyLayer);
+        // สามารถส่งสัญญาณไปปลุก AI ในอนาคตได้จากตรงนี้
+    }
+
     void HandleMovement()
     {
-        Vector2 moveInput = moveAction.ReadValue<Vector2>();
+        Vector2 moveInput = Vector2.zero;
+        if (moveAction != null) moveInput = moveAction.ReadValue<Vector2>();
+
         Vector3 direction = Vector3.zero;
 
-        // เช็คสวิตช์ว่าเราจะเดินแบบไหน?
         if (useCameraRelativeMovement)
         {
-            // แบบที่ 1: เดินอิงตามกล้อง (เหมาะกับ Isometric / Third-Person)
             Vector3 cameraForward = mainCamera.transform.forward;
             Vector3 cameraRight = mainCamera.transform.right;
             cameraForward.y = 0f;
@@ -189,7 +250,6 @@ public class TopDownPlayerController : MonoBehaviour
         }
         else
         {
-            // แบบที่ 2: เดินอิงตามแกนโลก (โลจิกเดิมของคุณ เหมาะกับ Top-Down แนวตั้งฉาก)
             direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
         }
 
@@ -203,13 +263,32 @@ public class TopDownPlayerController : MonoBehaviour
         if (direction.magnitude >= 0.1f)
         {
             controller.Move(direction * currentSpeed * Time.deltaTime);
+
+            // ระบบเสียงฝีเท้า
+            if (controller.isGrounded && Time.time >= nextFootstepTime)
+            {
+                if (!isCrouching)
+                {
+                    float currentNoiseRadius = isSprinting ? sprintNoiseRadius : walkNoiseRadius;
+                    EmitNoise(currentNoiseRadius);
+
+                    if (audioSource != null && footstepClip != null)
+                    {
+                        audioSource.PlayOneShot(footstepClip);
+                    }
+                }
+
+                float interval = isSprinting ? footstepInterval * 0.7f : footstepInterval;
+                nextFootstepTime = Time.time + interval;
+            }
         }
 
         controller.Move(new Vector3(0, -9.81f * Time.deltaTime, 0));
 
         if (animator != null)
         {
-            animator.SetFloat("Speed", direction.magnitude * walkSpeed);
+            animator.SetFloat("Speed", direction.magnitude * currentSpeed);
+            animator.SetBool("IsCrouching", isCrouching);
         }
     }
 
@@ -217,7 +296,9 @@ public class TopDownPlayerController : MonoBehaviour
     {
         if (isAiming || isArmed)
         {
-            Vector2 mousePos = pointerAction.ReadValue<Vector2>();
+            Vector2 mousePos = Vector2.zero;
+            if (pointerAction != null) mousePos = pointerAction.ReadValue<Vector2>();
+
             Ray ray = mainCamera.ScreenPointToRay(mousePos);
             Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
 
@@ -232,10 +313,11 @@ public class TopDownPlayerController : MonoBehaviour
         }
         else
         {
-            Vector2 moveInput = moveAction.ReadValue<Vector2>();
+            Vector2 moveInput = Vector2.zero;
+            if (moveAction != null) moveInput = moveAction.ReadValue<Vector2>();
+
             Vector3 direction = Vector3.zero;
 
-            // สลับโลจิกการหันหน้าให้ตรงกับโหมดการเดิน
             if (useCameraRelativeMovement)
             {
                 Vector3 cameraForward = mainCamera.transform.forward;
@@ -343,7 +425,9 @@ public class TopDownPlayerController : MonoBehaviour
 
     void HandleClimbing()
     {
-        Vector2 moveInput = moveAction.ReadValue<Vector2>();
+        Vector2 moveInput = Vector2.zero;
+        if (moveAction != null) moveInput = moveAction.ReadValue<Vector2>();
+
         float currentClimbSpeed = moveInput.y < 0 ? climbDownSpeed : climbUpSpeed;
         Vector3 climbDirection = new Vector3(0f, moveInput.y, 0f);
 
@@ -411,6 +495,7 @@ public class TopDownPlayerController : MonoBehaviour
         StopClimbing();
         isMovementLocked = false;
     }
+
     private void OnDrawGizmos()
     {
         Vector3 horizontalForward = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
