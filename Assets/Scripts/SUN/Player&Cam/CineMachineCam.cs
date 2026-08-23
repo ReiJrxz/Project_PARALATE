@@ -1,29 +1,41 @@
 using UnityEngine;
 using Unity.Cinemachine;
 
+// Base class — ใช้กับ Preset 1-4 ตรงๆ
 public class CameraZone : MonoBehaviour
 {
     [Header("กล้องประจำโซนนี้")]
     public CinemachineCamera virtualCamera;
 
-    [Header("ตั้งค่า Priority")]
-    public int activePriority = 100; // ค่าตอนเดินเข้าห้อง
-    public int inactivePriority = 0; // ค่าตอนเดินออกห้อง
+    [Header("Priority")]
+    protected static int globalPriorityCounter = 10;
+    public int inactivePriority = 0;
 
-    private void OnTriggerEnter(Collider other)
+    protected virtual void Start()
     {
+        if (virtualCamera == null)
+        {
+            Debug.LogWarning($"{name}: ยังไม่ได้ผูก virtualCamera");
+            return;
+        }
+        virtualCamera.Priority = inactivePriority;
+    }
+
+    protected virtual void OnTriggerEnter(Collider other)
+    {
+        if (virtualCamera == null) return;
         if (other.CompareTag("Player"))
         {
-            // เปลี่ยนจาก 10 เป็นตัวแปร activePriority
-            virtualCamera.Priority = activePriority;
+            globalPriorityCounter++;
+            virtualCamera.Priority = globalPriorityCounter;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
+        if (virtualCamera == null) return;
         if (other.CompareTag("Player"))
         {
-            // เปลี่ยนจาก 0 เป็นตัวแปร inactivePriority
             virtualCamera.Priority = inactivePriority;
         }
     }
