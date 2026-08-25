@@ -46,17 +46,7 @@ public class TopDownPlayerController : MonoBehaviour
     private float originalHeight;
     private Vector3 originalCenter;
 
-    [Header("Audio & Stealth (ระบบเสียง)")]
-    public AudioSource audioSource;
-    public AudioClip footstepClip;
-    public AudioClip whistleClip;
-    public float footstepInterval = 0.5f;
-
-    public float walkNoiseRadius = 7f;
-    public float sprintNoiseRadius = 15f;
-    public float whistleNoiseRadius = 20f;
-    public LayerMask enemyLayer;
-
+   
     [Header("Animation (อนิเมชั่น)")]
     public Animator animator;
 
@@ -88,18 +78,19 @@ public class TopDownPlayerController : MonoBehaviour
     private bool isAiming = false;
 
     private float climbCooldown = 0f;
-    private float nextFootstepTime = 0f;
 
     public bool IsMovementLocked => isMovementLocked;
     public bool IsClimbing => isClimbing;
 
+    [Header("Player Audio")]
+    public PlayerAudioController playerAudio;
     void Start()
     {
         controller = GetComponent<CharacterController>();
         mainCamera = Camera.main;
         playerInput = GetComponent<PlayerInput>();
 
-        if (audioSource == null) audioSource = GetComponent<AudioSource>();
+        if (playerAudio == null) playerAudio = GetComponent<PlayerAudioController>();
 
         // จำขนาดแคปซูลดั้งเดิมไว้ ป้องกันปัญหาจมพื้น
         if (controller != null)
@@ -171,13 +162,7 @@ public class TopDownPlayerController : MonoBehaviour
     private void OnWhistle(InputAction.CallbackContext context)
     {
         if (isVaulting || isMovementLocked) return;
-
-        if (audioSource != null && whistleClip != null)
-        {
-            audioSource.PlayOneShot(whistleClip);
-        }
-        EmitNoise(whistleNoiseRadius);
-        Debug.Log("เป่าปากล่อศัตรู! รัศมี: " + whistleNoiseRadius);
+        if (playerAudio != null) playerAudio.PlayWhistle();
     }
 
     void Update()
@@ -221,11 +206,6 @@ public class TopDownPlayerController : MonoBehaviour
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, crouchTransitionSpeed * Time.deltaTime);
     }
 
-    void EmitNoise(float radius)
-    {
-        Collider[] enemiesInEarshot = Physics.OverlapSphere(transform.position, radius, enemyLayer);
-        // สามารถส่งสัญญาณไปปลุก AI ในอนาคตได้จากตรงนี้
-    }
 
     void HandleMovement()
     {
@@ -258,22 +238,9 @@ public class TopDownPlayerController : MonoBehaviour
         {
             controller.Move(direction * currentSpeed * Time.deltaTime);
 
-            // ระบบเสียงฝีเท้า
-            if (controller.isGrounded && Time.time >= nextFootstepTime)
+            if (playerAudio != null)
             {
-                if (!isCrouching)
-                {
-                    float currentNoiseRadius = isSprinting ? sprintNoiseRadius : walkNoiseRadius;
-                    EmitNoise(currentNoiseRadius);
-
-                    if (audioSource != null && footstepClip != null)
-                    {
-                        audioSource.PlayOneShot(footstepClip);
-                    }
-                }
-
-                float interval = isSprinting ? footstepInterval * 0.7f : footstepInterval;
-                nextFootstepTime = Time.time + interval;
+                playerAudio.HandleFootstep(controller.isGrounded, isSprinting, isCrouching);
             }
         }
 

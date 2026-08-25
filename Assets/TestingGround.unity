@@ -7776,7 +7776,8 @@ GameObject:
   - component: {fileID: 688142573}
   - component: {fileID: 688142572}
   - component: {fileID: 688142577}
-  - component: {fileID: 688142576}
+  - component: {fileID: 688142583}
+  - component: {fileID: 688142582}
   - component: {fileID: 688142578}
   - component: {fileID: 688142579}
   - component: {fileID: 688142580}
@@ -7885,55 +7886,6 @@ Transform:
   - {fileID: 104895324}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &688142576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 688142571}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76f351bd61fad6e40a84d6d499c81b15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BasicPlayerMovement
-  useCameraRelativeMovement: 0
-  walkSpeed: 5
-  sprintSpeed: 8
-  crouchSpeed: 2.5
-  rotationSpeed: 12
-  isArmed: 0
-  cameraZoomSpeed: 10
-  virtualCamera: {fileID: 344457208}
-  vaultDistance: 2
-  vaultHeight: 1.2
-  vaultDuration: 1.3
-  hurdleLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  raycastDistance: 2
-  lowRayHeight: -0.5
-  highRayHeight: 0.1
-  enablePhysicalCrouch: 1
-  crouchHeight: 1
-  crouchTransitionSpeed: 10
-  audioSource: {fileID: 0}
-  footstepClip: {fileID: 0}
-  whistleClip: {fileID: 8300000, guid: dd1ea513a307dda4bb24fc188c074ba8, type: 3}
-  footstepInterval: 0.5
-  walkNoiseRadius: 7
-  sprintNoiseRadius: 15
-  whistleNoiseRadius: 20
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 2048
-  animator: {fileID: 0}
-  climbUpSpeed: 3
-  climbDownSpeed: 6
-  topExitOffset: 1.5
-  ladderLayer:
-    serializedVersion: 2
-    m_Bits: 128
 --- !u!143 &688142577
 CharacterController:
   m_ObjectHideFlags: 0
@@ -8123,6 +8075,68 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &688142582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688142571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f46f14bdb555303429e5b7fdfbddd099, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAudioController
+  footstepClip: {fileID: 0}
+  whistleClip: {fileID: 0}
+  footstepInterval: 0.5
+  sprintIntervalMultiplier: 0.7
+  walkNoiseRadius: 7
+  sprintNoiseRadius: 15
+  whistleNoiseRadius: 20
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &688142583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688142571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76f351bd61fad6e40a84d6d499c81b15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TopDownPlayerController
+  useCameraRelativeMovement: 0
+  walkSpeed: 5
+  sprintSpeed: 8
+  crouchSpeed: 2.5
+  rotationSpeed: 15
+  isArmed: 0
+  cameraZoomSpeed: 10
+  virtualCamera: {fileID: 0}
+  vaultDistance: 2
+  vaultHeight: 1.2
+  vaultDuration: 0.4
+  hurdleLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  raycastDistance: 1
+  lowRayHeight: 0.2
+  highRayHeight: 1
+  enablePhysicalCrouch: 0
+  crouchHeight: 1
+  crouchTransitionSpeed: 10
+  animator: {fileID: 0}
+  climbUpSpeed: 3
+  climbDownSpeed: 6
+  topExitOffset: 1.5
+  ladderLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  playerAudio: {fileID: 688142582}
 --- !u!43 &744716780
 Mesh:
   m_ObjectHideFlags: 0
