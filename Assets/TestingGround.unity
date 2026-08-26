@@ -1793,7 +1793,7 @@ Transform:
   m_GameObject: {fileID: 76126000}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.4, z: -0.27}
+  m_LocalPosition: {x: 0, y: -0.86, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15798,7 +15798,7 @@ Transform:
   m_GameObject: {fileID: 1302727771}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.203, z: -0.278}
+  m_LocalPosition: {x: 0, y: 3.203, z: -0.37}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16788,7 +16788,7 @@ Transform:
   m_GameObject: {fileID: 1613135907}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.602, z: -0.59}
+  m_LocalPosition: {x: 0, y: 1.56, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -22137,6 +22137,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1932271181679283720, guid: 2799adb4b0fc2c44499866386c5c3ccc, type: 3}
+      propertyPath: enemyLayer.m_Bits
+      value: 2048
+      objectReference: {fileID: 0}
+    - target: {fileID: 6173347099856426341, guid: 2799adb4b0fc2c44499866386c5c3ccc, type: 3}
+      propertyPath: lowRayHeight
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6173347099856426341, guid: 2799adb4b0fc2c44499866386c5c3ccc, type: 3}
+      propertyPath: highRayHeight
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6173347099856426341, guid: 2799adb4b0fc2c44499866386c5c3ccc, type: 3}
+      propertyPath: hurdleLayer.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 6173347099856426341, guid: 2799adb4b0fc2c44499866386c5c3ccc, type: 3}
+      propertyPath: ladderLayer.m_Bits
+      value: 128
+      objectReference: {fileID: 0}
     - target: {fileID: 8413936064641355821, guid: 2799adb4b0fc2c44499866386c5c3ccc, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.91

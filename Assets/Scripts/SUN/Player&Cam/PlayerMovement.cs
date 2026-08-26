@@ -308,6 +308,7 @@ public class TopDownPlayerController : MonoBehaviour
 
         bool hitLow = Physics.Raycast(lowRayOrigin, horizontalForward, out RaycastHit hit, raycastDistance, hurdleLayer);
         bool hitHigh = Physics.Raycast(highRayOrigin, horizontalForward, raycastDistance, hurdleLayer);
+        Debug.Log($"hitLow: {hitLow}, hitHigh: {hitHigh}");
 
         if (hitLow && !hitHigh)
         {
@@ -319,7 +320,7 @@ public class TopDownPlayerController : MonoBehaviour
             Vector3 landingRayOrigin = landingSpot + (Vector3.up * highRayHeight);
 
             bool hitThickWall = Physics.Raycast(landingRayOrigin, Vector3.down, highRayHeight, hurdleLayer);
-
+            Debug.Log($"hitThickWall: {hitThickWall}");
             if (!hitThickWall)
             {
                 transform.rotation = Quaternion.LookRotation(vaultDirection);
@@ -331,23 +332,34 @@ public class TopDownPlayerController : MonoBehaviour
     IEnumerator VaultRoutine(Vector3 targetPosition)
     {
         isVaulting = true;
-        controller.enabled = false;
+        // ไม่ปิด controller.enabled แล้ว เพื่อให้ยังชนกำแพง/สิ่งกีดขวางได้ระหว่างกระโดดข้าม
 
         Vector3 startPos = transform.position;
         float timePassed = 0f;
+        float previousHeightOffset = 0f;
 
         while (timePassed < 1f)
         {
             timePassed += Time.deltaTime / vaultDuration;
-            Vector3 currentPos = Vector3.Lerp(startPos, targetPosition, timePassed);
-            currentPos.y += Mathf.Sin(timePassed * Mathf.PI) * vaultHeight;
 
-            transform.position = currentPos;
+            Vector3 lerpedPos = Vector3.Lerp(startPos, targetPosition, timePassed);
+            float heightOffset = Mathf.Sin(Mathf.Clamp01(timePassed) * Mathf.PI) * vaultHeight;
+
+            // คำนวณตำแหน่งเป้าหมายของเฟรมนี้ (รวมส่วนโค้งกระโดดด้วย)
+            Vector3 targetFramePos = lerpedPos;
+            targetFramePos.y += heightOffset;
+
+            Vector3 delta = targetFramePos - transform.position;
+            controller.Move(delta);   // ใช้ Move แทน set position ตรงๆ ให้เช็คชนกำแพงระหว่างทาง
+
+            previousHeightOffset = heightOffset;
             yield return null;
         }
 
-        transform.position = targetPosition;
-        controller.enabled = true;
+        // Snap ตำแหน่งสุดท้ายให้แม่นยำ (จุดยืนจริง ไม่มี height offset)
+        Vector3 finalDelta = targetPosition - transform.position;
+        controller.Move(finalDelta);
+
         isVaulting = false;
     }
 
@@ -366,7 +378,7 @@ public class TopDownPlayerController : MonoBehaviour
     IEnumerator SmoothClimbEntryRoutine(Vector3 targetPos)
     {
         isMovementLocked = true;
-        controller.enabled = false;
+        // ไม่ปิด controller.enabled แล้ว เพื่อให้ยังชนกำแพงได้ระหว่างเข้าสู่บันได
 
         Vector3 startPos = transform.position;
         float timePassed = 0f;
@@ -375,13 +387,16 @@ public class TopDownPlayerController : MonoBehaviour
         while (timePassed < 1f)
         {
             timePassed += Time.deltaTime / duration;
-            transform.position = Vector3.Lerp(startPos, targetPos, timePassed);
+            Vector3 nextPos = Vector3.Lerp(startPos, targetPos, timePassed);
+            Vector3 delta = nextPos - transform.position;
+            controller.Move(delta);   // ใช้ Move แทน set position ตรงๆ
             yield return null;
         }
 
-        transform.position = targetPos;
-        controller.enabled = true;
-        isMovementLocked = false;
+        Vector3 finalDelta = targetPos - transform.position;
+        controller.Move(finalDelta);
+
+        isMovementLocked = false;   // <-- สำคัญมาก! ปลดล็อคตอนจบ ไม่งั้นค้างตลอดไป
     }
 
     void HandleClimbing()
@@ -437,7 +452,6 @@ public class TopDownPlayerController : MonoBehaviour
     {
         isMovementLocked = true;
         if (animator != null) animator.SetTrigger("ClimbTopExit");
-        controller.enabled = false;
 
         Vector3 startPos = transform.position;
         Vector3 targetPos = transform.position + (Vector3.up * 1.2f) + (transform.forward * topExitOffset);
@@ -447,12 +461,15 @@ public class TopDownPlayerController : MonoBehaviour
         while (timePassed < 1f)
         {
             timePassed += Time.deltaTime / duration;
-            transform.position = Vector3.Lerp(startPos, targetPos, timePassed);
+            Vector3 nextPos = Vector3.Lerp(startPos, targetPos, timePassed);
+            Vector3 delta = nextPos - transform.position;
+            controller.Move(delta); 
             yield return null;
         }
 
-        transform.position = targetPos;
-        controller.enabled = true;
+        Vector3 finalDelta = targetPos - transform.position;
+        controller.Move(finalDelta);
+
         StopClimbing();
         isMovementLocked = false;
     }
