@@ -1,7 +1,6 @@
 using UnityEngine;
 using Unity.Cinemachine;
 
-// Base class — ใช้กับ Preset 1-4 ตรงๆ
 public class CameraZone : MonoBehaviour
 {
     [Header("กล้องประจำโซนนี้")]
@@ -9,6 +8,7 @@ public class CameraZone : MonoBehaviour
 
     [Header("Priority")]
     protected static int globalPriorityCounter = 10;
+    protected const int ROOM_TIER_MAX = 900; // เพดานกันชน Action Camera (1000+)
     public int inactivePriority = 0;
 
     protected virtual void Start()
@@ -27,6 +27,9 @@ public class CameraZone : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             globalPriorityCounter++;
+            if (globalPriorityCounter >= ROOM_TIER_MAX)
+                globalPriorityCounter = 10; // wrap กลับ กันชน tier อื่น
+
             virtualCamera.Priority = globalPriorityCounter;
         }
     }
