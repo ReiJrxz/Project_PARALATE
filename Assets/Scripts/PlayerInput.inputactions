@@ -124,7 +124,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Whlistling",
+                    "name": "Whistle",
                     "type": "Button",
                     "id": "fd8d60c3-7d6a-4add-a5f0-76dbbbfaa09c",
                     "expectedControlType": "",
@@ -133,7 +133,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Crawling",
+                    "name": "WallLean",
                     "type": "Button",
                     "id": "6daf32b5-4269-44d6-a12c-d30a64967842",
                     "expectedControlType": "",
@@ -373,22 +373,22 @@
                 {
                     "name": "",
                     "id": "d498abb7-9735-406c-ae8d-02cb6ca90dc3",
-                    "path": "<Keyboard>/x",
+                    "path": "<Keyboard>/v",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Whlistling",
+                    "action": "Whistle",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "2b67f9b8-44f5-494b-a5fe-0d8a2678927e",
-                    "path": "<Keyboard>/z",
+                    "path": "<Keyboard>/x",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Crawling",
+                    "action": "WallLean",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

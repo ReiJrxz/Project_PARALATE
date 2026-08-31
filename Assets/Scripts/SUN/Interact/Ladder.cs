@@ -21,8 +21,6 @@ public class Ladder : MonoBehaviour
 
             if (player != null && climbStartPoint != null)
             {
-                // เปลี่ยนมาใช้ทิศทางแกน Z ของ climbStartPoint แทน 
-                // (ให้คุณหมุนลูกศรสีน้ำเงินของจุดปีนนี้ ให้พุ่งเข้าหาบันไดใน Scene ได้เลย)
                 Vector3 lookDirection = climbStartPoint.forward;
                 player.StartClimbing(lookDirection, climbStartPoint);
             }

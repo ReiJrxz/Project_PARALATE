@@ -101,7 +101,7 @@ public class GunAction : MonoBehaviour
         CancelReload();
         SetScoped(false, true);
         SetCrosshairVisible(false);
-        Cursor.visible = true;
+        //Cursor.visible = true;
     }
     public void SetHeld(bool held)
     {
@@ -116,7 +116,7 @@ public class GunAction : MonoBehaviour
         {
             CancelReload();
             SetScoped(false, true);
-            Cursor.visible = true;
+            //Cursor.visible = true;
         }
     }
     void Update()
@@ -244,7 +244,7 @@ public class GunAction : MonoBehaviour
             }
             else
             {
-                Cursor.visible = true; // โชว์เมาส์ปกติเมื่อเก็บปืน
+                //Cursor.visible = true; // โชว์เมาส์ปกติเมื่อเก็บปืน
             }
         }
     }
