@@ -142,16 +142,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Inventory",
-                    "type": "Button",
-                    "id": "c1354e32-fde0-4e83-838b-29219b0fe9c3",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "PowerWheel",
+                    "name": "Weapon Wheels",
                     "type": "Button",
                     "id": "3eb39b53-428d-4569-8c48-099b36e98de2",
                     "expectedControlType": "",
@@ -394,23 +385,12 @@
                 },
                 {
                     "name": "",
-                    "id": "4f2b2841-514b-4e22-9786-1e20a3dff886",
-                    "path": "<Keyboard>/b",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Inventory",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "f08e2b45-a73a-4a98-b0cb-84617eceebf0",
                     "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "PowerWheel",
+                    "action": "Weapon Wheels",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
