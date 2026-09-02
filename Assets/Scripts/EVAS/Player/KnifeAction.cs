@@ -70,10 +70,6 @@ public class KnifeAction : MonoBehaviour
         {
             Debug.Log("<color=cyan>มีดฟันไปโดน: " + hit.collider.name + "</color>");
 
-            Debug.Log("ชน: " + hit.collider.name);
-
-            Debug.Log("Hit object: " + hit.collider.name);
-
             EnemyHealth enemy = hit.collider.GetComponentInParent<EnemyHealth>();
             if (enemy != null)
             {

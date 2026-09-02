@@ -18,7 +18,7 @@ public class FieldOfView : MonoBehaviour
     public bool showVisionCone = true;
     public Color searchingColor = new Color(0f, 1f, 0f, 0.25f);
     public Color spottedColor = new Color(1f, 0f, 0f, 0.35f);
-    public float coneHeightOffset = 0.05f;
+    public float coneHeightOffset = -0.05f;
     [Range(3, 120)]
     public int coneSegments = 40;
 
@@ -59,7 +59,6 @@ public class FieldOfView : MonoBehaviour
             FieldOfViewCheck();
         }
     }
-    // �ѧ��ѹ��Ǩ�ͺ����ѵ������ö�ͧ��繼��������������
     private void FieldOfViewCheck()
     {
         canSeePlayer = false;
@@ -179,7 +178,6 @@ public class FieldOfView : MonoBehaviour
         if (coneTriangles == null || coneTriangles.Length != triangleCount)
             coneTriangles = new int[triangleCount];
     }
-    // �ѧ��ѹ��駤���բͧ Vision Cone
     private void SetConeColor(Color color)
     {
         if (coneMaterial == null)
@@ -191,7 +189,6 @@ public class FieldOfView : MonoBehaviour
         if (coneMaterial.HasProperty("_BaseColor"))
             coneMaterial.SetColor("_BaseColor", color);
     }
-    // �ѧ��ѹ�ӹǳ��ȷҧ�ҡ���
     private Vector3 DirectionFromAngle(float angleInDegrees)
     {
         return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0f, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
