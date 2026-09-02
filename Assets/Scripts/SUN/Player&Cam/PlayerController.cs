@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask wallLayer;
 
     [Header("Facing Check")]
-    public float maxFacingAngle = 90f; // หันเกินมุมนี้ = ถือว่าหันหนีกำแพง
+    public float maxFacingAngle = 120f; // หันเกินมุมนี้ = ถือว่าหันหนีกำแพง
 
     private bool isWallLeaning = false;
     private Vector3 wallDirectionOnEnter; // เก็บทิศไปกำแพงตอนเข้า state
@@ -41,7 +41,11 @@ public class PlayerController : MonoBehaviour
 
         if (Physics.Raycast(checkOrigin, transform.forward, out hit, wallCheckDistance, wallLayer))
         {
-            wallDirectionOnEnter = transform.forward; // จำทิศตอนเข้าไว้
+            wallDirectionOnEnter = transform.forward;
+            float side = Vector3.Dot(hit.normal, transform.right);
+            bool wallNormalPointsRight = side > 0; // ← ตัวแปรนี้ "เกิด" อยู่แค่ในนี้
+
+            actionCamera.OnWallLeanStart(transform.position, hit.normal, wallNormalPointsRight);
             EnterWallLean();
         }
     }
@@ -70,7 +74,6 @@ public class PlayerController : MonoBehaviour
     private void EnterWallLean()
     {
         isWallLeaning = true;
-        actionCamera.OnWallLeanStart();
     }
 
     private void ExitWallLean()
