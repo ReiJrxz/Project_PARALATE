@@ -19,8 +19,8 @@ GameObject:
   - component: {fileID: 8951187399617778230}
   - component: {fileID: 184613564265374035}
   - component: {fileID: 5350436961949451085}
-  - component: {fileID: 6044956673403840519}
   - component: {fileID: 7944954573667976441}
+  - component: {fileID: 6044956673403840519}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -311,10 +311,6 @@ MonoBehaviour:
     m_ActionName: 'Player/WallLean[/Keyboard/x]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: c1354e32-fde0-4e83-838b-29219b0fe9c3
-    m_ActionName: 'Player/Inventory[/Keyboard/b]'
-  - m_PersistentCalls:
-      m_Calls: []
     m_ActionId: 3eb39b53-428d-4569-8c48-099b36e98de2
     m_ActionName: 'Player/PowerWheel[/Keyboard/tab]'
   m_NeverAutoSwitchControlSchemes: 0
@@ -378,6 +374,27 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   maxFacingAngle: 90
+--- !u!114 &7944954573667976441
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3523246845713457628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f55d55cf6ce5e14dad9ed9167ae9c67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActionCameraController
+  wallLeanCamera: {fileID: 0}
+  cameraDistance: 3.5
+  cameraHeight: 1.6
+  lookAtHeight: 1.5
+  sideOffsetAngle: 30
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  transitionSpeed: 5
 --- !u!82 &6044956673403840519
 AudioSource:
   m_ObjectHideFlags: 0
@@ -475,19 +492,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &7944954573667976441
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3523246845713457628}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f55d55cf6ce5e14dad9ed9167ae9c67, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ActionCameraController
-  wallLeanCamera: {fileID: 0}
 --- !u!1 &4832131928001116885
 GameObject:
   m_ObjectHideFlags: 0
