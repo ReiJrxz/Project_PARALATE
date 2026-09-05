@@ -13121,7 +13121,7 @@ MonoBehaviour:
   maxHealth: 100
   healthBarFill: {fileID: 1741778409}
   healthCanvas: {fileID: 1042898150}
-  onDeath: 1
+  onDeath: 0
 --- !u!136 &891693483
 CapsuleCollider:
   m_ObjectHideFlags: 0

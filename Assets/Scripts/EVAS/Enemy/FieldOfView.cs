@@ -77,7 +77,6 @@ public class FieldOfView : MonoBehaviour
             }
         }
     }
-    // �ѧ��ѹ��Ǩ�ͺ��ҵ��˹�����������������ͧ�ͧ�ѵ���������
     public bool IsTargetInVisionCone(Transform target)
     {
         if (target == null)
@@ -93,7 +92,6 @@ public class FieldOfView : MonoBehaviour
 
         return !Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstructionMask);
     }
-    // �ѧ��ѹ���ҧ Visual �ͧ Vision Cone
     private void CreateConeVisual()
     {
         coneVisual = new GameObject("VisionConeVisual");
@@ -118,7 +116,6 @@ public class FieldOfView : MonoBehaviour
         coneMaterial.renderQueue = 3000;
         coneRenderer.material = coneMaterial;
     }
-    // �ѧ��ѹ�ѻവ Visual �ͧ Vision Cone
     private void UpdateConeVisual()
     {
         if (coneVisual == null)
@@ -166,7 +163,6 @@ public class FieldOfView : MonoBehaviour
 
         SetConeColor(canSeePlayer ? spottedColor : searchingColor);
     }
-    // �ѧ��ѹ��Ǩ�ͺ������ҧ������������Ѻ Mesh �ͧ Vision Cone
     private void EnsureMeshArrays(int segmentCount)
     {
         int vertexCount = segmentCount + 2;
