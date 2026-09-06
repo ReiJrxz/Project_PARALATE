@@ -29,10 +29,11 @@ public class EnemyController : MonoBehaviour
 
     [Header("Chase")]
     [SerializeField] private float chaseSpeed = 5f;
-    [SerializeField] private float returnToPatrolAfterLostSightTime = 3f;
+    [SerializeField] private float returnToPatrolAfterLostSightTime = 4f;
 
     private NavMeshAgent agent;
     private FieldOfView fieldOfView;
+    private AlertState alertState;
     private Transform chaseTarget;
     private Coroutine lookAroundCoroutine;
     private EnemyState currentState;
@@ -49,6 +50,7 @@ public class EnemyController : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         fieldOfView = GetComponent<FieldOfView>();
+        alertState = GetComponent<AlertState>();
         patrolSpeed = agent.speed;
     }
 
@@ -63,7 +65,7 @@ public class EnemyController : MonoBehaviour
         if (currentState == EnemyState.Locked)
             return;
 
-        if (currentState != EnemyState.Chase && CanSeeChaseTarget())
+        if (currentState != EnemyState.Chase && ShouldStartChaseTarget())
         {
             StartChase();
             return;
@@ -108,6 +110,20 @@ public class EnemyController : MonoBehaviour
         }
 
         ExitLocked();
+    }
+
+    public void MoveToInvestigationPoint(Vector3 investigationPoint)
+    {
+        if (currentState == EnemyState.Locked || currentState == EnemyState.Chase)
+            return;
+
+        StopLookAround();
+        currentState = EnemyState.Patrol;
+
+        agent.speed = patrolSpeed;
+        agent.isStopped = false;
+        agent.updateRotation = true;
+        agent.SetDestination(investigationPoint);
     }
 
     private void UpdatePatrol()
@@ -165,6 +181,9 @@ public class EnemyController : MonoBehaviour
 
     private void EnterPatrolFromNearestWaypoint()
     {
+        if (alertState != null)
+            alertState.EnterReturnState();
+
         EnterPatrol(true);
     }
 
@@ -312,6 +331,14 @@ public class EnemyController : MonoBehaviour
             return false;
 
         return fieldOfView.canSeePlayer;
+    }
+
+    private bool ShouldStartChaseTarget()
+    {
+        if (!CanSeeChaseTarget())
+            return false;
+
+        return alertState == null || alertState.IsAlert;
     }
 
     private void EnsureChaseTarget()

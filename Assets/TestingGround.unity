@@ -8338,7 +8338,7 @@ MonoBehaviour:
   attackRate: 0.5
   raycastOffset: {x: 0, y: 0, z: 0}
   isHeld: 0
-  attackAction: {fileID: 0}
+  attackAction: {fileID: -3566526748847213536, guid: 3bdf035a2b3eac841b3fdc702c70b4a7, type: 3}
   playerTransform: {fileID: 4136811918164220977}
 --- !u!1 &760112398
 GameObject:
@@ -13056,6 +13056,7 @@ GameObject:
   - component: {fileID: 891693481}
   - component: {fileID: 891693486}
   - component: {fileID: 891693487}
+  - component: {fileID: 891693488}
   m_Layer: 0
   m_Name: Capsule (1)
   m_TagString: Untagged
@@ -13091,7 +13092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f5bb617e9edb9345ad4b909769f3af1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FieldOfView
-  radius: 7
+  radius: 15
   angle: 90
   playerRef: {fileID: 4225818444403733921}
   targetMask:
@@ -13244,8 +13245,39 @@ MonoBehaviour:
   lookAngle: 60
   lookTurnSpeed: 180
   lookHoldTime: 0.4
-  chaseSpeed: 5
-  returnToPatrolAfterLostSightTime: 3
+  chaseSpeed: 6
+  returnToPatrolAfterLostSightTime: 4
+--- !u!114 &891693488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891693479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a7c8ce0b2f942548b90c86de0e8b6aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AlertState
+  fieldOfView: {fileID: 891693481}
+  enemyController: {fileID: 891693487}
+  neutralToSuspiciousPoint: 4
+  suspiciousToAlertPoint: 2
+  closeDistance: 5
+  middleDistance: 10
+  farAlertPerSecond: 1
+  middleAlertPerSecond: 2
+  closeAlertPerSecond: 4
+  returnPointDecrease: 1
+  returnDecreaseInterval: 2
+  showDebugGizmos: 1
+  logStateChanges: 1
+  closeDistanceColor: {r: 1, g: 0, b: 0, a: 1}
+  middleDistanceColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  farDistanceColor: {r: 0, g: 0, b: 1, a: 1}
+  isCountingAlertPoint: 0
+  currentAlertGainPerSecond: 0
+  currentDistanceZone: 0
 --- !u!1 &908774527
 GameObject:
   m_ObjectHideFlags: 0
