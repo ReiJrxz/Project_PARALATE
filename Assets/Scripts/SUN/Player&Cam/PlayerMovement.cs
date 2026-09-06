@@ -46,7 +46,7 @@ public class TopDownPlayerController : MonoBehaviour
     private float originalHeight;
     private Vector3 originalCenter;
 
-   
+
     [Header("Animation (อนิเมชั่น)")]
     public Animator animator;
 
@@ -332,11 +332,14 @@ public class TopDownPlayerController : MonoBehaviour
     IEnumerator VaultRoutine(Vector3 targetPosition)
     {
         isVaulting = true;
-        // ไม่ปิด controller.enabled แล้ว เพื่อให้ยังชนกำแพง/สิ่งกีดขวางได้ระหว่างกระโดดข้าม
+
+        // 1. "พับขาขึ้น" โดยการหดความสูงแคปซูลลงครึ่งหนึ่ง และดันจุดศูนย์กลางขึ้น
+        // เพื่อให้ก้นแคปซูลไม่ไปเกี่ยวโดนขอบ Hurdle ระหว่างข้าม
+        controller.height = originalHeight * 0.5f;
+        controller.center = originalCenter + new Vector3(0, originalHeight * 0.25f, 0);
 
         Vector3 startPos = transform.position;
         float timePassed = 0f;
-        float previousHeightOffset = 0f;
 
         while (timePassed < 1f)
         {
@@ -350,15 +353,18 @@ public class TopDownPlayerController : MonoBehaviour
             targetFramePos.y += heightOffset;
 
             Vector3 delta = targetFramePos - transform.position;
-            controller.Move(delta);   // ใช้ Move แทน set position ตรงๆ ให้เช็คชนกำแพงระหว่างทาง
+            controller.Move(delta);   // ใช้ Move เพื่อให้ยังเช็คชนกำแพงระหว่างทางได้
 
-            previousHeightOffset = heightOffset;
             yield return null;
         }
 
         // Snap ตำแหน่งสุดท้ายให้แม่นยำ (จุดยืนจริง ไม่มี height offset)
         Vector3 finalDelta = targetPosition - transform.position;
         controller.Move(finalDelta);
+
+        // 2. คืนค่าแคปซูลกลับเป็นปกติเมื่อลงถึงพื้นอย่างปลอดภัย
+        controller.height = originalHeight;
+        controller.center = originalCenter;
 
         isVaulting = false;
     }
@@ -463,7 +469,7 @@ public class TopDownPlayerController : MonoBehaviour
             timePassed += Time.deltaTime / duration;
             Vector3 nextPos = Vector3.Lerp(startPos, targetPos, timePassed);
             Vector3 delta = nextPos - transform.position;
-            controller.Move(delta); 
+            controller.Move(delta);
             yield return null;
         }
 
