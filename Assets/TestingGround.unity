@@ -4378,11 +4378,11 @@ MonoBehaviour:
   reloadAction: {fileID: 4804699413793143599, guid: 3bdf035a2b3eac841b3fdc702c70b4a7, type: 3}
   enableScope: 1
   normalFieldOfView: 50
-  scopedFieldOfView: 25
+  scopedFieldOfView: 40
   scopeZoomSpeed: 12
   hideCrosshairWhileScoped: 0
   enableScopeCameraOffset: 1
-  scopedCameraOffset: {x: 0, y: -5, z: 5}
+  scopedCameraOffset: {x: 0, y: -5, z: 3.5}
   enableScopeCameraAngle: 1
   scopedTiltOffset: -10
   enableDynamicLook: 1
