@@ -9,9 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c7b38e213e270042a9e4e7f559e81c2, type: 3}
-  m_Name: Scrap
-  m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: Scrap
+  m_Script: {fileID: 11500000, guid: 3014f9cc8b691de4eb003bfd9524534d, type: 3}
+  m_Name: Metal
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceData
+  resourceName: Metal
   icon: {fileID: 0}
-  promptText: '[ E ] to pick up'

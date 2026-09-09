@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8461423594315147919}
   - component: {fileID: 3759070319076359718}
   - component: {fileID: 8299494645655708048}
+  - component: {fileID: 2691529881702064734}
   m_Layer: 12
   m_Name: Metal
   m_TagString: Untagged
@@ -112,3 +113,17 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.83
   m_Center: {x: 0.00000047683716, y: 0.00000071525574, z: 0.0000038146973}
+--- !u!114 &2691529881702064734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1718062173743258946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f99b7115439e84468a7850450e6999b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResourcePickup
+  resourceData: {fileID: 11400000, guid: 770e6dc21926900489507e4130bdbb25, type: 2}
+  amount: 1
