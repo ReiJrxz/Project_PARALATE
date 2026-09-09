@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -21,6 +22,7 @@ public class PickupSystem : MonoBehaviour
     private InputAction unequipWeaponAction;
     private TopDownPlayerController movementController;
     private KnockoutSystem knockoutSystem;
+    private PickupDetector pickupDetector;
 
     public bool HasEquippedWeapon => heldItem != null;
     public bool HasKnifeEquipped => heldItem != null && heldItem.GetComponent<KnifeAction>() != null;
@@ -33,6 +35,7 @@ public class PickupSystem : MonoBehaviour
         unequipWeaponAction = playerInput.actions["UnequipWeapon"];
         movementController = GetComponent<TopDownPlayerController>();
         knockoutSystem = GetComponent<KnockoutSystem>();
+        pickupDetector = GetComponent<PickupDetector>();
     }
 
     void Update()
@@ -44,7 +47,7 @@ public class PickupSystem : MonoBehaviour
             return;
 
         if (interactAction.WasPressedThisFrame())
-            TryPickup();
+            pickupDetector.TryInteract();
 
         if (switchWeaponAction.WasPressedThisFrame())
             SwitchWeapon();
@@ -53,21 +56,7 @@ public class PickupSystem : MonoBehaviour
             UnequipWeapon();
     }
 
-    void TryPickup()
-    {
-        Ray ray = new Ray(transform.position, transform.forward);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, pickupRange))
-        {
-            GameObject weaponRoot = GetWeaponRoot(hit.collider.gameObject);
-
-            if (hit.collider.CompareTag("Pickup") || weaponRoot.CompareTag("Pickup"))
-                PickUpObject(weaponRoot);
-        }
-    }
-
-    void PickUpObject(GameObject item)
+    public void PickUpObject(GameObject item)
     {
         if (item == null)
             return;
@@ -191,4 +180,5 @@ public class PickupSystem : MonoBehaviour
 
         item.SetActive(held);
     }
+
 }
