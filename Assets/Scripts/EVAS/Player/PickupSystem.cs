@@ -35,22 +35,58 @@ public class PickupSystem : MonoBehaviour
         knockoutSystem = GetComponent<KnockoutSystem>();
     }
 
-    void Update()
+    private void OnEnable()
+    {
+        // ผูก Callback เข้ากับ Input Events
+        if (interactAction != null)
+            interactAction.performed += OnInteract;
+
+        if (switchWeaponAction != null)
+            switchWeaponAction.performed += OnSwitchWeapon;
+
+        if (unequipWeaponAction != null)
+            unequipWeaponAction.performed += OnUnequipWeapon;
+    }
+    private void OnDisable()
+    {
+        // ถอด Event ออกเมื่อ GameObject ถูกปิดหรือถูกทำลาย
+        if (interactAction != null)
+            interactAction.performed -= OnInteract;
+
+        if (switchWeaponAction != null)
+            switchWeaponAction.performed -= OnSwitchWeapon;
+
+        if (unequipWeaponAction != null)
+            unequipWeaponAction.performed -= OnUnequipWeapon;
+    }
+    // ตรวจสอบสถานะการควบคุมตัวละครก่อนทำ Action
+    private bool CanPerformAction()
     {
         if (movementController != null && movementController.IsMovementLocked)
-            return;
+            return false;
 
         if (knockoutSystem != null && knockoutSystem.IsKnockout)
-            return;
+            return false;
 
-        if (interactAction.WasPressedThisFrame())
-            TryPickup();
+        return true;
+    }
 
-        if (switchWeaponAction.WasPressedThisFrame())
-            SwitchWeapon();
+    private void OnInteract(InputAction.CallbackContext context)
+    {
+        if (!CanPerformAction()) return;
+        TryPickup();
+    }
 
-        if (unequipWeaponAction.WasPressedThisFrame())
-            UnequipWeapon();
+    private void OnSwitchWeapon(InputAction.CallbackContext context)
+    {
+        if (!CanPerformAction()) return;
+        SwitchWeapon();
+    }
+
+    private void OnUnequipWeapon(InputAction.CallbackContext context)
+    {
+        if (!CanPerformAction()) return;
+        UnequipWeapon();
     }
 
     void TryPickup()

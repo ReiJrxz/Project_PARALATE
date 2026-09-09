@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-
 public class AlertState : MonoBehaviour
 {
     public enum AlertDistanceZone //ระยะการ alert
@@ -45,7 +44,6 @@ public class AlertState : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool showDebugGizmos = true;
-    
     [SerializeField] private bool logStateChanges;
     [SerializeField] private Color closeDistanceColor = new Color(1f, 0.2f, 0.2f, 0.8f);
     [SerializeField] private Color middleDistanceColor = new Color(1f, 0.85f, 0.1f, 0.8f);
@@ -92,6 +90,7 @@ public class AlertState : MonoBehaviour
         {
             lastKnownPlayerPosition = fieldOfView.playerRef.transform.position;
             AddSeenPlayerPoint(GetAlertGainPerSecond() * Time.deltaTime);
+            returnDecreaseTimer = 0f;
             return;
         }
 
@@ -123,6 +122,7 @@ public class AlertState : MonoBehaviour
 
         float farDistance = fieldOfView != null ? fieldOfView.radius : middleDistance;
         DrawDistanceGizmo(farDistance, farDistanceColor);
+
     }
 
     public void ResetAlert()
@@ -195,7 +195,7 @@ public class AlertState : MonoBehaviour
 
     private void UpdateReturn()
     {
-        if (currentState != AlertAIState.Return)
+        if (currentState == AlertAIState.Chasing)
             return;
 
         returnDecreaseTimer += Time.deltaTime;

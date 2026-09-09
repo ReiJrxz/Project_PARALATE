@@ -112,6 +112,7 @@ public class GunAction : MonoBehaviour
         if (held)
             UpdateAmmoUI();
 
+
         if (!held)
         {
             CancelReload();
