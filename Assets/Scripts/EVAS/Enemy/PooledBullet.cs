@@ -9,7 +9,7 @@ public class PooledBullet : MonoBehaviour
     [SerializeField] private float lifeTime = 3f;
     [SerializeField] private float damage = 10f;
     [SerializeField] private LayerMask hitMask = ~0;
-    [SerializeField] private bool meshEnable = true;
+    [SerializeField] private bool meshDisable = true;
 
     private Rigidbody rb;
     private SphereCollider bulletCollider;
@@ -193,7 +193,7 @@ public class PooledBullet : MonoBehaviour
     }
     private void DisableMesh()
     {
-        if (meshEnable)
+        if (meshDisable)
             GetComponent<MeshRenderer>().enabled = false;
         else
             GetComponent<MeshRenderer>().enabled = true;
