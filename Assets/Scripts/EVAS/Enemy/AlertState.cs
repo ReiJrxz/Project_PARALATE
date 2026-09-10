@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -44,6 +45,7 @@ public class AlertState : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool showDebugGizmos = true;
+    [SerializeField] private bool showDebugLabel = true;
     [SerializeField] private bool logStateChanges;
     [SerializeField] private Color closeDistanceColor = new Color(1f, 0.2f, 0.2f, 0.8f);
     [SerializeField] private Color middleDistanceColor = new Color(1f, 0.85f, 0.1f, 0.8f);
@@ -63,7 +65,7 @@ public class AlertState : MonoBehaviour
 
     //public float NeutralPoint => neutralPoint;
     //public float SuspiciousPoint => suspiciousPoint;
-    //public float CurrentTotalPoint => neutralPoint + suspiciousPoint;
+    public float CurrentTotalPoint => neutralPoint + suspiciousPoint;
     //public float NeutralToSuspiciousPoint => neutralToSuspiciousPoint;
     //public float SuspiciousToAlertPoint => suspiciousToAlertPoint;
     //public Vector3 LastKnownPlayerPosition => lastKnownPlayerPosition;
@@ -123,6 +125,10 @@ public class AlertState : MonoBehaviour
         float farDistance = fieldOfView != null ? fieldOfView.radius : middleDistance;
         DrawDistanceGizmo(farDistance, farDistanceColor);
 
+#if UNITY_EDITOR
+        if (showDebugLabel)
+            DrawDebugLabel();
+#endif
     }
 
     public void ResetAlert()
@@ -195,9 +201,6 @@ public class AlertState : MonoBehaviour
 
     private void UpdateReturn()
     {
-        if (currentState == AlertAIState.Chasing)
-            return;
-
         returnDecreaseTimer += Time.deltaTime;
 
         if (returnDecreaseTimer < returnDecreaseInterval)
@@ -214,21 +217,35 @@ public class AlertState : MonoBehaviour
 
         if (suspiciousPoint > 0f)
         {
-            suspiciousPoint = Mathf.Max(0f, suspiciousPoint - amount);
-
-            if (suspiciousPoint > 0f)
-                return;
+            float usedPoint = Mathf.Min(amount, suspiciousPoint);
+            suspiciousPoint -= usedPoint;
+            amount -= usedPoint;
         }
 
-        if (neutralPoint > 0f)
-        {
+        if (amount > 0f && neutralPoint > 0f)
             neutralPoint = Mathf.Max(0f, neutralPoint - amount);
 
-            if (neutralPoint > 0f)
-                return;
+        SyncStateToRemainingPoints();
+    }
+
+    private void SyncStateToRemainingPoints()
+    {
+        if (neutralPoint <= 0f && suspiciousPoint <= 0f)
+        {
+            AlertAIState previousState = currentState;
+            ResetAlert();
+
+            if (previousState == AlertAIState.Chasing)
+                enemyController?.StopChase();
+
+            return;
         }
 
-        ResetAlert();
+        if (currentState == AlertAIState.Chasing && suspiciousPoint < suspiciousToAlertPoint)
+        {
+            SetState(AlertAIState.Suspicious);
+            enemyController?.StopChase();
+        }
     }
 
     private void EnterSuspicious()
@@ -350,4 +367,19 @@ public class AlertState : MonoBehaviour
         if (logStateChanges)
             Debug.Log($"{name} Alert State: {previousState} -> {currentState}", this);
     }
+
+#if UNITY_EDITOR
+    private void DrawDebugLabel()
+    {
+        string playerDistanceText = currentDistanceToPlayer >= 0f ? currentDistanceToPlayer.ToString("0.0") : "No Player";
+        string labelText =
+            $"Alert: {currentState}\n" +
+            $"Zone: {currentDistanceZone} | Distance: {playerDistanceText}\n" +
+            $"Counting: {isCountingAlertPoint} | Gain: {currentAlertGainPerSecond:0.0}/s\n" +
+            $"Point: {CurrentTotalPoint:0.0}/{neutralToSuspiciousPoint + suspiciousToAlertPoint:0.0}";
+
+        Handles.Label(transform.position + Vector3.up * 2f, labelText);
+    }
+
+#endif
 }
