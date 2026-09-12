@@ -60,6 +60,8 @@ public class PlayerController : MonoBehaviour
         if (!stillNearWall)
         {
             ExitWallLean();
+
+            Debug.Log("Exited Wall Lean due to distance");
             return; // ออกแล้ว ไม่ต้องเช็คมุมต่อ
         }
 
@@ -80,5 +82,6 @@ public class PlayerController : MonoBehaviour
     {
         isWallLeaning = false;
         actionCamera.OnWallLeanEnd();
+        Debug.Log("Exited Wall Lean");
     }
 }

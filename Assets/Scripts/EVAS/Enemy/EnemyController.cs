@@ -29,10 +29,11 @@ public class EnemyController : MonoBehaviour
 
     [Header("Chase")]
     [SerializeField] private float chaseSpeed = 5f;
-    [SerializeField] private float returnToPatrolAfterLostSightTime = 3f;
+    [SerializeField] private float returnToPatrolAfterLostSightTime = 4f;
 
     private NavMeshAgent agent;
     private FieldOfView fieldOfView;
+    private AlertState alertState;
     private Transform chaseTarget;
     private Coroutine lookAroundCoroutine;
     private EnemyState currentState;
@@ -45,10 +46,14 @@ public class EnemyController : MonoBehaviour
 
     private bool HasWaypoints => waypoints != null && waypoints.Length > 0;
 
+    public bool IsChasing =>
+        currentState == EnemyState.Chase || (currentState == EnemyState.Locked && stateBeforeLock == EnemyState.Chase);
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         fieldOfView = GetComponent<FieldOfView>();
+        alertState = GetComponent<AlertState>();
         patrolSpeed = agent.speed;
     }
 
@@ -63,7 +68,7 @@ public class EnemyController : MonoBehaviour
         if (currentState == EnemyState.Locked)
             return;
 
-        if (currentState != EnemyState.Chase && CanSeeChaseTarget())
+        if (currentState != EnemyState.Chase && ShouldStartChaseTarget())
         {
             StartChase();
             return;
@@ -94,9 +99,9 @@ public class EnemyController : MonoBehaviour
         minimumChaseTimer = Mathf.Max(minimumChaseTimer, minimumChaseTime);
 
         agent.speed = chaseSpeed;
-        agent.isStopped = false;
+        SetAgentStopped(false);
         agent.updateRotation = true;
-        agent.SetDestination(chaseTarget.position);
+        SetAgentDestination(chaseTarget.position);
     }
 
     public void SetMovementLocked(bool locked)
@@ -110,9 +115,36 @@ public class EnemyController : MonoBehaviour
         ExitLocked();
     }
 
+    public void RotateYawTowards(Vector3 worldPosition, float turnSpeed)
+    {
+        Vector3 lookDirection = worldPosition - transform.position;
+        lookDirection.y = 0f;
+
+        if (lookDirection.sqrMagnitude < 0.001f)
+            return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+        SyncAgentPosition();
+    }
+
+    public void MoveToInvestigationPoint(Vector3 investigationPoint)
+    {
+        if (currentState == EnemyState.Locked || currentState == EnemyState.Chase)
+            return;
+
+        StopLookAround();
+        currentState = EnemyState.Patrol;
+
+        agent.speed = patrolSpeed;
+        SetAgentStopped(false);
+        agent.updateRotation = true;
+        SetAgentDestination(investigationPoint);
+    }
+
     private void UpdatePatrol()
     {
-        if (!HasWaypoints)
+        if (!HasWaypoints || !CanUseAgent())
             return;
 
         if (!agent.pathPending && agent.remainingDistance <= stopAtDistance)
@@ -129,7 +161,7 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        agent.SetDestination(chaseTarget.position);
+        SetAgentDestination(chaseTarget.position);
 
         if (CanSeeChaseTarget())
             lostSightTimer = 0f;
@@ -143,6 +175,14 @@ public class EnemyController : MonoBehaviour
             EnterPatrolFromNearestWaypoint();
     }
 
+    public void StopChase()
+    {
+        if (currentState != EnemyState.Chase)
+            return;
+
+        EnterPatrol(true);
+    }
+
     private void EnterPatrol(bool useNearestWaypoint)
     {
         StopLookAround();
@@ -151,7 +191,7 @@ public class EnemyController : MonoBehaviour
         minimumChaseTimer = 0f;
 
         agent.speed = patrolSpeed;
-        agent.isStopped = false;
+        SetAgentStopped(false);
         agent.updateRotation = true;
 
         if (!HasWaypoints)
@@ -165,6 +205,9 @@ public class EnemyController : MonoBehaviour
 
     private void EnterPatrolFromNearestWaypoint()
     {
+        if (alertState != null)
+            alertState.EnterReturnState();
+
         EnterPatrol(true);
     }
 
@@ -186,7 +229,7 @@ public class EnemyController : MonoBehaviour
         stateBeforeLock = currentState;
         StopLookAround();
         currentState = EnemyState.Locked;
-        agent.isStopped = true;
+        SetAgentStopped(true);
         agent.updateRotation = false;
     }
 
@@ -197,7 +240,7 @@ public class EnemyController : MonoBehaviour
 
         EnemyState resumeState = stateBeforeLock;
         currentState = resumeState;
-        agent.isStopped = false;
+        SetAgentStopped(false);
         agent.updateRotation = true;
 
         if (resumeState == EnemyState.Chase)
@@ -210,7 +253,7 @@ public class EnemyController : MonoBehaviour
 
     private IEnumerator LookAroundRoutine()
     {
-        agent.isStopped = true;
+        SetAgentStopped(true);
         updateRotationBeforeManualTurn = agent.updateRotation;
         agent.updateRotation = false;
 
@@ -218,7 +261,7 @@ public class EnemyController : MonoBehaviour
         yield return LookAround();
 
         agent.updateRotation = updateRotationBeforeManualTurn;
-        agent.isStopped = false;
+        SetAgentStopped(false);
         lookAroundCoroutine = null;
         AdvanceToNextWaypoint();
     }
@@ -234,7 +277,7 @@ public class EnemyController : MonoBehaviour
         if (currentState == EnemyState.LookAround)
         {
             agent.updateRotation = updateRotationBeforeManualTurn;
-            agent.isStopped = false;
+            SetAgentStopped(false);
         }
     }
 
@@ -259,11 +302,13 @@ public class EnemyController : MonoBehaviour
                 transform.rotation,
                 targetRotation,
                 lookTurnSpeed * Time.deltaTime);
+            SyncAgentPosition();
 
             yield return null;
         }
 
         transform.rotation = targetRotation;
+        SyncAgentPosition();
     }
 
     private void AdvanceToNextWaypoint()
@@ -282,7 +327,52 @@ public class EnemyController : MonoBehaviour
         if (!HasWaypoints || waypoints[currentWaypointIndex] == null)
             return;
 
-        agent.SetDestination(waypoints[currentWaypointIndex].position);
+        SetAgentDestination(waypoints[currentWaypointIndex].position);
+    }
+
+    private bool CanUseAgent()
+    {
+        return agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh;
+    }
+
+    private bool EnsureAgentOnNavMesh()
+    {
+        if (agent == null || !agent.enabled || !agent.gameObject.activeInHierarchy)
+            return false;
+
+        if (agent.isOnNavMesh)
+            return true;
+
+        const float sampleDistance = 4f;
+        if (!NavMesh.SamplePosition(transform.position, out NavMeshHit hit, sampleDistance, NavMesh.AllAreas))
+            return false;
+
+        return agent.Warp(hit.position);
+    }
+
+    private void SetAgentStopped(bool stopped)
+    {
+        if (!EnsureAgentOnNavMesh())
+            return;
+
+        agent.isStopped = stopped;
+
+        if (stopped)
+            agent.velocity = Vector3.zero;
+    }
+
+    private void SetAgentDestination(Vector3 destination)
+    {
+        if (!EnsureAgentOnNavMesh())
+            return;
+
+        agent.SetDestination(destination);
+    }
+
+    private void SyncAgentPosition()
+    {
+        if (agent != null && agent.isOnNavMesh)
+            agent.nextPosition = transform.position;
     }
 
     private int GetNearestWaypointIndex()
@@ -312,6 +402,14 @@ public class EnemyController : MonoBehaviour
             return false;
 
         return fieldOfView.canSeePlayer;
+    }
+
+    private bool ShouldStartChaseTarget()
+    {
+        if (!CanSeeChaseTarget())
+            return false;
+
+        return alertState == null || alertState.IsAlert;
     }
 
     private void EnsureChaseTarget()

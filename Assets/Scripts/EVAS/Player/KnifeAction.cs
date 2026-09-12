@@ -22,15 +22,38 @@ public class KnifeAction : MonoBehaviour
     private float nextAttackTime;
     private PlayerInput playerInput;
     private InputAction resolvedAttackAction;
-    void Update()
+    private void Awake()
     {
         ResolveAttackAction();
+    }
 
-        if (isHeld && resolvedAttackAction != null && resolvedAttackAction.WasPressedThisFrame() && Time.time > nextAttackTime)
+    private void OnEnable()
+    {
+        // ผูก Event เมื่อเปิดใช้งาน Script หรือ Object
+        if (resolvedAttackAction != null)
+        {
+            resolvedAttackAction.performed += OnAttackPerformed;
+            resolvedAttackAction.Enable();
+        }
+    }
+
+    private void OnDisable()
+    {
+        // ถอด Event ออกเสมอเมื่อปิดใช้งาน เพื่อป้องกัน Memory Leak
+        if (resolvedAttackAction != null)
+        {
+            resolvedAttackAction.performed -= OnAttackPerformed;
+        }
+    }
+
+    // ฟังก์ชันนี้จะถูกเรียกเฉพาะตอนกดปุ่มโจมตีเท่านั้น ไม่ได้วนลูปทุกเฟรม
+    private void OnAttackPerformed(InputAction.CallbackContext context)
+    {
+        if (isHeld && Time.time >= nextAttackTime)
         {
             nextAttackTime = Time.time + attackRate;
             Attack();
-            Debug.Log("Atack");
+            Debug.Log("Attack");
         }
     }
 
@@ -42,14 +65,11 @@ public class KnifeAction : MonoBehaviour
             return;
         }
 
-        if (resolvedAttackAction != null)
-            return;
-
         playerInput = GetComponentInParent<PlayerInput>();
-        if (playerInput == null)
-            return;
-
-        resolvedAttackAction = playerInput.actions["Fire"];
+        if (playerInput != null)
+        {
+            resolvedAttackAction = playerInput.actions["Fire"];
+        }
     }
     // ฟังก์ชันสำหรับการโจมตีด้วยมีด
     void Attack()
@@ -69,10 +89,6 @@ public class KnifeAction : MonoBehaviour
         if(Physics.Raycast(attackOrigin, attackDirection, out hit, attackRange))
         {
             Debug.Log("<color=cyan>มีดฟันไปโดน: " + hit.collider.name + "</color>");
-
-            Debug.Log("ชน: " + hit.collider.name);
-
-            Debug.Log("Hit object: " + hit.collider.name);
 
             EnemyHealth enemy = hit.collider.GetComponentInParent<EnemyHealth>();
             if (enemy != null)

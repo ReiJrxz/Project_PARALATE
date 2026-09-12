@@ -18,7 +18,7 @@ public class FieldOfView : MonoBehaviour
     public bool showVisionCone = true;
     public Color searchingColor = new Color(0f, 1f, 0f, 0.25f);
     public Color spottedColor = new Color(1f, 0f, 0f, 0.35f);
-    public float coneHeightOffset = 0.05f;
+    public float coneHeightOffset = -0.05f;
     [Range(3, 120)]
     public int coneSegments = 40;
 
@@ -59,7 +59,6 @@ public class FieldOfView : MonoBehaviour
             FieldOfViewCheck();
         }
     }
-    // �ѧ��ѹ��Ǩ�ͺ����ѵ������ö�ͧ��繼��������������
     private void FieldOfViewCheck()
     {
         canSeePlayer = false;
@@ -71,6 +70,9 @@ public class FieldOfView : MonoBehaviour
         Collider[] rangeChecks = Physics.OverlapSphere(transform.position, radius, targetMask);
         for (int i = 0; i < rangeChecks.Length; i++)
         {
+            if (!rangeChecks[i].CompareTag("Player"))
+                continue;
+
             if (IsTargetInVisionCone(rangeChecks[i].transform))
             {
                 canSeePlayer = true;
@@ -78,23 +80,29 @@ public class FieldOfView : MonoBehaviour
             }
         }
     }
-    // �ѧ��ѹ��Ǩ�ͺ��ҵ��˹�����������������ͧ�ͧ�ѵ���������
     public bool IsTargetInVisionCone(Transform target)
     {
         if (target == null)
             return false;
 
-        Vector3 directionToTarget = (target.position - transform.position).normalized;
+        Vector3 origin = transform.position + Vector3.up;
+        Vector3 targetPosition = target.position + Vector3.up;
+        Vector3 directionToTarget = targetPosition - origin;
+        float distanceToTarget = directionToTarget.magnitude;
+
+        if (distanceToTarget <= 0.0001f)
+            return true;
+
+        directionToTarget /= distanceToTarget;
+
         if (Vector3.Angle(transform.forward, directionToTarget) >= angle / 2)
             return false;
 
-        float distanceToTarget = Vector3.Distance(transform.position, target.position);
         if (distanceToTarget > radius)
             return false;
 
-        return !Physics.Raycast(transform.position, directionToTarget, distanceToTarget, obstructionMask);
+        return !Physics.Raycast(origin, directionToTarget, distanceToTarget, obstructionMask);
     }
-    // �ѧ��ѹ���ҧ Visual �ͧ Vision Cone
     private void CreateConeVisual()
     {
         coneVisual = new GameObject("VisionConeVisual");
@@ -119,7 +127,6 @@ public class FieldOfView : MonoBehaviour
         coneMaterial.renderQueue = 3000;
         coneRenderer.material = coneMaterial;
     }
-    // �ѧ��ѹ�ѻവ Visual �ͧ Vision Cone
     private void UpdateConeVisual()
     {
         if (coneVisual == null)
@@ -167,7 +174,6 @@ public class FieldOfView : MonoBehaviour
 
         SetConeColor(canSeePlayer ? spottedColor : searchingColor);
     }
-    // �ѧ��ѹ��Ǩ�ͺ������ҧ������������Ѻ Mesh �ͧ Vision Cone
     private void EnsureMeshArrays(int segmentCount)
     {
         int vertexCount = segmentCount + 2;
@@ -179,7 +185,6 @@ public class FieldOfView : MonoBehaviour
         if (coneTriangles == null || coneTriangles.Length != triangleCount)
             coneTriangles = new int[triangleCount];
     }
-    // �ѧ��ѹ��駤���բͧ Vision Cone
     private void SetConeColor(Color color)
     {
         if (coneMaterial == null)
@@ -191,7 +196,6 @@ public class FieldOfView : MonoBehaviour
         if (coneMaterial.HasProperty("_BaseColor"))
             coneMaterial.SetColor("_BaseColor", color);
     }
-    // �ѧ��ѹ�ӹǳ��ȷҧ�ҡ���
     private Vector3 DirectionFromAngle(float angleInDegrees)
     {
         return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0f, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
