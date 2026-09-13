@@ -13,6 +13,9 @@ public class PickupSystem : MonoBehaviour
     public Vector3 holdPositionOffset;
     public Vector3 holdRotationOffset;
 
+    [Header("UI")]
+    public AmmoUIManager ammoUIManager;
+
     private GameObject heldItem;
     private GameObject gunItem;
     private GameObject knifeItem;
@@ -40,14 +43,14 @@ public class PickupSystem : MonoBehaviour
 
     void Update()
     {
-        if (movementController != null && movementController.IsMovementLocked)
-            return;
-
         if (knockoutSystem != null && knockoutSystem.IsKnockout)
             return;
 
         if (interactAction.WasPressedThisFrame())
             pickupDetector.TryInteract();
+
+        if (movementController != null && movementController.IsMovementLocked)
+            return;
 
         if (switchWeaponAction.WasPressedThisFrame())
             SwitchWeapon();
@@ -142,6 +145,8 @@ public class PickupSystem : MonoBehaviour
         SetWeaponHeld(gunItem, false);
         SetWeaponHeld(knifeItem, false);
         heldItem = null;
+        if (ammoUIManager != null)
+            ammoUIManager.SetActiveGun(null);
     }
 
     GameObject GetPreferredWeapon()
@@ -170,15 +175,20 @@ public class PickupSystem : MonoBehaviour
         if (item == null)
             return;
 
+        item.SetActive(held);
+
         GunAction gun = item.GetComponent<GunAction>();
         if (gun != null)
+        {
             gun.SetHeld(held);
+
+            if (held && ammoUIManager != null)
+                ammoUIManager.SetActiveGun(gun); // สลับ UI มาผูกกับปืนกระบอกนี้
+        }
 
         KnifeAction knife = item.GetComponent<KnifeAction>();
         if (knife != null)
             knife.isHeld = held;
-
-        item.SetActive(held);
     }
 
 }

@@ -72,6 +72,7 @@ public class TopDownPlayerController : MonoBehaviour
     private bool isMovementLocked = false;
     private bool isClimbing = false;
     private float movementSpeedMultiplier = 1f;
+    private bool isSprintLocked = false; // เพิ่มบรรทัดนี้
 
     private bool isCrouching = false;
     private bool isSprinting = false;
@@ -145,7 +146,9 @@ public class TopDownPlayerController : MonoBehaviour
 
     private void OnSprintStart(InputAction.CallbackContext context)
     {
+        if (isSprintLocked) return;
         isSprinting = true;
+
     }
 
     private void OnSprintStop(InputAction.CallbackContext context)
@@ -193,7 +196,11 @@ public class TopDownPlayerController : MonoBehaviour
     {
         movementSpeedMultiplier = Mathf.Max(0f, multiplier);
     }
-
+    public void SetSprintLocked(bool locked)
+    {
+        isSprintLocked = locked;
+        if (locked) isSprinting = false; // บังคับยกเลิกสปรินท์ทันทีที่ถูกล็อก
+    }
     void HandleCrouchPhysicality()
     {
         if (!enablePhysicalCrouch) return;
@@ -230,7 +237,7 @@ public class TopDownPlayerController : MonoBehaviour
         float currentSpeed = walkSpeed;
 
         if (isCrouching) currentSpeed = crouchSpeed;
-        else if (isSprinting) currentSpeed = sprintSpeed;
+        else if (isSprinting && !isSprintLocked) currentSpeed = sprintSpeed;
 
         currentSpeed *= movementSpeedMultiplier;
 

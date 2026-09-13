@@ -1,42 +1,32 @@
 using UnityEngine;
 
-[RequireComponent(typeof(InteractableObject))]
-public class NoteReader : MonoBehaviour
+[RequireComponent(typeof(Collider))]
+public class NoteReader : MonoBehaviour, IInteractable
 {
     [Header("เนื้อหาโน้ต")]
     [TextArea(3, 10)]
     public string noteText = "เนื้อหาโน้ตตรงนี้...";
 
-    private InteractableObject interactable;
     private bool isReading = false;
+    private GameObject currentReader;
 
-    void Start()
-    {
-        interactable = GetComponent<InteractableObject>();
-    }
+    public string PromptText => isReading ? "[ E ] to close" : "[ E ] to read";
 
-    // ผูกฟังก์ชันนี้เข้ากับ onInteract ใน Inspector (จุดเดียวที่ฟังปุ่ม E)
-    public void OnInteractPressed()
+    public void Interact(GameObject interactor)
     {
         if (isReading)
-        {
             CloseNote();
-        }
         else
-        {
-            OpenNote();
-        }
+            OpenNote(interactor);
     }
 
-    void OpenNote()
+    void OpenNote(GameObject interactor)
     {
         isReading = true;
+        currentReader = interactor;
 
-        if (interactable.interactingPlayer != null)
-        {
-            TopDownPlayerController player = interactable.interactingPlayer.GetComponent<TopDownPlayerController>();
-            if (player != null) player.SetMovementLocked(true);
-        }
+        TopDownPlayerController player = interactor.GetComponent<TopDownPlayerController>();
+        if (player != null) player.SetMovementLocked(true);
 
         NoteUIManager.Instance.ShowNote(noteText);
     }
@@ -45,12 +35,13 @@ public class NoteReader : MonoBehaviour
     {
         isReading = false;
 
-        if (interactable.interactingPlayer != null)
+        if (currentReader != null)
         {
-            TopDownPlayerController player = interactable.interactingPlayer.GetComponent<TopDownPlayerController>();
+            TopDownPlayerController player = currentReader.GetComponent<TopDownPlayerController>();
             if (player != null) player.SetMovementLocked(false);
         }
 
+        currentReader = null;
         NoteUIManager.Instance.HideNote();
     }
 }

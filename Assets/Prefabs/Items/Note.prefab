@@ -12,9 +12,8 @@ GameObject:
   - component: {fileID: 2920252141964243964}
   - component: {fileID: 349974785456847833}
   - component: {fileID: 1290769433859829732}
-  - component: {fileID: 5062461846549864536}
   - component: {fileID: 7563966236264448835}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Note
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -114,36 +113,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.95
   m_Center: {x: 0.00000047683716, y: 0.00000071525574, z: 0.00000047683716}
---- !u!114 &5062461846549864536
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2151027806861470574}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 46baaf390dd9cfd4a92ba32b2d59895c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InteractableObject
-  interactMessage: Read
-  interactAction: {fileID: 5731384896986285384, guid: 3bdf035a2b3eac841b3fdc702c70b4a7, type: 3}
-  onInteract:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 7563966236264448835}
-        m_TargetAssemblyTypeName: NoteReader, Assembly-CSharp
-        m_MethodName: OnInteractPressed
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  interactingPlayer: {fileID: 0}
 --- !u!114 &7563966236264448835
 MonoBehaviour:
   m_ObjectHideFlags: 0

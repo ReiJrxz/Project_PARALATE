@@ -1,9 +1,9 @@
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 public class AmmoUIManager : MonoBehaviour
 {
-    [Header("อ้างอิงสคริปต์ปืน")]
+    [Header("อ้างอิงสคริปต์ปืน (กระบอกที่กำลังถืออยู่)")]
     public GunAction playerGun;
 
     [Header("UI Elements")]
@@ -17,32 +17,60 @@ public class AmmoUIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        if (playerGun == null)
-            return;
-
-        playerGun.OnAmmoChanged += HandleAmmoChanged;
-        playerGun.OnReloadStatusChanged += HandleReloadChanged;
-        playerGun.OnHeldChanged += HandleHeldChanged;
-
-        SyncFromGun();
+        SubscribeToGun(playerGun);
     }
 
     private void OnDisable()
     {
-        if (playerGun == null)
-            return;
-
-        playerGun.OnAmmoChanged -= HandleAmmoChanged;
-        playerGun.OnReloadStatusChanged -= HandleReloadChanged;
-        playerGun.OnHeldChanged -= HandleHeldChanged;
+        UnsubscribeFromGun(playerGun);
     }
 
-    private void SyncFromGun()
+    // เรียกฟังก์ชันนี้จากสคริปต์สลับอาวุธ ตอนเปลี่ยนปืนที่ถือ
+    public void SetActiveGun(GunAction newGun)
     {
-        isGunHeld = playerGun.isHeld;
-        isReloading = playerGun.IsReloading;
-        lastCurrentAmmo = playerGun.CurrentAmmo;
-        lastMaxAmmo = playerGun.MagazineSize;
+        if (playerGun == newGun)
+            return;
+
+        UnsubscribeFromGun(playerGun);
+        playerGun = newGun;
+
+        if (playerGun != null)
+            SubscribeToGun(playerGun);
+        else
+        {
+            isGunHeld = false;
+            RefreshDisplay(); // ซ่อน panel เมื่อไม่มีปืนถืออยู่
+        }
+    }
+
+    private void SubscribeToGun(GunAction gun)
+    {
+        if (gun == null)
+            return;
+
+        gun.OnAmmoChanged += HandleAmmoChanged;
+        gun.OnReloadStatusChanged += HandleReloadChanged;
+        gun.OnHeldChanged += HandleHeldChanged;
+
+        SyncFromGun(gun);
+    }
+
+    private void UnsubscribeFromGun(GunAction gun)
+    {
+        if (gun == null)
+            return;
+
+        gun.OnAmmoChanged -= HandleAmmoChanged;
+        gun.OnReloadStatusChanged -= HandleReloadChanged;
+        gun.OnHeldChanged -= HandleHeldChanged;
+    }
+
+    private void SyncFromGun(GunAction gun)
+    {
+        isGunHeld = gun.isHeld;
+        isReloading = gun.IsReloading;
+        lastCurrentAmmo = gun.CurrentAmmo;
+        lastMaxAmmo = gun.MagazineSize;
         RefreshDisplay();
     }
 

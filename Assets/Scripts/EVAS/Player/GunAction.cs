@@ -6,6 +6,7 @@ using TMPro;
 using System;
 
 [RequireComponent(typeof(LineRenderer))]
+[RequireComponent(typeof(AudioSource))]
 public class GunAction : MonoBehaviour
 {
     [Header("Gun Settings")]
@@ -61,6 +62,18 @@ public class GunAction : MonoBehaviour
     private LineRenderer laserLine;
     private float nextFireTime;
 
+    [Header("Audio")]
+    public AudioClip fireSound;
+    public AudioClip reloadStartSound;   // เสียงตอนเริ่มรีโหลด (ดึงแม็ก/เสียบแม็ก)
+    public AudioClip reloadFinishSound;  // เสียงตอนรีโหลดเสร็จ (ปิดแม็ก/ขึ้นลำ) - ใส่หรือไม่ใส่ก็ได้
+    public AudioClip equipSound;         // เสียงตอนชักปืนขึ้นมาถือ
+    [Range(0f, 1f)] public float fireVolume = 1f;
+    [Range(0f, 1f)] public float reloadVolume = 1f;
+    [Range(0f, 1f)] public float equipVolume = 1f;
+    public bool randomizePitch = true;
+    [Range(0f, 0.2f)] public float pitchVariance = 0.05f;
+    private AudioSource audioSource;
+
     [SerializeField] private int currentAmmo;
     private bool isReloading;
     private Coroutine reloadCoroutine;
@@ -90,6 +103,9 @@ public class GunAction : MonoBehaviour
         virtualCameras = FindObjectsByType<CinemachineCamera>(FindObjectsInactive.Include);
         movementController = GetComponentInParent<TopDownPlayerController>();
 
+        audioSource = GetComponent<AudioSource>(); // เพิ่มบรรทัดนี้
+        audioSource.playOnAwake = false;            // กันไม่ให้เล่นเองตอนเริ่มเกม
+
         if (mainCam != null)
             normalFieldOfView = mainCam.fieldOfView;
 
@@ -110,8 +126,10 @@ public class GunAction : MonoBehaviour
         OnHeldChanged?.Invoke(held);
 
         if (held)
-            UpdateAmmoUI();
-
+        { 
+        UpdateAmmoUI();
+        PlaySound(equipSound, equipVolume);
+        }
 
         if (!held)
         {
@@ -198,6 +216,7 @@ public class GunAction : MonoBehaviour
         isReloading = true;
         OnReloadStatusChanged?.Invoke(true);
         SetReloadMovementSpeed(true);
+        PlaySound(reloadStartSound, reloadVolume); ;
 
         yield return new WaitForSeconds(reloadDuration);
 
@@ -205,6 +224,8 @@ public class GunAction : MonoBehaviour
         isReloading = false;
         SetReloadMovementSpeed(false);
         reloadCoroutine = null;
+
+        PlaySound(reloadFinishSound, reloadVolume);
 
         OnReloadStatusChanged?.Invoke(false);
         UpdateAmmoUI();
@@ -220,6 +241,8 @@ public class GunAction : MonoBehaviour
 
         movementController.SetMovementSpeedMultiplier(
             reloading ? reloadMovementSpeedMultiplier : 1f);
+
+        movementController.SetSprintLocked(reloading);
     }
 
     void UpdateAmmoUI()
@@ -410,6 +433,8 @@ public class GunAction : MonoBehaviour
         currentAmmo--;
         UpdateAmmoUI();
 
+        PlaySound(fireSound, fireVolume);
+
         if (showDebugLine) StartCoroutine(ShotEffect());
 
         laserLine.SetPosition(0, firePoint.position);
@@ -458,5 +483,18 @@ public class GunAction : MonoBehaviour
         laserLine.enabled = true;
         yield return new WaitForSeconds(0.05f);
         laserLine.enabled = false;
+    }
+
+    private void PlaySound(AudioClip clip, float volume)
+    {
+        if (clip == null || audioSource == null)
+            return;
+
+        if (randomizePitch)
+            audioSource.pitch = 1f + UnityEngine.Random.Range(-pitchVariance, pitchVariance);
+        else
+            audioSource.pitch = 1f;
+
+        audioSource.PlayOneShot(clip, volume);
     }
 }
