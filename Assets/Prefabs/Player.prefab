@@ -54,7 +54,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3523246845713457628}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 0}
 --- !u!23 &8461849946201886286
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -164,7 +164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76f351bd61fad6e40a84d6d499c81b15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TopDownPlayerController
-  useCameraRelativeMovement: 0
+  useCameraRelativeMovement: 1
   walkSpeed: 5
   sprintSpeed: 8
   crouchSpeed: 2.5
@@ -181,7 +181,7 @@ MonoBehaviour:
   raycastDistance: 1
   lowRayHeight: -0.5
   highRayHeight: 0.1
-  enablePhysicalCrouch: 0
+  enablePhysicalCrouch: 1
   crouchHeight: 1
   crouchTransitionSpeed: 10
   animator: {fileID: 0}
@@ -576,7 +576,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4832131928001116885}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 0}
 --- !u!23 &2535522999814410363
 MeshRenderer:
   m_ObjectHideFlags: 0

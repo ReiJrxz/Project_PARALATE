@@ -27499,6 +27499,10 @@ PrefabInstance:
       propertyPath: m_IsTrigger
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8848405048649252619, guid: 4765a774e50795745834dbabce120ada, type: 3}
+      propertyPath: closeDistance
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
