@@ -77,6 +77,8 @@ public class TopDownPlayerController : MonoBehaviour
     private bool isCrouching = false;
     private bool isSprinting = false;
     private bool isAiming = false;
+    private Transform aimCameraOverrideTransform;
+    private float aimCameraOverrideFov = 50f;
 
     private float climbCooldown = 0f;
 
@@ -201,6 +203,13 @@ public class TopDownPlayerController : MonoBehaviour
         isSprintLocked = locked;
         if (locked) isSprinting = false; // บังคับยกเลิกสปรินท์ทันทีที่ถูกล็อก
     }
+
+    public void SetAimCameraOverride(Transform cameraTransform, float fieldOfView, bool active)
+    {
+        aimCameraOverrideTransform = active ? cameraTransform : null;
+        aimCameraOverrideFov = fieldOfView;
+    }
+
     void HandleCrouchPhysicality()
     {
         if (!enablePhysicalCrouch) return;
@@ -262,20 +271,11 @@ public class TopDownPlayerController : MonoBehaviour
 
     void HandleRotation()
     {
-        if (isAiming || isArmed)
+        if (isAiming)
         {
-            Vector2 mousePos = Vector2.zero;
-            if (pointerAction != null) mousePos = pointerAction.ReadValue<Vector2>();
-
-            Ray ray = mainCamera.ScreenPointToRay(mousePos);
-            Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-
-            if (groundPlane.Raycast(ray, out float rayDistance))
+            if (TryGetCrosshairLookDirection(out Vector3 lookDirection))
             {
-                Vector3 point = ray.GetPoint(rayDistance);
-                Vector3 lookTarget = new Vector3(point.x, transform.position.y, point.z);
-
-                Quaternion targetRotation = Quaternion.LookRotation(lookTarget - transform.position);
+                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
         }
@@ -305,6 +305,66 @@ public class TopDownPlayerController : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
         }
+    }
+
+    bool TryGetCrosshairLookDirection(out Vector3 lookDirection)
+    {
+        lookDirection = Vector3.zero;
+
+        if (mainCamera == null)
+            mainCamera = Camera.main;
+
+        if (mainCamera == null && aimCameraOverrideTransform == null)
+            return false;
+
+        Vector2 pointerPosition = GetPointerScreenPosition();
+        Ray ray = GetAimRay(pointerPosition);
+        Plane groundPlane = new Plane(Vector3.up, transform.position);
+
+        if (groundPlane.Raycast(ray, out float rayDistance))
+        {
+            Vector3 point = ray.GetPoint(rayDistance);
+            lookDirection = point - transform.position;
+        }
+        else
+        {
+            lookDirection = ray.direction;
+        }
+
+        lookDirection.y = 0f;
+        return lookDirection.sqrMagnitude > 0.001f;
+    }
+
+    Ray GetAimRay(Vector2 screenPosition)
+    {
+        if (aimCameraOverrideTransform != null)
+        {
+            float safeScreenHeight = Mathf.Max(1f, Screen.height);
+            float safeScreenWidth = Mathf.Max(1f, Screen.width);
+            float halfVerticalFov = aimCameraOverrideFov * Mathf.Deg2Rad * 0.5f;
+            float halfHeight = Mathf.Tan(halfVerticalFov);
+            float halfWidth = halfHeight * (safeScreenWidth / safeScreenHeight);
+
+            float normalizedX = (screenPosition.x / safeScreenWidth - 0.5f) * 2f;
+            float normalizedY = (screenPosition.y / safeScreenHeight - 0.5f) * 2f;
+            Vector3 localDirection = new Vector3(normalizedX * halfWidth, normalizedY * halfHeight, 1f).normalized;
+            Vector3 worldDirection = aimCameraOverrideTransform.TransformDirection(localDirection);
+
+            return new Ray(aimCameraOverrideTransform.position, worldDirection);
+        }
+
+        return mainCamera.ScreenPointToRay(screenPosition);
+    }
+
+    Vector2 GetPointerScreenPosition()
+    {
+        if (pointerAction == null)
+            return new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+
+        Vector2 pointerPosition = pointerAction.ReadValue<Vector2>();
+        return new Vector2(
+            Mathf.Clamp(pointerPosition.x, 0f, Screen.width),
+            Mathf.Clamp(pointerPosition.y, 0f, Screen.height));
     }
 
     void AttemptVault()

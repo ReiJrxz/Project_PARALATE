@@ -16711,6 +16711,10 @@ PrefabInstance:
       propertyPath: crosshairUI
       value: 
       objectReference: {fileID: 1984909933}
+    - target: {fileID: 7678648541893415455, guid: 06763626f69097b4eaaa50ca83879dc9, type: 3}
+      propertyPath: useFirstPersonScope
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -27194,6 +27198,10 @@ PrefabInstance:
       propertyPath: 'waypoints.Array.data[1]'
       value: 
       objectReference: {fileID: 419243231}
+    - target: {fileID: 2750856017713391071, guid: 4765a774e50795745834dbabce120ada, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
     - target: {fileID: 3831700900276834782, guid: 4765a774e50795745834dbabce120ada, type: 3}
       propertyPath: playerRef
       value: 
@@ -27206,6 +27214,10 @@ PrefabInstance:
       propertyPath: minimapDotPrefab
       value: 
       objectReference: {fileID: 540900782}
+    - target: {fileID: 4608485821116385252, guid: 4765a774e50795745834dbabce120ada, type: 3}
+      propertyPath: bulletPrefab
+      value: 
+      objectReference: {fileID: 1835759463962887333, guid: ab528aa8e35899d4babee0dd6f26bf9d, type: 3}
     - target: {fileID: 7176063913029227463, guid: 4765a774e50795745834dbabce120ada, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.95
