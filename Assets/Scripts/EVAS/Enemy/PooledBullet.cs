@@ -19,6 +19,8 @@ public class PooledBullet : MonoBehaviour
     private float lifeTimer;
     private bool isReturned;
 
+    public PlayerHealth pHealth;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -139,7 +141,13 @@ public class PooledBullet : MonoBehaviour
             return;
 
         if (other.CompareTag("Player"))
+        {
             Debug.Log($"[{nameof(PooledBullet)}] {name}: Hit player. Dealing {damage} damage.", this);
+            PlayerHealth playerHealth = other.GetComponentInParent<PlayerHealth>();
+            if (playerHealth != null)
+                playerHealth.TakeDamage(damage);
+        }
+            
         else
             Debug.Log($"[{nameof(PooledBullet)}] {name}: Hit {other.name}.", this);
 
