@@ -25,6 +25,7 @@ public class AlertState : MonoBehaviour
     [Header("References")]
     [SerializeField] private FieldOfView fieldOfView;
     [SerializeField] private EnemyController enemyController;
+    [SerializeField] private EnemyAudioController enemyAudio;
 
     [Header("State Points")]
     [FormerlySerializedAs("suspiciousThreshold")]
@@ -259,6 +260,7 @@ public class AlertState : MonoBehaviour
     private void EnterAlert()
     {
         SetState(AlertAIState.Alert);
+        enemyAudio?.PlayAlertSound();
 
         if (fieldOfView != null && fieldOfView.canSeePlayer)
             EnterChasing();
@@ -345,6 +347,9 @@ public class AlertState : MonoBehaviour
 
         if (enemyController == null)
             enemyController = GetComponent<EnemyController>();
+
+        if (enemyAudio == null)
+            enemyAudio = GetComponent<EnemyAudioController>();
     }
 
     private void DrawDistanceGizmo(float radius, Color color)

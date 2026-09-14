@@ -1564,8 +1564,8 @@ MonoBehaviour:
       enableFptlForForwardOpaque: 0
       enableBigTilePrepass: 0
       isFptlEnabled: 0
-  clearColorMode: 0
-  backgroundColorHDR: {r: 0, g: 1, b: 0.5327018, a: 0}
+  clearColorMode: 1
+  backgroundColorHDR: {r: 0.053889267, g: 0.066037714, b: 0.060430735, a: 0}
   clearDepth: 1
   volumeLayerMask:
     serializedVersion: 2
@@ -1994,6 +1994,7 @@ GameObject:
   - component: {fileID: 1228066119}
   - component: {fileID: 1228066121}
   - component: {fileID: 1228066120}
+  - component: {fileID: 1228066122}
   m_Layer: 0
   m_Name: GameManagers
   m_TagString: Untagged
@@ -2056,6 +2057,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caefcb171a797f649bbf85cf79521658, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunInventory
+--- !u!114 &1228066122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1228066117}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b1b5783cf12f00419a64d8497bbbea1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlaytestResetHotkey
 --- !u!1 &1235127217
 GameObject:
   m_ObjectHideFlags: 0
@@ -3215,7 +3228,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: The larping Stealth game
+  m_text: The Casual Stealth game
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3370,6 +3383,75 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1692746564}
   m_CullTransparentMesh: 1
+--- !u!1001 &1748201120
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1805.9187
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1805.9187
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1805.9187
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -7.73
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.57
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 7.952451
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.6958768
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.6958768
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.12552096
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.12552096
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 69.55
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: f7bfa715f11093a4d971357759865140, type: 3}
+      propertyPath: m_Name
+      value: Usp(Upgrade)_handGun
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f7bfa715f11093a4d971357759865140, type: 3}
 --- !u!1 &1875744670
 GameObject:
   m_ObjectHideFlags: 0
@@ -3940,3 +4022,4 @@ SceneRoots:
   - {fileID: 1469243192}
   - {fileID: 1228066118}
   - {fileID: 424566691}
+  - {fileID: 1748201120}

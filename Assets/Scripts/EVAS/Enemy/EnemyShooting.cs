@@ -34,6 +34,7 @@ public class EnemyShooting : MonoBehaviour
 
     private EnemyController enemyController;
     private FieldOfView fieldOfView;
+    private EnemyAudioController enemyAudio;
     private Transform playerTransform;
     private bool isShootingRoutineRunning;
     private float lastFireTime = -Mathf.Infinity;
@@ -48,6 +49,7 @@ public class EnemyShooting : MonoBehaviour
     {
         enemyController = GetComponent<EnemyController>();
         fieldOfView = GetComponent<FieldOfView>();
+        enemyAudio = GetComponent<EnemyAudioController>();
 
         if (firePoint == null) firePoint = transform;
 
@@ -185,6 +187,7 @@ public class EnemyShooting : MonoBehaviour
 
         PooledBullet bullet = bulletPool.Get();
         bullet.Launch(spawnPos, Quaternion.LookRotation(fireDirection), fireDirection * bulletSpeed, transform);
+        enemyAudio?.PlayFireSound();
     }
 
     private bool TryGetMuzzleAim(out Vector3 spawnPos, out Vector3 fireDirection, out Vector3 aimPoint)

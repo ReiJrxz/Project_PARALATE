@@ -38,6 +38,7 @@ public class EnemyController : MonoBehaviour
     private Coroutine lookAroundCoroutine;
     private EnemyState currentState;
     private EnemyState stateBeforeLock;
+    private EnemyAudioController enemyAudio;
     private int currentWaypointIndex;
     private float patrolSpeed;
     private float lostSightTimer;
@@ -54,6 +55,7 @@ public class EnemyController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         fieldOfView = GetComponent<FieldOfView>();
         alertState = GetComponent<AlertState>();
+        enemyAudio = GetComponent<EnemyAudioController>();
         patrolSpeed = agent.speed;
     }
 
@@ -65,6 +67,9 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
+        if (enemyAudio != null && CanUseAgent()) // เพิ่มบล็อกนี้
+            enemyAudio.HandleFootstep(agent.velocity.magnitude);
+
         if (currentState == EnemyState.Locked)
             return;
 
