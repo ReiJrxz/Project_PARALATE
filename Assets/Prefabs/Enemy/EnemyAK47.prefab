@@ -552,7 +552,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c16fe42028bbfe94caccfa5974f7b9ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyShooting
-  bulletPrefab: {fileID: 0}
+  bulletPrefab: {fileID: 1835759463962887333, guid: ab528aa8e35899d4babee0dd6f26bf9d, type: 3}
   firePoint: {fileID: 5264720152402438067}
   bulletSpeed: 25
   shootingRange: 15
@@ -560,7 +560,7 @@ MonoBehaviour:
   maxPoolSize: 30
   aimDelayBeforeShoot: 1
   postShootDelay: 1
-  fireCooldown: 2
+  fireCooldown: 0.1
   aimHeightOffset: 1
   obstructionMask:
     serializedVersion: 2

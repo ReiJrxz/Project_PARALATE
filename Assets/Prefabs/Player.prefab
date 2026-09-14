@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 7944954573667976441}
   - component: {fileID: 2849337750918315522}
   - component: {fileID: 6044956673403840519}
+  - component: {fileID: 8617868563665944825}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -191,6 +192,7 @@ MonoBehaviour:
   ladderLayer:
     serializedVersion: 2
     m_Bits: 128
+  topDownAngleThreshold: 0.9
   playerAudio: {fileID: 8672259171821128312}
 --- !u!114 &8672259171821128312
 MonoBehaviour:
@@ -538,6 +540,25 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8617868563665944825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3523246845713457628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b1fcd83a8463984a8e3b9045d4f8940, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  health: 100
+  maxHealth: 100
+  healthBar: {fileID: 0}
+  DeadScene: {fileID: 0}
+  isInvincible: 0
+  respawnKey: 11
+  toggleInvincibleKey: 12
 --- !u!1 &4832131928001116885
 GameObject:
   m_ObjectHideFlags: 0
@@ -766,6 +787,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: ea2fddc1fe30d9e46838f4b917cfee4a, type: 3}
       propertyPath: m_Name
       value: Mige 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ea2fddc1fe30d9e46838f4b917cfee4a, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

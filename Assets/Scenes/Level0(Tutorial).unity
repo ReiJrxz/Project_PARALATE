@@ -14421,6 +14421,17 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!114 &441093165 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3453493257843899532, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+  m_PrefabInstance: {fileID: 295719529}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &447081599
 GameObject:
   m_ObjectHideFlags: 0
@@ -36498,17 +36509,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8404243857973046065, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
   m_PrefabInstance: {fileID: 1098993966}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &977656332 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5350436961949451085, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-  m_PrefabInstance: {fileID: 1098993966}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c848b77dfd36ff941a921bdde442449e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
 --- !u!43 &980436533
 Mesh:
   m_ObjectHideFlags: 0
@@ -42070,42 +42070,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player 1
       objectReference: {fileID: 0}
-    - target: {fileID: 3523246845713457628, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 4226827506186658610, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 4832131928001116885, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 6344518851335881470, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      propertyPath: m_ActionEvents.Array.data[14].m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6344518851335881470, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      propertyPath: m_ActionEvents.Array.data[14].m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 977656332}
-    - target: {fileID: 6344518851335881470, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      propertyPath: m_ActionEvents.Array.data[14].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnWallLean
-      objectReference: {fileID: 0}
-    - target: {fileID: 6344518851335881470, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      propertyPath: m_ActionEvents.Array.data[14].m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: PlayerController, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 6505496240576266214, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      propertyPath: m_Layer
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 7717890220541595206, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      propertyPath: enablePhysicalCrouch
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7944954573667976441, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
       propertyPath: wallLeanCamera
       value: 
@@ -42150,6 +42114,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8617868563665944825, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
+      propertyPath: DeadScene
+      value: 
+      objectReference: {fileID: 1331295960}
+    - target: {fileID: 8617868563665944825, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
+      propertyPath: healthBar
+      value: 
+      objectReference: {fileID: 441093165}
     - target: {fileID: 8951187399617778230, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
       propertyPath: ammoUIManager
       value: 
@@ -48460,6 +48432,17 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!114 &1331295960 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4914927553768398447, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+  m_PrefabInstance: {fileID: 295719529}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!43 &1346203485
 Mesh:
   m_ObjectHideFlags: 0
