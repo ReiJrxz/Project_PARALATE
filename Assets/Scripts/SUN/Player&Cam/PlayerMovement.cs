@@ -46,7 +46,6 @@ public class TopDownPlayerController : MonoBehaviour
     private float originalHeight;
     private Vector3 originalCenter;
 
-
     [Header("Animation (อนิเมชั่น)")]
     public Animator animator;
 
@@ -55,6 +54,11 @@ public class TopDownPlayerController : MonoBehaviour
     public float climbDownSpeed = 6f;
     public float topExitOffset = 1.5f;
     public LayerMask ladderLayer;
+
+    // ★ แก้ไขตรงนี้ — เพิ่ม field ใหม่ ใช้กำหนดว่ากล้องมองชันแค่ไหนถึงจะสลับไปใช้ camUp แทน camForward
+    [Header("Camera Relative Movement (Top-down fix)")]
+    [Tooltip("ถ้า |camera.forward.y| เกินค่านี้ ถือว่ากล้องมองชันเกินไป จะสลับไปใช้ camera.up แทน")]
+    public float topDownAngleThreshold = 0.9f;
 
     private CharacterController controller;
     private Camera mainCamera;
@@ -72,7 +76,7 @@ public class TopDownPlayerController : MonoBehaviour
     private bool isMovementLocked = false;
     private bool isClimbing = false;
     private float movementSpeedMultiplier = 1f;
-    private bool isSprintLocked = false; // เพิ่มบรรทัดนี้
+    private bool isSprintLocked = false;
 
     private bool isCrouching = false;
     private bool isSprinting = false;
@@ -87,6 +91,7 @@ public class TopDownPlayerController : MonoBehaviour
 
     [Header("Player Audio")]
     public PlayerAudioController playerAudio;
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -95,7 +100,6 @@ public class TopDownPlayerController : MonoBehaviour
 
         if (playerAudio == null) playerAudio = GetComponent<PlayerAudioController>();
 
-        // จำขนาดแคปซูลดั้งเดิมไว้ ป้องกันปัญหาจมพื้น
         if (controller != null)
         {
             originalHeight = controller.height;
@@ -150,7 +154,6 @@ public class TopDownPlayerController : MonoBehaviour
     {
         if (isSprintLocked) return;
         isSprinting = true;
-
     }
 
     private void OnSprintStop(InputAction.CallbackContext context)
@@ -198,10 +201,11 @@ public class TopDownPlayerController : MonoBehaviour
     {
         movementSpeedMultiplier = Mathf.Max(0f, multiplier);
     }
+
     public void SetSprintLocked(bool locked)
     {
         isSprintLocked = locked;
-        if (locked) isSprinting = false; // บังคับยกเลิกสปรินท์ทันทีที่ถูกล็อก
+        if (locked) isSprinting = false;
     }
 
     public void SetAimCameraOverride(Transform cameraTransform, float fieldOfView, bool active)
@@ -215,35 +219,45 @@ public class TopDownPlayerController : MonoBehaviour
         if (!enablePhysicalCrouch) return;
 
         Vector3 targetScale = transform.localScale;
-
         float targetYScale = isCrouching ? (crouchHeight / originalHeight) : 1f;
         targetScale.y = targetYScale;
 
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, crouchTransitionSpeed * Time.deltaTime);
     }
 
+    // ★ แก้ไขตรงนี้ — เพิ่มฟังก์ชันใหม่ทั้งหมด ใช้แทนการคำนวณ direction ที่เคยเขียนซ้ำสองจุด (HandleMovement กับ HandleRotation)
+    Vector3 GetCameraRelativeDirection(Vector2 moveInput)
+    {
+        Vector3 camForward = mainCamera.transform.forward;
+        Vector3 camUp = mainCamera.transform.up;
+        Vector3 camRight = mainCamera.transform.right;
+
+        // ถ้ากล้องมองชันเกือบตรงลงพื้น (top-down) forward จะไม่มีองค์ประกอบแนวราบเหลือให้ใช้
+        // ให้สลับไปใช้ camera.up แทน เพราะมันยังอยู่ในแนวราบพอดีตอนกล้องมองลงตรงๆ
+        Vector3 forwardOnPlane = Mathf.Abs(camForward.y) > topDownAngleThreshold ? camUp : camForward;
+
+        forwardOnPlane.y = 0f;
+        camRight.y = 0f;
+
+        return (forwardOnPlane.normalized * moveInput.y + camRight.normalized * moveInput.x).normalized;
+    }
 
     void HandleMovement()
     {
         Vector2 moveInput = Vector2.zero;
         if (moveAction != null) moveInput = moveAction.ReadValue<Vector2>();
 
-        Vector3 direction = Vector3.zero;
+        Vector3 direction;
 
         if (useCameraRelativeMovement)
         {
-            Vector3 cameraForward = mainCamera.transform.forward;
-            Vector3 cameraRight = mainCamera.transform.right;
-            cameraForward.y = 0f;
-            cameraRight.y = 0f;
-            direction = (cameraForward.normalized * moveInput.y + cameraRight.normalized * moveInput.x).normalized;
+            // ★ แก้ไขตรงนี้ — เดิมคำนวณ camForward/camRight ตรงนี้เอง 4 บรรทัด เปลี่ยนมาเรียกฟังก์ชันกลางแทน
+            direction = GetCameraRelativeDirection(moveInput);
         }
         else
         {
             direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
         }
-
-      
 
         float currentSpeed = walkSpeed;
 
@@ -286,15 +300,12 @@ public class TopDownPlayerController : MonoBehaviour
             Vector2 moveInput = Vector2.zero;
             if (moveAction != null) moveInput = moveAction.ReadValue<Vector2>();
 
-            Vector3 direction = Vector3.zero;
+            Vector3 direction;
 
             if (useCameraRelativeMovement)
             {
-                Vector3 cameraForward = mainCamera.transform.forward;
-                Vector3 cameraRight = mainCamera.transform.right;
-                cameraForward.y = 0f;
-                cameraRight.y = 0f;
-                direction = (cameraForward.normalized * moveInput.y + cameraRight.normalized * moveInput.x).normalized;
+                // ★ แก้ไขตรงนี้ — เหมือนกับใน HandleMovement เรียกฟังก์ชันกลางเดียวกัน ไม่ต้องเขียนซ้ำ
+                direction = GetCameraRelativeDirection(moveInput);
             }
             else
             {
@@ -402,8 +413,6 @@ public class TopDownPlayerController : MonoBehaviour
     {
         isVaulting = true;
 
-        // 1. "พับขาขึ้น" โดยการหดความสูงแคปซูลลงครึ่งหนึ่ง และดันจุดศูนย์กลางขึ้น
-        // เพื่อให้ก้นแคปซูลไม่ไปเกี่ยวโดนขอบ Hurdle ระหว่างข้าม
         controller.height = originalHeight * 0.5f;
         controller.center = originalCenter + new Vector3(0, originalHeight * 0.25f, 0);
 
@@ -417,21 +426,18 @@ public class TopDownPlayerController : MonoBehaviour
             Vector3 lerpedPos = Vector3.Lerp(startPos, targetPosition, timePassed);
             float heightOffset = Mathf.Sin(Mathf.Clamp01(timePassed) * Mathf.PI) * vaultHeight;
 
-            // คำนวณตำแหน่งเป้าหมายของเฟรมนี้ (รวมส่วนโค้งกระโดดด้วย)
             Vector3 targetFramePos = lerpedPos;
             targetFramePos.y += heightOffset;
 
             Vector3 delta = targetFramePos - transform.position;
-            controller.Move(delta);   // ใช้ Move เพื่อให้ยังเช็คชนกำแพงระหว่างทางได้
+            controller.Move(delta);
 
             yield return null;
         }
 
-        // Snap ตำแหน่งสุดท้ายให้แม่นยำ (จุดยืนจริง ไม่มี height offset)
         Vector3 finalDelta = targetPosition - transform.position;
         controller.Move(finalDelta);
 
-        // 2. คืนค่าแคปซูลกลับเป็นปกติเมื่อลงถึงพื้นอย่างปลอดภัย
         controller.height = originalHeight;
         controller.center = originalCenter;
 
@@ -453,7 +459,6 @@ public class TopDownPlayerController : MonoBehaviour
     IEnumerator SmoothClimbEntryRoutine(Vector3 targetPos)
     {
         isMovementLocked = true;
-        // ไม่ปิด controller.enabled แล้ว เพื่อให้ยังชนกำแพงได้ระหว่างเข้าสู่บันได
 
         Vector3 startPos = transform.position;
         float timePassed = 0f;
@@ -464,14 +469,14 @@ public class TopDownPlayerController : MonoBehaviour
             timePassed += Time.deltaTime / duration;
             Vector3 nextPos = Vector3.Lerp(startPos, targetPos, timePassed);
             Vector3 delta = nextPos - transform.position;
-            controller.Move(delta);   // ใช้ Move แทน set position ตรงๆ
+            controller.Move(delta);
             yield return null;
         }
 
         Vector3 finalDelta = targetPos - transform.position;
         controller.Move(finalDelta);
 
-        isMovementLocked = false;   // <-- สำคัญมาก! ปลดล็อคตอนจบ ไม่งั้นค้างตลอดไป
+        isMovementLocked = false;
     }
 
     void HandleClimbing()
