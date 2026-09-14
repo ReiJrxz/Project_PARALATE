@@ -8655,6 +8655,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: EnemyAK47
       objectReference: {fileID: 0}
+    - target: {fileID: 3978973205561271169, guid: 4765a774e50795745834dbabce120ada, type: 3}
+      propertyPath: minimapDotPrefab
+      value: 
+      objectReference: {fileID: 1981170994}
     - target: {fileID: 7176063913029227463, guid: 4765a774e50795745834dbabce120ada, type: 3}
       propertyPath: m_LocalPosition.x
       value: 14.582764
@@ -75858,6 +75862,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1624555120}
   m_LocalEulerAnglesHint: {x: 0, y: -39.101, z: 0}
+--- !u!1 &1981170994 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3961821848214297913, guid: 4765a774e50795745834dbabce120ada, type: 3}
+  m_PrefabInstance: {fileID: 45093453}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1991874313
 GameObject:
   m_ObjectHideFlags: 0

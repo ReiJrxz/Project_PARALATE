@@ -1,25 +1,26 @@
 using UnityEngine;
 using Unity.Cinemachine;
 
-
-// Preset 5 — สืบทอดมาจาก base แล้วเพิ่มแค่ส่วนคำนวณมุม/ความสูง
 public class MultiFloorCameraZone : CameraZone
 {
-    [Header("ตั้งค่ามุมสำหรับชั้นนี้")]
-    public float cameraPitch = 45f;
-    public float cameraDistance = 12f;
-    public Transform floorLookAtTarget;
+    [Header("มุมกล้องสำหรับชั้นนี้")]
+    public float cameraPitch = 45f;      // มุมเงย/ก้ม (90 = มองตรงลงพื้นสนิท)
+    public float cameraDistance = 12f;   // ระยะห่างจาก Anchor
 
     protected override void Start()
     {
-        base.Start(); // เรียก logic priority เดิมจาก base ก่อน
+        base.Start(); // ได้ logic Priority.Value + CheckIfPlayerAlreadyInside มาจาก CameraZone
 
-        var transposer = virtualCamera.GetComponent<CinemachineFollow>();
-        if (transposer != null)
-            transposer.FollowOffset = CalculateOffset(cameraPitch, cameraDistance);
+        if (virtualCamera == null) return;
 
-        if (floorLookAtTarget != null)
-            virtualCamera.LookAt = floorLookAtTarget;
+        var positionComposer = virtualCamera.GetComponent<CinemachinePositionComposer>();
+        if (positionComposer != null)
+        {
+            positionComposer.TargetOffset = CalculateOffset(cameraPitch, cameraDistance);
+        }
+
+        // ตั้งมุมกล้องด้วยมือ ตาม Pitch ของชั้นนี้ (เหมือนหลักการ Do Nothing ที่ใช้กับ Room Camera ปกติ)
+        virtualCamera.transform.rotation = Quaternion.Euler(cameraPitch, 0f, 0f);
     }
 
     private Vector3 CalculateOffset(float pitch, float distance)
