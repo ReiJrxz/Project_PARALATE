@@ -243,6 +243,8 @@ public class TopDownPlayerController : MonoBehaviour
             direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
         }
 
+      
+
         float currentSpeed = walkSpeed;
 
         if (isCrouching) currentSpeed = crouchSpeed;
@@ -256,7 +258,7 @@ public class TopDownPlayerController : MonoBehaviour
 
             if (playerAudio != null)
             {
-                playerAudio.HandleFootstep(controller.isGrounded, isSprinting, isCrouching);
+                playerAudio.HandleFootstep(controller.isGrounded, isSprinting, isCrouching, currentSpeed);
             }
         }
 

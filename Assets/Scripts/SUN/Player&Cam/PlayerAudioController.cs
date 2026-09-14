@@ -12,6 +12,12 @@ public class PlayerAudioController : MonoBehaviour
         public AudioClip[] footstepClips;
     }
 
+    [Header("Footstep Timing")]
+    public float baseFootstepInterval = 0.4f;
+    [Tooltip("ความเร็วอ้างอิงที่ interval เท่ากับ baseFootstepInterval พอดี")]
+    public float referenceSpeed = 5f; // ควรเท่ากับ walkSpeed ใน TopDownPlayerController
+    public float minFootstepInterval = 0.2f; // กันไม่ให้ถี่เกินไปตอนวิ่งเร็วมาก
+
     [Header("Surface-Based Footsteps")]
     [Tooltip("ชุดเสียงเดินตามพื้นผิว ต่อ Tag ของ Collider พื้น")]
     public SurfaceSound[] surfaceSounds;
@@ -73,7 +79,7 @@ public class PlayerAudioController : MonoBehaviour
     /// เรียกทุกเฟรมที่ตัวละครกำลังเดิน/วิ่งบนพื้น
     /// จัดการ cooldown ระหว่างฝีเท้าให้เอง
     /// </summary>
-    public void HandleFootstep(bool isGrounded, bool isSprinting, bool isCrouching)
+    public void HandleFootstep(bool isGrounded, bool isSprinting, bool isCrouching, float currentSpeed)
     {
         if (!isGrounded || Time.time < nextFootstepTime) return;
 
@@ -86,8 +92,9 @@ public class PlayerAudioController : MonoBehaviour
             PlayFootstepSound(clips);
         }
 
-        float interval = isSprinting ? footstepInterval * sprintIntervalMultiplier : footstepInterval;
-        nextFootstepTime = Time.time + interval;
+        float speedRatio = Mathf.Max(currentSpeed, 0.1f) / referenceSpeed;
+        float interval = baseFootstepInterval / speedRatio;
+        nextFootstepTime = Time.time + Mathf.Max(interval, minFootstepInterval);
     }
 
     AudioClip[] GetClipsForCurrentSurface()

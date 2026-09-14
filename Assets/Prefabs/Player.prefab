@@ -204,18 +204,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f46f14bdb555303429e5b7fdfbddd099, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAudioController
+  baseFootstepInterval: 0.4
+  referenceSpeed: 5
+  minFootstepInterval: 0.2
   surfaceSounds: []
   defaultFootstepClips:
   - {fileID: 8300000, guid: c6adaf6028e80aa40959254af1287d9f, type: 3}
   groundCheckDistance: 1.2
   groundLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 31735
   whistleClip: {fileID: 8300000, guid: dd1ea513a307dda4bb24fc188c074ba8, type: 3}
   pitchVariance: 0.08
   volumeVariance: 0.15
   footstepBaseVolume: 1
-  footstepInterval: 1
+  footstepInterval: 0.35
   sprintIntervalMultiplier: 0.7
   walkNoiseRadius: 7
   sprintNoiseRadius: 15
