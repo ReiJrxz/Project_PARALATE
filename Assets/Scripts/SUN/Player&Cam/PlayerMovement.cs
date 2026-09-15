@@ -78,9 +78,11 @@ public class TopDownPlayerController : MonoBehaviour
     private float movementSpeedMultiplier = 1f;
     private bool isSprintLocked = false;
 
+    private bool isWalking = false;
     private bool isCrouching = false;
     private bool isSprinting = false;
     private bool isAiming = false;
+
     private Transform aimCameraOverrideTransform;
     private float aimCameraOverrideFov = 50f;
 
@@ -190,6 +192,7 @@ public class TopDownPlayerController : MonoBehaviour
         HandleCrouchPhysicality();
         HandleMovement();
         HandleRotation();
+        PlayAnima();
     }
 
     public void SetMovementLocked(bool locked)
@@ -216,13 +219,15 @@ public class TopDownPlayerController : MonoBehaviour
 
     void HandleCrouchPhysicality()
     {
-        if (!enablePhysicalCrouch) return;
+        if (!enablePhysicalCrouch || controller == null) return;
 
-        Vector3 targetScale = transform.localScale;
-        float targetYScale = isCrouching ? (crouchHeight / originalHeight) : 1f;
-        targetScale.y = targetYScale;
+        float targetHeight = isCrouching ? crouchHeight : originalHeight;
 
-        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, crouchTransitionSpeed * Time.deltaTime);
+        Vector3 targetCenter = originalCenter;
+        targetCenter.y = originalCenter.y - ((originalHeight - targetHeight) * 0.5f);
+
+        controller.height = Mathf.Lerp(controller.height, targetHeight, crouchTransitionSpeed * Time.deltaTime);
+        controller.center = Vector3.Lerp(controller.center, targetCenter, crouchTransitionSpeed * Time.deltaTime);
     }
 
     // ★ แก้ไขตรงนี้ — เพิ่มฟังก์ชันใหม่ทั้งหมด ใช้แทนการคำนวณ direction ที่เคยเขียนซ้ำสองจุด (HandleMovement กับ HandleRotation)
@@ -258,7 +263,7 @@ public class TopDownPlayerController : MonoBehaviour
         {
             direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
         }
-
+        isWalking = direction.magnitude >= 0.1f;
         float currentSpeed = walkSpeed;
 
         if (isCrouching) currentSpeed = crouchSpeed;
@@ -277,12 +282,6 @@ public class TopDownPlayerController : MonoBehaviour
         }
 
         controller.Move(new Vector3(0, -9.81f * Time.deltaTime, 0));
-
-        if (animator != null)
-        {
-            animator.SetFloat("Speed", direction.magnitude * currentSpeed);
-            animator.SetBool("IsCrouching", isCrouching);
-        }
     }
 
     void HandleRotation()
@@ -552,6 +551,12 @@ public class TopDownPlayerController : MonoBehaviour
 
         StopClimbing();
         isMovementLocked = false;
+    }
+
+    private void PlayAnima()
+    {
+        animator?.SetBool("isWalk", isWalking);
+        animator?.SetBool("isSneak", isCrouching);
     }
 
     private void OnDrawGizmos()

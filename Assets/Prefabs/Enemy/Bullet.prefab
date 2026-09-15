@@ -97,7 +97,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PooledBullet
   lifeTime: 3
-  damage: 100
+  damage: 35
   hitMask:
     serializedVersion: 2
     m_Bits: 4294967295

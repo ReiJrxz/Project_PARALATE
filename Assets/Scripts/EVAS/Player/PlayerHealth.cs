@@ -38,9 +38,7 @@ public class PlayerHealth : MonoBehaviour
         UpdateHealthBar();
 
         if(!isDead && health <= 0)
-        {
             Die();
-        }
     }
 
     public void TakeDamage(float damage)
