@@ -80,7 +80,7 @@ MonoBehaviour:
   maxHealth: 100
   healthBarFill: {fileID: 1719189411452499469}
   healthCanvas: {fileID: 2263936238131679322}
-  onDeath: 1
+  onDeath: 0
 --- !u!114 &3831700900276834782
 MonoBehaviour:
   m_ObjectHideFlags: 0

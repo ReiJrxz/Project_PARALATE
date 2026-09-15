@@ -18117,6 +18117,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Knife
       objectReference: {fileID: 0}
+    - target: {fileID: 5846429074682474947, guid: 034c71351221d714b924a1140340f2e9, type: 3}
+      propertyPath: attackAction
+      value: 
+      objectReference: {fileID: -3566526748847213536, guid: 3bdf035a2b3eac841b3fdc702c70b4a7, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -86,7 +86,7 @@ public class KnifeAction : MonoBehaviour
         Debug.DrawRay(attackOrigin, attackDirection * attackRange, Color.red, 2f);
 
         RaycastHit hit;
-        if(Physics.Raycast(attackOrigin, attackDirection, out hit, attackRange))
+        if(Physics.Raycast(attackOrigin, attackDirection, out hit, attackRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
             Debug.Log("<color=cyan>มีดฟันไปโดน: " + hit.collider.name + "</color>");
 
