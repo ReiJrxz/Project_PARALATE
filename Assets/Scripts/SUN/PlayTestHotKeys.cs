@@ -6,7 +6,7 @@ public class PlaytestResetHotkey : MonoBehaviour
 {
     void Update()
     {
-        if (Keyboard.current != null && Keyboard.current.digit0Key.wasPressedThisFrame)
+        if (Keyboard.current != null && Keyboard.current.lKey.wasPressedThisFrame)
         {
             ResetToMainMenu();
         }

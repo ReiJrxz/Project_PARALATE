@@ -10,4 +10,5 @@ public class LevelExitTrigger : MonoBehaviour
             LevelManager.Instance.CompleteLevel();
         }
     }
+
 }

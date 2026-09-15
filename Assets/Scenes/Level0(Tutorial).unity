@@ -10804,6 +10804,14 @@ PrefabInstance:
       propertyPath: heightOffset
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 2223553413262019586, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2460920935584212886, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4386575564388508724, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -62724,7 +62732,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6096931039512054187, guid: 1caa2d2a1e1b1f748aac3b37299bb1e9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -18.723482
+      value: -18.724445
       objectReference: {fileID: 0}
     - target: {fileID: 6096931039512054187, guid: 1caa2d2a1e1b1f748aac3b37299bb1e9, type: 3}
       propertyPath: m_LocalPosition.y
