@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.InputSystem;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -9,10 +8,8 @@ public class PlayerHealth : MonoBehaviour
     public Image healthBar;
     public Image DeadScene;
 
-    [Header("Respawn & Debug")]
+    [Header("Debug")]
     public bool isInvincible;
-    public Key respawnKey = Key.LeftBracket;
-    public Key toggleInvincibleKey = Key.RightBracket;
 
     private Vector3 spawnPosition;
     private Quaternion spawnRotation;
@@ -34,7 +31,6 @@ public class PlayerHealth : MonoBehaviour
 
     void Update()
     {
-        HandleDebugInput();
         UpdateHealthBar();
 
         if(!isDead && health <= 0)
@@ -87,22 +83,6 @@ public class PlayerHealth : MonoBehaviour
             DeadScene.gameObject.SetActive(true);
 
         UpdateHealthBar();
-    }
-
-    private void HandleDebugInput()
-    {
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard == null)
-            return;
-
-        if (keyboard[respawnKey].wasPressedThisFrame)
-            Respawn();
-
-        if (keyboard[toggleInvincibleKey].wasPressedThisFrame)
-        {
-            isInvincible = !isInvincible;
-            Debug.Log($"Player Invincible: {isInvincible}", this);
-        }
     }
 
     private void UpdateHealthBar()

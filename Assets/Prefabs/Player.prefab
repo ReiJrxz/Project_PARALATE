@@ -557,8 +557,6 @@ MonoBehaviour:
   healthBar: {fileID: 0}
   DeadScene: {fileID: 0}
   isInvincible: 0
-  respawnKey: 11
-  toggleInvincibleKey: 12
 --- !u!1 &4832131928001116885
 GameObject:
   m_ObjectHideFlags: 0
