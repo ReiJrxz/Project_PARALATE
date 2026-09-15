@@ -153,7 +153,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -737, y: -286.64}
+  m_AnchoredPosition: {x: -725, y: -258}
   m_SizeDelta: {x: 381.64, y: 506.98}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &9956590
@@ -176,33 +176,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'INPUT
-
-    WASD - Move
-
-    C - Crouch
-
-    SHIFT - sprint
-
-    Space
-    - Hop over
-
-    E - Collect , Climb Ladder
-
-    X - WallLean Camera Change (only
-    facing wall)
-
-
-    F - Kill (from behind)
-
-    Left Ctrl (Hold) - Mercy (From
-    behind)
-
-
-    LeftClick - Fire (When gun is viable)
-
-    RightClick - Aim (When
-    gun is viable) '
+  m_text: "INPUT\nWASD - Move\nC - Crouch\nSHIFT - sprint\nSpace - Hop over\nE -
+    Collect , Climb Ladder\nX - WallLean Camera Change (only facing wall)\n\nF -
+    Kill (from behind)\nLeft Ctrl (Hold) - Mercy (From behind)\n\nR - Reload (When
+    gun is viable)\nLeftClick - Fire (When gun is viable)\nRightClick - Aim (When
+    gun is viable)\n "
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
