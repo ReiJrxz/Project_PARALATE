@@ -169,10 +169,10 @@ GameObject:
   - component: {fileID: 2654463098087615782}
   - component: {fileID: 3439542103654195770}
   - component: {fileID: 5649831259936105326}
-  - component: {fileID: 1995883741275289366}
+  - component: {fileID: 2501975617550388151}
   - component: {fileID: 5041806745218822092}
   m_Layer: 12
-  m_Name: AK47
+  m_Name: Sniper
   m_TagString: Pickup
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -366,10 +366,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GunAction
   firePoint: {fileID: 3954896181780727238}
-  range: 100
-  damage: 20
-  fireRate: 0.7
-  magazineSize: 30
+  range: 200
+  damage: 80
+  fireRate: 0.5
+  magazineSize: 5
   reloadDuration: 4
   reloadMovementSpeedMultiplier: 0.5
   autoReloadWhenEmpty: 0
@@ -416,7 +416,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemPickup
   itemData: {fileID: 11400000, guid: 79b5c77364ba1a147af8335f20db5de8, type: 2}
---- !u!114 &1995883741275289366
+--- !u!114 &2501975617550388151
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -428,7 +428,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cc3eb417998b444f957777de8ef24cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponInfo
-  displayName: AK47
+  displayName: Sniper
   icon: {fileID: 0}
 --- !u!82 &5041806745218822092
 AudioSource:

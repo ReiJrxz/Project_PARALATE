@@ -16,7 +16,7 @@ public class ActionCameraController : MonoBehaviour
     public LayerMask wallLayer; // เพิ่มบรรทัดนี้ — ประกาศแยกต่างหากในคลาสนี้
 
     [Header("Damping")]
-    public float transitionSpeed = 5f;
+    public float transitionSpeed = 8f;
 
     private const int ACTION_PRIORITY = 1000;
     private const int INACTIVE = 0;

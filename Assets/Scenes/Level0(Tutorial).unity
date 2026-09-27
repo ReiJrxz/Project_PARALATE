@@ -78080,8 +78080,8 @@ MonoBehaviour:
     Enabled: 0
     DefaultMode: 2
   DefaultBlend:
-    Style: 0
-    Time: 2
+    Style: 1
+    Time: 0.1
     CustomCurve:
       serializedVersion: 2
       m_Curve: []

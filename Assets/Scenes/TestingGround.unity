@@ -1801,6 +1801,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &112246817 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1567603018744325741, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+  m_PrefabInstance: {fileID: 3096071562088304266}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &121694429
 GameObject:
   m_ObjectHideFlags: 0
@@ -2277,6 +2282,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 630649539}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &127320727 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2900776274049011585, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+  m_PrefabInstance: {fileID: 3096071562088304266}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b238901d676d5344900a07db23a5827, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AmmoUIManager
 --- !u!1 &128013942
 GameObject:
   m_ObjectHideFlags: 0
@@ -7408,17 +7424,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraZone
   virtualCamera: {fileID: 1262977317}
   inactivePriority: 9
---- !u!114 &676411002 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7678648541893415455, guid: 06763626f69097b4eaaa50ca83879dc9, type: 3}
-  m_PrefabInstance: {fileID: 1106447428}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5cb5fb9ae1691f4da02b8009e3ef27f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GunAction
 --- !u!43 &730559880
 Mesh:
   m_ObjectHideFlags: 0
@@ -15669,6 +15674,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 06763626f69097b4eaaa50ca83879dc9, type: 3}
+--- !u!224 &1109715575 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 4328105192839475241, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+  m_PrefabInstance: {fileID: 3096071562088304266}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1135687811
 GameObject:
   m_ObjectHideFlags: 0
@@ -25527,10 +25537,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5026020362112180523, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
-      propertyPath: playerGun
-      value: 
-      objectReference: {fileID: 676411002}
     - target: {fileID: 6263587560004742178, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
       propertyPath: m_Name
       value: MainHUD
@@ -26073,6 +26079,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 13239512091762908, guid: f8ec6cfc9960e9a43896279c40a04aff, type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 8192
+      objectReference: {fileID: 0}
     - target: {fileID: 498498013494759591, guid: f8ec6cfc9960e9a43896279c40a04aff, type: 3}
       propertyPath: m_Name
       value: AnotherCamera
@@ -26288,6 +26298,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5869982482188529001, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
+      propertyPath: wheelPanel
+      value: 
+      objectReference: {fileID: 112246817}
+    - target: {fileID: 5869982482188529001, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
+      propertyPath: slotContainer
+      value: 
+      objectReference: {fileID: 1109715575}
     - target: {fileID: 7944954573667976441, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
       propertyPath: wallLeanCamera
       value: 
@@ -26340,6 +26358,10 @@ PrefabInstance:
       propertyPath: healthBar
       value: 
       objectReference: {fileID: 97184808}
+    - target: {fileID: 8951187399617778230, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
+      propertyPath: ammoUIManager
+      value: 
+      objectReference: {fileID: 127320727}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

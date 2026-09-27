@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 2849337750918315522}
   - component: {fileID: 6044956673403840519}
   - component: {fileID: 8617868563665944825}
+  - component: {fileID: 5869982482188529001}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -337,6 +338,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: a7b9e141-1692-42ec-b75d-9889398db093
     m_ActionName: 'Player/Map[/Keyboard/m]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 25807322-cd3d-44ba-a9f5-207df6b91cdb
+    m_ActionName: 'Player/ScrollWeapon[/Mouse/scroll/y]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -362,6 +367,7 @@ MonoBehaviour:
   holdPositionOffset: {x: 0, y: 0, z: 0}
   holdRotationOffset: {x: 0, y: 90, z: 0}
   ammoUIManager: {fileID: 0}
+  weaponWheel: {fileID: 5869982482188529001}
 --- !u!114 &184613564265374035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -557,6 +563,26 @@ MonoBehaviour:
   healthBar: {fileID: 0}
   DeadScene: {fileID: 0}
   isInvincible: 0
+--- !u!114 &5869982482188529001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3523246845713457628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70e7c092e8fc09d49ac6fc60108ca602, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponWheelUI
+  pickupSystem: {fileID: 8951187399617778230}
+  playerInput: {fileID: 6344518851335881470}
+  wheelPanel: {fileID: 0}
+  slotContainer: {fileID: 0}
+  slotPrefab: {fileID: 7990936315420508910, guid: 19a207cc6aca8ab4eb0d2756aa6ca1a6, type: 3}
+  timeScaleWhileOpen: 0.2
+  allowEmptySlot: 1
+  scrollThreshold: 0.1
 --- !u!1 &4832131928001116885
 GameObject:
   m_ObjectHideFlags: 0

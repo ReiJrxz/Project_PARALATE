@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     public float wallExitDistance = 1.3f;
     public LayerMask wallLayer;
 
+
     [Header("Facing Check")]
     public float maxFacingAngle = 120f; // หันเกินมุมนี้ = ถือว่าหันหนีกำแพง
 

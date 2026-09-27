@@ -1,10 +1,12 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(PlayerInput))]
 public class PickupSystem : MonoBehaviour
 {
+
     [Header("Pickup Settings")]
     public Transform PickUp;
     public float pickupRange = 3f;
@@ -15,6 +17,9 @@ public class PickupSystem : MonoBehaviour
 
     [Header("UI")]
     public AmmoUIManager ammoUIManager;
+
+    [Header("Weapon Wheel")]
+    public WeaponWheelUI weaponWheel;
 
     private GameObject heldItem;
     private GameObject gunItem;
@@ -50,6 +55,10 @@ public class PickupSystem : MonoBehaviour
             pickupDetector.TryInteract();
 
         if (movementController != null && movementController.IsMovementLocked)
+            return;
+
+        // ถ้าวงล้อเปิดอยู่ ไม่ต้องรับ input สลับ/ถอดแบบเดิม
+        if (weaponWheel != null && weaponWheel.IsOpen)
             return;
 
         if (switchWeaponAction.WasPressedThisFrame())
@@ -103,6 +112,7 @@ public class PickupSystem : MonoBehaviour
             knife.playerTransform = transform;
         }
 
+
         EquipWeapon(item);
         Debug.Log("Equipped: " + item.name);
     }
@@ -140,15 +150,6 @@ public class PickupSystem : MonoBehaviour
         EquipWeapon(GetPreferredWeapon());
     }
 
-    void UnequipWeapon()
-    {
-        SetWeaponHeld(gunItem, false);
-        SetWeaponHeld(knifeItem, false);
-        heldItem = null;
-        if (ammoUIManager != null)
-            ammoUIManager.SetActiveGun(null);
-    }
-
     GameObject GetPreferredWeapon()
     {
         if (gunItem != null)
@@ -168,6 +169,18 @@ public class PickupSystem : MonoBehaviour
         heldItem = item;
         heldItem.SetActive(true);
         SetWeaponHeld(heldItem, true);
+
+        if (ammoUIManager != null)
+            ammoUIManager.SetActiveWeapon(heldItem); // เพิ่มบรรทัดนี้
+    }
+    void UnequipWeapon()
+    {
+        SetWeaponHeld(gunItem, false);
+        SetWeaponHeld(knifeItem, false);
+        heldItem = null;
+
+        if (ammoUIManager != null)
+            ammoUIManager.SetActiveWeapon(null); // เปลี่ยนจาก SetActiveGun(null)
     }
 
     void SetWeaponHeld(GameObject item, bool held)
@@ -179,16 +192,36 @@ public class PickupSystem : MonoBehaviour
 
         GunAction gun = item.GetComponent<GunAction>();
         if (gun != null)
-        {
             gun.SetHeld(held);
-
-            if (held && ammoUIManager != null)
-                ammoUIManager.SetActiveGun(gun); // สลับ UI มาผูกกับปืนกระบอกนี้
-        }
 
         KnifeAction knife = item.GetComponent<KnifeAction>();
         if (knife != null)
             knife.isHeld = held;
+    }
+
+    public GameObject HeldItem => heldItem;
+
+    /// <summary>คืนรายการอาวุธที่ถืออยู่ทั้งหมด เรียงตามลำดับคงที่ (ปืนก่อน มีดหลัง)</summary>
+    public List<GameObject> GetOwnedWeapons()
+    {
+        List<GameObject> weapons = new List<GameObject>();
+
+        if (gunItem != null) weapons.Add(gunItem);
+        if (knifeItem != null) weapons.Add(knifeItem);
+
+        return weapons;
+    }
+
+    /// <summary>ให้ UI เรียกเพื่อสลับอาวุธ (เปลี่ยนจาก private เป็น public)</summary>
+    public void EquipWeaponPublic(GameObject item)
+    {
+        EquipWeapon(item);
+    }
+
+    /// <summary>ถอดอาวุธจากภายนอก (เผื่อเลือก "ไม่ถืออะไร" ในวงล้อ)</summary>
+    public void UnequipWeaponPublic()
+    {
+        UnequipWeapon();
     }
 
 }

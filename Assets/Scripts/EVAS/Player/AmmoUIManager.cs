@@ -1,46 +1,61 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AmmoUIManager : MonoBehaviour
 {
-    [Header("อ้างอิงสคริปต์ปืน (กระบอกที่กำลังถืออยู่)")]
-    public GunAction playerGun;
+    [Header("UI Elements - Panel")]
+    public GameObject weaponHudPanel; // panel รวม โชว์ทุกครั้งที่ถืออาวุธ (ไม่ว่าปืนหรือมีด)
 
-    [Header("UI Elements")]
-    public GameObject ammoPanel;
+    [Header("UI Elements - Weapon Info")]
+    public TextMeshProUGUI weaponNameText;
+    public Image weaponIconImage;
+
+    [Header("UI Elements - Ammo (โชว์เฉพาะปืน)")]
+    public GameObject ammoGroup; // แยก GameObject ย่อยเฉพาะส่วนกระสุน จะได้ซ่อน/โชว์แยกจาก panel หลักได้
     public TextMeshProUGUI ammoText;
+
+    private GunAction currentGun;
+    private WeaponInfo currentWeaponInfo;
+    private bool isWeaponHeld;
 
     private int lastCurrentAmmo;
     private int lastMaxAmmo;
     private bool isReloading;
-    private bool isGunHeld;
 
-    private void OnEnable()
+    /// <summary>เรียกจาก PickupSystem ทุกครั้งที่ถือ/สลับ/ถอดอาวุธ ส่ง null ถ้าไม่ถืออะไรเลย</summary>
+    public void SetActiveWeapon(GameObject item)
     {
-        SubscribeToGun(playerGun);
+        UnsubscribeFromGun(currentGun);
+        currentGun = null;
+        currentWeaponInfo = null;
+
+        if (item == null)
+        {
+            isWeaponHeld = false;
+            RefreshDisplay();
+            return;
+        }
+
+        isWeaponHeld = true;
+        currentWeaponInfo = item.GetComponent<WeaponInfo>();
+
+        GunAction gun = item.GetComponent<GunAction>();
+        if (gun != null)
+        {
+            currentGun = gun;
+            SubscribeToGun(gun);
+            return; // SubscribeToGun จะเรียก RefreshDisplay ให้เองผ่าน SyncFromGun
+        }
+
+        // ไม่ใช่ปืน (มีด หรืออาวุธชนิดอื่นที่ไม่มีกระสุน)
+        isReloading = false;
+        RefreshDisplay();
     }
 
     private void OnDisable()
     {
-        UnsubscribeFromGun(playerGun);
-    }
-
-    // เรียกฟังก์ชันนี้จากสคริปต์สลับอาวุธ ตอนเปลี่ยนปืนที่ถือ
-    public void SetActiveGun(GunAction newGun)
-    {
-        if (playerGun == newGun)
-            return;
-
-        UnsubscribeFromGun(playerGun);
-        playerGun = newGun;
-
-        if (playerGun != null)
-            SubscribeToGun(playerGun);
-        else
-        {
-            isGunHeld = false;
-            RefreshDisplay(); // ซ่อน panel เมื่อไม่มีปืนถืออยู่
-        }
+        UnsubscribeFromGun(currentGun);
     }
 
     private void SubscribeToGun(GunAction gun)
@@ -50,9 +65,11 @@ public class AmmoUIManager : MonoBehaviour
 
         gun.OnAmmoChanged += HandleAmmoChanged;
         gun.OnReloadStatusChanged += HandleReloadChanged;
-        gun.OnHeldChanged += HandleHeldChanged;
 
-        SyncFromGun(gun);
+        lastCurrentAmmo = gun.CurrentAmmo;
+        lastMaxAmmo = gun.MagazineSize;
+        isReloading = gun.IsReloading;
+        RefreshDisplay();
     }
 
     private void UnsubscribeFromGun(GunAction gun)
@@ -62,30 +79,6 @@ public class AmmoUIManager : MonoBehaviour
 
         gun.OnAmmoChanged -= HandleAmmoChanged;
         gun.OnReloadStatusChanged -= HandleReloadChanged;
-        gun.OnHeldChanged -= HandleHeldChanged;
-    }
-
-    private void SyncFromGun(GunAction gun)
-    {
-        isGunHeld = gun.isHeld;
-        isReloading = gun.IsReloading;
-        lastCurrentAmmo = gun.CurrentAmmo;
-        lastMaxAmmo = gun.MagazineSize;
-        RefreshDisplay();
-    }
-
-    private void HandleHeldChanged(bool held)
-    {
-        isGunHeld = held;
-
-        if (held)
-        {
-            lastCurrentAmmo = playerGun.CurrentAmmo;
-            lastMaxAmmo = playerGun.MagazineSize;
-            isReloading = playerGun.IsReloading;
-        }
-
-        RefreshDisplay();
     }
 
     private void HandleAmmoChanged(int currentAmmo, int maxAmmo)
@@ -103,16 +96,34 @@ public class AmmoUIManager : MonoBehaviour
 
     private void RefreshDisplay()
     {
-        if (ammoPanel != null)
-            ammoPanel.SetActive(isGunHeld);
-        else if (ammoText != null)
-            ammoText.gameObject.SetActive(isGunHeld);
+        if (weaponHudPanel != null)
+            weaponHudPanel.SetActive(isWeaponHeld);
 
-        if (!isGunHeld || ammoText == null)
+        if (!isWeaponHeld)
             return;
 
-        ammoText.text = isReloading
-            ? "Reloading..."
-            : $"{lastCurrentAmmo} / {lastMaxAmmo}";
+        // ชื่อ/ไอคอน โชว์เสมอไม่ว่าอาวุธชนิดไหน
+        if (weaponNameText != null)
+            weaponNameText.text = currentWeaponInfo != null ? currentWeaponInfo.DisplayName : "Weapon";
+
+        if (weaponIconImage != null)
+        {
+            Sprite icon = currentWeaponInfo != null ? currentWeaponInfo.Icon : null;
+            weaponIconImage.sprite = icon;
+            weaponIconImage.enabled = icon != null;
+        }
+
+        // ส่วนกระสุน โชว์เฉพาะตอนถือปืน (currentGun != null)
+        bool showAmmo = currentGun != null;
+
+        if (ammoGroup != null)
+            ammoGroup.SetActive(showAmmo);
+
+        if (showAmmo && ammoText != null)
+        {
+            ammoText.text = isReloading
+                ? "Reloading..."
+                : $"{lastCurrentAmmo} / {lastMaxAmmo}";
+        }
     }
 }
