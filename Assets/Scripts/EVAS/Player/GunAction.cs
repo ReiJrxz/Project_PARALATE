@@ -78,6 +78,9 @@ public class GunAction : MonoBehaviour
     public AudioClip reloadFinishSound;  // เสียงตอนรีโหลดเสร็จ (ปิดแม็ก/ขึ้นลำ) - ใส่หรือไม่ใส่ก็ได้
     public AudioClip equipSound;         // เสียงตอนชักปืนขึ้นมาถือ
     [Range(0f, 1f)] public float fireVolume = 1f;
+
+    [Header("Noise (Stealth AI)")]
+    [SerializeField, Min(0f)] private float shootingNoiseRadius = 35f;
     [Range(0f, 1f)] public float reloadVolume = 1f;
     [Range(0f, 1f)] public float equipVolume = 1f;
     public bool randomizePitch = true;
@@ -515,6 +518,8 @@ public class GunAction : MonoBehaviour
         UpdateAmmoUI();
 
         PlaySound(fireSound, fireVolume);
+        NoiseEmitterSystem.Emit(ownerTransform != null ? ownerTransform.gameObject : gameObject,
+            firePoint.position, shootingNoiseRadius, NoiseType.Shooting);
 
         if (showDebugLine) StartCoroutine(ShotEffect());
 
@@ -524,7 +529,7 @@ public class GunAction : MonoBehaviour
 
         RaycastHit hit;
 
-        if (Physics.Raycast(firePoint.position, shootDirection, out hit, range))
+        if (Physics.Raycast(firePoint.position, shootDirection, out hit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
             Debug.Log("Hit: " + hit.collider.name);
             laserLine.SetPosition(1, hit.point);
@@ -564,7 +569,7 @@ public class GunAction : MonoBehaviour
         Ray aimRay = GetScopedAimRay();
         Vector3 aimPoint = aimRay.GetPoint(range);
 
-        if (Physics.Raycast(aimRay, out RaycastHit cameraHit, range))
+        if (Physics.Raycast(aimRay, out RaycastHit cameraHit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             aimPoint = cameraHit.point;
 
         Vector3 direction = aimPoint - firePoint.position;

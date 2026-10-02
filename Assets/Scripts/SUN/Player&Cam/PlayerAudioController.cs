@@ -45,12 +45,11 @@ public class PlayerAudioController : MonoBehaviour
     public float walkNoiseRadius = 7f;
     public float sprintNoiseRadius = 15f;
     public float whistleNoiseRadius = 20f;
-    public LayerMask enemyLayer;
+    public LayerMask enemyLayer; // Kept for existing prefab data; detection is now handled by NoiseEmitterSystem.
 
     private AudioSource audioSource;
     private float nextFootstepTime = 0f;
     private int lastFootstepIndex = -1;
-    private readonly Collider[] noiseBuffer = new Collider[16];
     private Dictionary<string, AudioClip[]> surfaceLookup;
 
     void Awake()
@@ -85,8 +84,9 @@ public class PlayerAudioController : MonoBehaviour
 
         if (!isCrouching)
         {
-            float radius = isSprinting ? sprintNoiseRadius : walkNoiseRadius;
-            EmitNoise(radius);
+            NoiseEmitterSystem.Emit(gameObject, transform.position,
+                isSprinting ? sprintNoiseRadius : walkNoiseRadius,
+                isSprinting ? NoiseType.Sprinting : NoiseType.Walking);
 
             AudioClip[] clips = GetClipsForCurrentSurface();
             PlayFootstepSound(clips);
@@ -143,16 +143,8 @@ public class PlayerAudioController : MonoBehaviour
         {
             audioSource.PlayOneShot(whistleClip);
         }
-        EmitNoise(whistleNoiseRadius);
+        NoiseEmitterSystem.Emit(gameObject, transform.position, whistleNoiseRadius, NoiseType.Whistling);
         Debug.Log("เป่าปากล่อศัตรู! รัศมี: " + whistleNoiseRadius);
     }
 
-    void EmitNoise(float radius)
-    {
-        int count = Physics.OverlapSphereNonAlloc(transform.position, radius, noiseBuffer, enemyLayer);
-        for (int i = 0; i < count; i++)
-        {
-            // ส่งสัญญาณไปปลุก AI ในอนาคตได้จากตรงนี้ เช่น noiseBuffer[i].GetComponent<EnemyAI>()?.OnHearNoise(transform.position);
-        }
-    }
 }

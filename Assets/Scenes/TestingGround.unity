@@ -15600,6 +15600,57 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &1099601635
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1099601637}
+  - component: {fileID: 1099601636}
+  m_Layer: 0
+  m_Name: NoiseEmitterSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1099601636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099601635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 218e6cc4175bb274096fa398a41f0508, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NoiseEmitterSystem
+  listenerLayers:
+    serializedVersion: 2
+    m_Bits: 2048
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 512
+  wallDampening: 0.5
+--- !u!4 &1099601637
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099601635}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 10.2205, y: 0.03472, z: 8.58263}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1106447428
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25641,6 +25692,7 @@ GameObject:
   - component: {fileID: 4608485822679216901}
   - component: {fileID: 7312693760414004626}
   - component: {fileID: 8759545452348995300}
+  - component: {fileID: 8848405047762226155}
   m_Layer: 11
   m_Name: EnemyAK47
   m_TagString: Untagged
@@ -25767,6 +25819,24 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3523246845713457628, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
   m_PrefabInstance: {fileID: 7356783810209024581}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4225818444403733936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4225818444403733921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7393b3538f1c5a34bb3a166853656043, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerNoiseEmitter
+  walkingNoiseRadius: 5
+  sprintingNoiseRadius: 15
+  shootingNoiseRadius: 35
+  whistlingNoiseRadius: 20
+  throwingNoiseRadius: 10
+  showNoiseRanges: 1
 --- !u!1 &4474043306036034441
 GameObject:
   m_ObjectHideFlags: 0
@@ -26343,7 +26413,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3523246845713457628, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4225818444403733936}
   m_SourcePrefab: {fileID: 100100000, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
 --- !u!23 &7492132007619802816
 MeshRenderer:
@@ -26689,6 +26762,19 @@ MonoBehaviour:
   isCountingAlertPoint: 0
   currentAlertGainPerSecond: 0
   currentDistanceZone: 0
+--- !u!114 &8848405047762226155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3961821846954256856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c195a119df7534940aed0afcd0cdab48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyNoiseSensor
+  memoryDuration: 5
 --- !u!33 &8922552714107596901
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -26770,3 +26856,4 @@ SceneRoots:
   - {fileID: 7945237224712055632}
   - {fileID: 946158441}
   - {fileID: 1106447428}
+  - {fileID: 1099601637}

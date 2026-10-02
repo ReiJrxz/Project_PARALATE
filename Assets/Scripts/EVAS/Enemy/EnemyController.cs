@@ -53,6 +53,8 @@ public class EnemyController : MonoBehaviour
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        if (GetComponent<EnemyNoiseSensor>() == null)
+            gameObject.AddComponent<EnemyNoiseSensor>();
         fieldOfView = GetComponent<FieldOfView>();
         alertState = GetComponent<AlertState>();
         enemyAudio = GetComponent<EnemyAudioController>();
