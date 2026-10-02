@@ -1,6 +1,9 @@
+
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.Cinemachine;
 
+[RequireComponent(typeof(BoxCollider))]
 public class CameraZone : MonoBehaviour
 {
     [Header("กล้องประจำโซนนี้")]
@@ -9,12 +12,22 @@ public class CameraZone : MonoBehaviour
     [Header("Priority")]
     protected static int globalPriorityCounter = 10;
     protected const int ROOM_TIER_MAX = 900;
-    public int inactivePriority = 0;
 
-    private BoxCollider zoneCollider;
+    public int inactivePriority = 0;
+    public int activePriority = 20;
+
+    protected BoxCollider zoneCollider;
+
+    private readonly HashSet<Collider> playerColliders =
+        new HashSet<Collider>();
 
     protected virtual void Start()
     {
+        zoneCollider = GetComponent<BoxCollider>();
+
+        if (zoneCollider != null)
+            zoneCollider.isTrigger = true;
+
         if (virtualCamera == null)
         {
             Debug.LogWarning($"{name}: ยังไม่ได้ผูก virtualCamera");
@@ -22,60 +35,85 @@ public class CameraZone : MonoBehaviour
         }
 
         virtualCamera.Priority.Value = inactivePriority;
-        zoneCollider = GetComponent<BoxCollider>();
 
         CheckIfPlayerAlreadyInside();
     }
 
-    private void CheckIfPlayerAlreadyInside()
+    protected virtual void CheckIfPlayerAlreadyInside()
     {
         if (zoneCollider == null)
-        {
-            Debug.LogWarning($"{name}: ไม่พบ BoxCollider บน GameObject นี้!");
             return;
-        }
 
-        Vector3 center = transform.TransformPoint(zoneCollider.center);
-        Vector3 halfExtents = Vector3.Scale(zoneCollider.size * 0.5f, transform.lossyScale);
+        Vector3 center =
+            transform.TransformPoint(zoneCollider.center);
 
-        Collider[] overlaps = Physics.OverlapBox(center, halfExtents, transform.rotation);
-        Debug.Log($"{name}: เจอ {overlaps.Length} colliders ในโซน"); // เพิ่มบรรทัดนี้
+        Vector3 halfExtents = Vector3.Scale(
+            zoneCollider.size * 0.5f,
+            transform.lossyScale);
 
-        foreach (var col in overlaps)
+        Collider[] overlaps = Physics.OverlapBox(
+            center, halfExtents, transform.rotation);
+
+        foreach (Collider col in overlaps)
         {
-            Debug.Log($"{name}: เจอ collider ชื่อ {col.name} tag = {col.tag}"); // เพิ่มบรรทัดนี้
             if (col.CompareTag("Player"))
-            {
-                ActivateCamera();
-                break;
-            }
+                playerColliders.Add(col);
         }
+
+        if (playerColliders.Count > 0)
+            ActivateCamera();
     }
 
-    private void ActivateCamera()
+    protected virtual void ActivateCamera()
     {
+        if (virtualCamera == null)
+            return;
+
         globalPriorityCounter++;
+
         if (globalPriorityCounter >= ROOM_TIER_MAX)
             globalPriorityCounter = 10;
 
-        virtualCamera.Priority.Value = globalPriorityCounter;
-        Debug.Log($"{name}: เปิดกล้อง {virtualCamera.name} priority = {virtualCamera.Priority}"); // เพิ่มบรรทัดนี้
-    }
-    protected virtual void OnTriggerEnter(Collider other)
-    {
-        if (virtualCamera == null) return;
-        if (other.CompareTag("Player"))
-        {
-            ActivateCamera();
-        }
+        virtualCamera.Priority.Value =
+            Mathf.Max(activePriority, globalPriorityCounter);
+
+        Debug.Log(
+            $"{name}: เปิดกล้อง {virtualCamera.name}, " +
+            $"Priority = {virtualCamera.Priority.Value}");
     }
 
-    private void OnTriggerExit(Collider other)
+    protected virtual void OnTriggerEnter(Collider other)
     {
-        if (virtualCamera == null) return;
-        if (other.CompareTag("Player"))
+        if (virtualCamera == null ||
+            !other.CompareTag("Player"))
+            return;
+
+        bool wasEmpty = playerColliders.Count == 0;
+        playerColliders.Add(other);
+
+        if (wasEmpty)
+            ActivateCamera();
+    }
+
+    protected virtual void OnTriggerExit(Collider other)
+    {
+        if (!other.CompareTag("Player"))
+            return;
+
+        playerColliders.Remove(other);
+
+        if (playerColliders.Count == 0 &&
+            virtualCamera != null)
         {
             virtualCamera.Priority.Value = inactivePriority;
         }
+    }
+
+    protected virtual void OnDisable()
+    {
+        playerColliders.Clear();
+
+        if (virtualCamera != null)
+            virtualCamera.Priority.Value = inactivePriority;
     }
 }

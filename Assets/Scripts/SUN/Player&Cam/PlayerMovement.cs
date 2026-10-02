@@ -60,6 +60,11 @@ public class TopDownPlayerController : MonoBehaviour
     [Tooltip("ถ้า |camera.forward.y| เกินค่านี้ ถือว่ากล้องมองชันเกินไป จะสลับไปใช้ camera.up แทน")]
     public float topDownAngleThreshold = 0.9f;
 
+    [Header("Vent / Tank Control Settings")]
+    public bool isInVentMode = false;
+    public float ventMoveSpeed = 2.5f;
+    public float ventTurnSpeed = 90f; // องศาต่อวินาที
+
     private CharacterController controller;
     private Camera mainCamera;
     private PlayerInput playerInput;
@@ -180,6 +185,13 @@ public class TopDownPlayerController : MonoBehaviour
         if (climbCooldown > 0f) climbCooldown -= Time.deltaTime;
         if (isVaulting || isMovementLocked) return;
         if (isClimbing) { HandleClimbing(); return; }
+
+        if (isInVentMode)
+        {
+            HandleVentMovement();
+            PlayAnima();
+            return;
+        }
 
         if (aimAction != null) isAiming = aimAction.IsPressed();
 
@@ -318,7 +330,28 @@ public class TopDownPlayerController : MonoBehaviour
             }
         }
     }
+    public void SetTankControlMode(bool active)
+    {
+        isInVentMode = active;
+    }
 
+    void HandleVentMovement()
+    {
+        Vector2 moveInput = Vector2.zero;
+        if (moveAction != null) moveInput = moveAction.ReadValue<Vector2>();
+
+        // A/D หมุนตัวผู้เล่น (หมุนกล้อง FPS ที่เป็นลูกไปด้วยในตัว เพราะเป็น Transform Hierarchy)
+        float turn = moveInput.x * ventTurnSpeed * Time.deltaTime;
+        transform.Rotate(0f, turn, 0f);
+
+        // W/S เดินหน้า-ถอยหลังตามทิศที่หันอยู่ ณ ขณะนั้น
+        Vector3 forwardMove = transform.forward * moveInput.y * ventMoveSpeed * Time.deltaTime;
+        controller.Move(forwardMove);
+
+        controller.Move(new Vector3(0, -9.81f * Time.deltaTime, 0));
+
+        isWalking = Mathf.Abs(moveInput.y) >= 0.1f; // ใช้ร่วมกับ PlayAnima() ที่มีอยู่แล้ว
+    }
     bool TryGetCrosshairLookDirection(out Vector3 lookDirection)
     {
         lookDirection = Vector3.zero;
