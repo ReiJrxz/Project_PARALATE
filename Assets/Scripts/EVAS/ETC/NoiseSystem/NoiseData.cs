@@ -7,6 +7,7 @@ public enum NoiseType
     Shooting,
     Whistling,
     Throwing,
+    BulletHitWall
 }
 public readonly struct NoiseData
 {

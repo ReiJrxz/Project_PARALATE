@@ -8,6 +8,7 @@ public class PlayerNoiseEmitter : MonoBehaviour
     [SerializeField] private float shootingNoiseRadius = 35f;
     [SerializeField] private float whistlingNoiseRadius = 20f;
     [SerializeField] private float throwingNoiseRadius = 10f;
+    [SerializeField] private float bulletHitWallNoiseRadius = 7f;
 
     [Header("Debug")]
     [SerializeField] private bool showNoiseRanges = false;
@@ -54,10 +55,10 @@ public class PlayerNoiseEmitter : MonoBehaviour
     {
         EmitNoise(transform.position, throwingNoiseRadius, NoiseType.Throwing);
     }
-    //กระจายเสียงแบบกำหนดเอง
-    public void EmitCustomNoise(Vector3 position, float radius, NoiseType type)
+    //เสียงกระสุนปืนกระทบผนัง
+    public void EmitBulletHitWall(Vector3 hitPoint)
     {
-        EmitNoise(position, radius, type);
+        EmitNoise(hitPoint, bulletHitWallNoiseRadius, NoiseType.BulletHitWall);
     }
     #endregion
 

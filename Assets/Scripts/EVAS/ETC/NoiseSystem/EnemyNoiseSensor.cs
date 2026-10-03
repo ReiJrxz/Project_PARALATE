@@ -70,7 +70,8 @@ public class EnemyNoiseSensor : MonoBehaviour, INoiseListener
         return type switch
         {
             NoiseType.Shooting => 6f,
-            NoiseType.Sprinting => 2f,
+            NoiseType.Sprinting => 4f,
+            NoiseType.BulletHitWall => 4f,
             NoiseType.Whistling => 2f,
             NoiseType.Throwing => 2f,
             NoiseType.Walking => 1f,
@@ -78,29 +79,30 @@ public class EnemyNoiseSensor : MonoBehaviour, INoiseListener
         };
     }
 
-    private void ApplyBehaviorByNoiseType(NoiseType type)
-    {
-        switch (type)
-        {
-            case NoiseType.Shooting:
-                break;
+    //private void ApplyBehaviorByNoiseType(NoiseType type)
+    //{
+    //    switch (type)
+    //    {
+    //        case NoiseType.Shooting:
+    //            break;
 
-            case NoiseType.Sprinting:
-                break;
+    //        case NoiseType.Sprinting:
+    //            break;
 
-            case NoiseType.Whistling:
-            case NoiseType.Throwing:
-            case NoiseType.Walking:
-            default:
-                break;
-        }
-    }
+    //        case NoiseType.Whistling:
+    //        case NoiseType.Throwing:
+    //        case NoiseType.Walking:
+    //        default:
+    //            break;
+    //    }
+    //}
     private int GetNoisePriority(NoiseType type)
     {
         return type switch
         {
             NoiseType.Shooting => 4,
             NoiseType.Sprinting => 3,
+            NoiseType.BulletHitWall => 2,
             NoiseType.Whistling => 2,
             NoiseType.Throwing => 2,
             NoiseType.Walking => 1,

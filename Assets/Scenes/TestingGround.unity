@@ -25836,6 +25836,7 @@ MonoBehaviour:
   shootingNoiseRadius: 35
   whistlingNoiseRadius: 20
   throwingNoiseRadius: 10
+  bulletHitWallNoiseRadius: 7
   showNoiseRanges: 1
 --- !u!1 &4474043306036034441
 GameObject:
