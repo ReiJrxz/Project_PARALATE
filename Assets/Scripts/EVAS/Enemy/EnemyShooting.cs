@@ -127,16 +127,34 @@ public class EnemyShooting : MonoBehaviour
             return;
 
         if (CanSeeTarget())
-            shootRoutine = StartCoroutine(ShootSequenceRoutine());
+            shootRoutine = StartCoroutine(ShootSequenceRoutine(aimDelayBeforeShoot));
     }
-    private IEnumerator ShootSequenceRoutine()
+
+    public bool TryStartReflexShot()
+    {
+        FindPlayerTarget();
+
+        if (!isActiveAndEnabled || playerTransform == null || isShootingRoutineRunning)
+            return false;
+
+        if (Time.time < lastFireTime + fireCooldown)
+            return false;
+
+        if ((transform.position - playerTransform.position).sqrMagnitude > shootingRangeSqr)
+            return false;
+
+        shootRoutine = StartCoroutine(ShootSequenceRoutine(0f));
+        return true;
+    }
+
+    private IEnumerator ShootSequenceRoutine(float aimDelay)
     {
         isShootingRoutineRunning = true;
 
         enemyController.SetMovementLocked(true);
 
         float timer = 0f;
-        while(timer < aimDelayBeforeShoot)
+        while(timer < aimDelay)
         {
             if (playerTransform != null && enemyController != null)
                 enemyController.RotateYawTowards(playerTransform.position, rotationSpeed);

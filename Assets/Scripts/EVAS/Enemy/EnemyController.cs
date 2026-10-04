@@ -135,6 +135,23 @@ public class EnemyController : MonoBehaviour
         SyncAgentPosition();
     }
 
+    //หมุนไปยังตำแหน่งที่กำหนดด้วยความเร็วที่กำหนด
+    public void RotateYawTowardsAtSpeed(Vector3 worldPosition, float degreesPerSecond)
+    {
+        Vector3 lookDirection = worldPosition - transform.position;
+        lookDirection.y = 0f;
+
+        if (lookDirection.sqrMagnitude < 0.001f)
+            return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            targetRotation,
+            degreesPerSecond * Time.deltaTime);
+        SyncAgentPosition();
+    }
+
     public void MoveToInvestigationPoint(Vector3 investigationPoint)
     {
         if (currentState == EnemyState.Locked || currentState == EnemyState.Chase)

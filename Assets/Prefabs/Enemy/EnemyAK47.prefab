@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 4608485821116385252}
   - component: {fileID: 7312693761301528947}
   - component: {fileID: 8759545451457315333}
+  - component: {fileID: 638612901475893421}
   m_Layer: 11
   m_Name: EnemyAK47
   m_TagString: Untagged
@@ -229,6 +230,22 @@ MonoBehaviour:
   playerTag: Player
   rotationSpeed: 10
   playerSearchInterval: 0.5
+--- !u!114 &638612901475893421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3961821848214297913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eff2d559019b6142bb57e2ef412c67d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyReflexSystem
+  reflexRadius: 5
+  reflexTurnSpeed: 720
+  fireAngleTolerance: 4
+  reflexCooldown: 1
 --- !u!114 &7312693761301528947
 MonoBehaviour:
   m_ObjectHideFlags: 0

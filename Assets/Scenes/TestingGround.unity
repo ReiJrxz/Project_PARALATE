@@ -18309,7 +18309,6 @@ GameObject:
   - component: {fileID: 1344467451}
   - component: {fileID: 1344467450}
   - component: {fileID: 1344467456}
-  - component: {fileID: 1344467457}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -18478,26 +18477,6 @@ NavMeshAgent:
   m_BaseOffset: 0.9999995
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &1344467457
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1344467448}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 199a837a363a43b438665a6a2a88a745, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  waypoints: []
-  patrolWaitTime: 2
-  stopAtDistance: 0.5
-  lookAngle: 60
-  lookTurnSpeed: 180
-  lookHoldTime: 0.4
-  chaseSpeed: 5
-  returnToPatrolAfterLostSightTime: 3
 --- !u!43 &1361204088
 Mesh:
   m_ObjectHideFlags: 0
@@ -25693,6 +25672,7 @@ GameObject:
   - component: {fileID: 7312693760414004626}
   - component: {fileID: 8759545452348995300}
   - component: {fileID: 8848405047762226155}
+  - component: {fileID: 8848405047762226156}
   m_Layer: 11
   m_Name: EnemyAK47
   m_TagString: Untagged
@@ -26776,6 +26756,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyNoiseSensor
   memoryDuration: 5
+--- !u!114 &8848405047762226156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3961821846954256856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eff2d559019b6142bb57e2ef412c67d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyReflexSystem
+  reflexRadius: 5
+  reflexTurnSpeed: 720
+  fireAngleTolerance: 4
+  reflexCooldown: 1
 --- !u!33 &8922552714107596901
 MeshFilter:
   m_ObjectHideFlags: 0
