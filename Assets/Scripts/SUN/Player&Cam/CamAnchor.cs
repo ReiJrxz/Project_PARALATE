@@ -8,7 +8,11 @@ public class CameraFollowAnchor : MonoBehaviour
 
     [Header("Follow Axes")]
     [SerializeField] private bool followX = true;
+    [SerializeField] private bool followY = false;
     [SerializeField] private bool followZ = true;
+
+    [Header("Follow Offset")]
+    [SerializeField] private Vector3 followOffset = Vector3.zero;
 
     [Header("Fixed World Height")]
     [SerializeField] private float fixedY = 2.5f;
@@ -25,14 +29,19 @@ public class CameraFollowAnchor : MonoBehaviour
 
         Vector3 pos = transform.position;
 
+        // เลือกว่าจะตามตำแหน่ง Player ในแต่ละแกนหรือไม่
         if (followX)
-            pos.x = player.position.x;
+            pos.x = player.position.x + followOffset.x;
+
+        if (followY)
+            pos.y = player.position.y + followOffset.y;
+        else
+            pos.y = fixedY;
 
         if (followZ)
-            pos.z = player.position.z;
+            pos.z = player.position.z + followOffset.z;
 
-        pos.y = fixedY;
-
+        // จำกัดพื้นที่ที่ Anchor สามารถเคลื่อนที่ได้
         if (useBounds)
         {
             pos.x = Mathf.Clamp(pos.x, xBounds.x, xBounds.y);
