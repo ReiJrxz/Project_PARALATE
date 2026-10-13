@@ -4274,7 +4274,7 @@ Transform:
   m_GameObject: {fileID: 344457205}
   serializedVersion: 2
   m_LocalRotation: {x: 0.33298412, y: -0, z: -0, w: 0.9429325}
-  m_LocalPosition: {x: 0.91, y: 11.229992, z: -8.539995}
+  m_LocalPosition: {x: 0.91, y: 10.789992, z: -8.539995}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -19791,7 +19791,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollowAnchor
   player: {fileID: 4136811918164220977}
   followX: 1
+  followY: 0
   followZ: 1
+  followOffset: {x: 0, y: 0, z: 0}
   fixedY: 2.5
   useBounds: 0
   xBounds: {x: -10, y: 10}
@@ -21809,7 +21811,7 @@ Transform:
   m_GameObject: {fileID: 1823688464}
   serializedVersion: 2
   m_LocalRotation: {x: 0.33298412, y: 0, z: 0, w: 0.9429325}
-  m_LocalPosition: {x: 0.90999985, y: 11.229992, z: -7.4413223}
+  m_LocalPosition: {x: 0.90999985, y: 10.789992, z: -7.4413223}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -26179,17 +26181,13 @@ PrefabInstance:
       propertyPath: slotContainer
       value: 
       objectReference: {fileID: 1109715575}
-    - target: {fileID: 7944954573667976441, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      propertyPath: wallLeanCamera
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 8404243857973046065, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.91
       objectReference: {fileID: 0}
     - target: {fileID: 8404243857973046065, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.23
+      value: 0.79
       objectReference: {fileID: 0}
     - target: {fileID: 8404243857973046065, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
       propertyPath: m_LocalPosition.z
