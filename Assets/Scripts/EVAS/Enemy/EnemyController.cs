@@ -53,6 +53,8 @@ public class EnemyController : MonoBehaviour
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        if (GetComponent<EnemyNoiseSensor>() == null)
+            gameObject.AddComponent<EnemyNoiseSensor>();
         fieldOfView = GetComponent<FieldOfView>();
         alertState = GetComponent<AlertState>();
         enemyAudio = GetComponent<EnemyAudioController>();
@@ -130,6 +132,23 @@ public class EnemyController : MonoBehaviour
 
         Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+        SyncAgentPosition();
+    }
+
+    //หมุนไปยังตำแหน่งที่กำหนดด้วยความเร็วที่กำหนด
+    public void RotateYawTowardsAtSpeed(Vector3 worldPosition, float degreesPerSecond)
+    {
+        Vector3 lookDirection = worldPosition - transform.position;
+        lookDirection.y = 0f;
+
+        if (lookDirection.sqrMagnitude < 0.001f)
+            return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            targetRotation,
+            degreesPerSecond * Time.deltaTime);
         SyncAgentPosition();
     }
 

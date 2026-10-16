@@ -78,6 +78,7 @@ public class GunAction : MonoBehaviour
     public AudioClip reloadFinishSound;  // เสียงตอนรีโหลดเสร็จ (ปิดแม็ก/ขึ้นลำ) - ใส่หรือไม่ใส่ก็ได้
     public AudioClip equipSound;         // เสียงตอนชักปืนขึ้นมาถือ
     [Range(0f, 1f)] public float fireVolume = 1f;
+
     [Range(0f, 1f)] public float reloadVolume = 1f;
     [Range(0f, 1f)] public float equipVolume = 1f;
     public bool randomizePitch = true;
@@ -108,6 +109,7 @@ public class GunAction : MonoBehaviour
     private bool isScoped;
     private InputAction resolvedAimAction;
     private Transform ownerTransform;
+    private PlayerNoiseEmitter playerNoiseEmitter;
     private CinemachineCamera firstPersonScopeCamera;
     private GameObject firstPersonScopeCameraObject;
     private CinemachineBrain cinemachineBrain;
@@ -131,6 +133,7 @@ public class GunAction : MonoBehaviour
         //virtualCameras = FindObjectsByType<CinemachineCamera>(FindObjectsInactive.Include);
         movementController = GetComponentInParent<TopDownPlayerController>();
         ownerTransform = movementController != null ? movementController.transform : transform.root;
+        ResolveNoiseEmitter();
         EnsureFirstPersonScopeCamera();
 
         audioSource = GetComponent<AudioSource>(); // เพิ่มบรรทัดนี้
@@ -165,6 +168,7 @@ public class GunAction : MonoBehaviour
         isHeld = held;
         movementController = GetComponentInParent<TopDownPlayerController>();
         ownerTransform = movementController != null ? movementController.transform : transform.root;
+        ResolveNoiseEmitter();
         EnsureFirstPersonScopeCamera();
         SetCrosshairVisible(held && isScoped && !hideCrosshairWhileScoped);
         OnHeldChanged?.Invoke(held);
@@ -514,7 +518,9 @@ public class GunAction : MonoBehaviour
         currentAmmo--;
         UpdateAmmoUI();
 
+        // เล่นเสียงยิงปืนและปล่อยเสียงให้ AI ได้ยิน
         PlaySound(fireSound, fireVolume);
+        ResolveNoiseEmitter()?.EmitShooting(firePoint.position);
 
         if (showDebugLine) StartCoroutine(ShotEffect());
 
@@ -524,13 +530,16 @@ public class GunAction : MonoBehaviour
 
         RaycastHit hit;
 
-        if (Physics.Raycast(firePoint.position, shootDirection, out hit, range))
+        if (Physics.Raycast(firePoint.position, shootDirection, out hit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
             Debug.Log("Hit: " + hit.collider.name);
             laserLine.SetPosition(1, hit.point);
 
-            EnemyHealth enemy = hit.collider.GetComponent<EnemyHealth>();
-            if (enemy != null) enemy.TakeDamage(damage);
+            if (hit.collider.TryGetComponent<EnemyHealth>(out var enemy))
+                enemy.TakeDamage(damage);
+            else
+                ResolveNoiseEmitter()?.EmitBulletHitWall(hit.point);
+
         }
         else
         {
@@ -539,6 +548,23 @@ public class GunAction : MonoBehaviour
 
         if (currentAmmo <= 0 && autoReloadWhenEmpty)
             StartReload();
+    }
+
+    private PlayerNoiseEmitter ResolveNoiseEmitter()
+    {
+        Transform sourceTransform = ownerTransform != null ? ownerTransform : transform.root;
+
+        if (sourceTransform == null)
+            return null;
+
+        if (playerNoiseEmitter == null || playerNoiseEmitter.gameObject != sourceTransform.gameObject)
+        {
+            playerNoiseEmitter = sourceTransform.GetComponent<PlayerNoiseEmitter>();
+            if (playerNoiseEmitter == null)
+                playerNoiseEmitter = sourceTransform.gameObject.AddComponent<PlayerNoiseEmitter>();
+        }
+
+        return playerNoiseEmitter;
     }
 
     private Vector3 GetForwardShootDirection()
@@ -564,7 +590,7 @@ public class GunAction : MonoBehaviour
         Ray aimRay = GetScopedAimRay();
         Vector3 aimPoint = aimRay.GetPoint(range);
 
-        if (Physics.Raycast(aimRay, out RaycastHit cameraHit, range))
+        if (Physics.Raycast(aimRay, out RaycastHit cameraHit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             aimPoint = cameraHit.point;
 
         Vector3 direction = aimPoint - firePoint.position;
