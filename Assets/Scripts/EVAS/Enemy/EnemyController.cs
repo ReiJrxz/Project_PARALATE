@@ -44,11 +44,13 @@ public class EnemyController : MonoBehaviour
     private float lostSightTimer;
     private float minimumChaseTimer;
     private bool updateRotationBeforeManualTurn;
+    private bool goapControlActive;
 
     private bool HasWaypoints => waypoints != null && waypoints.Length > 0;
 
     public bool IsChasing =>
         currentState == EnemyState.Chase || (currentState == EnemyState.Locked && stateBeforeLock == EnemyState.Chase);
+    public bool IsGoapControlled => goapControlActive;
 
     private void Awake()
     {
@@ -73,6 +75,9 @@ public class EnemyController : MonoBehaviour
             enemyAudio.HandleFootstep(agent.velocity.magnitude);
 
         if (currentState == EnemyState.Locked)
+            return;
+
+        if (goapControlActive)
             return;
 
         if (currentState != EnemyState.Chase && ShouldStartChaseTarget())
@@ -205,6 +210,27 @@ public class EnemyController : MonoBehaviour
             return;
 
         EnterPatrol(true);
+    }
+
+    public void SetGoapControl(bool active)
+    {
+        if (goapControlActive == active)
+            return;
+
+        goapControlActive = active;
+        if (active || currentState == EnemyState.Locked)
+            return;
+
+        EnterPatrol(true);
+    }
+
+    public void MoveToCombatPoint(Vector3 point)
+    {
+        if (currentState == EnemyState.Locked) return;
+        agent.speed = chaseSpeed;
+        SetAgentStopped(false);
+        agent.updateRotation = true;
+        SetAgentDestination(point);
     }
 
     private void EnterPatrol(bool useNearestWaypoint)
