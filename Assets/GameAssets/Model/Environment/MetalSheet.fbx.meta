@@ -8,12 +8,12 @@ ModelImporter:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: Lift_MetalFence_Controlpad_Material.006_BaseMap
-    second: {fileID: 2800000, guid: 894dcdd6f93b7e94e9d35d9af46b2ab5, type: 3}
+    second: {fileID: 2800000, guid: 4940c27687918d44c98f1a1c3daf7369, type: 3}
   - first:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: Lift_MetalFence_Controlpad_Material.006_Normal
-    second: {fileID: 2800000, guid: e8dd13761454417448ec5735474fc3f2, type: 3}
+    second: {fileID: 2800000, guid: 0a6081c69220f9d48aa4040cecb74c4b, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

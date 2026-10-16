@@ -8,12 +8,12 @@ ModelImporter:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: AirwaysAndContrucSteelr_Material.009_BaseMap
-    second: {fileID: 2800000, guid: 4caaf3495634e0841a64b672c12d7965, type: 3}
+    second: {fileID: 2800000, guid: ccdddc1a11747434d872a6e754659d27, type: 3}
   - first:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: AirwaysAndContrucSteelr_Material.009_Normal
-    second: {fileID: 2800000, guid: 7b739b57c422aef45af63cf8fc1feab8, type: 3}
+    second: {fileID: 2800000, guid: 5af109154f6d9e748af2cc63a23e7a0f, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

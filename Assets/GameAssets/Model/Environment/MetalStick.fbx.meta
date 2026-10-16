@@ -8,12 +8,12 @@ ModelImporter:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: Pillar_Material.007_BaseMap
-    second: {fileID: 2800000, guid: 201afcb49d704374fa65ea610a58164d, type: 3}
+    second: {fileID: 2800000, guid: e8d4b136b5f67c340bbad4558e46bdd9, type: 3}
   - first:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: Pillar_Material.007_Normal
-    second: {fileID: 2800000, guid: f0612660e2074264bab6f5faa87c501f, type: 3}
+    second: {fileID: 2800000, guid: bbe297a5ba1c1024293348b7578f4ed4, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0

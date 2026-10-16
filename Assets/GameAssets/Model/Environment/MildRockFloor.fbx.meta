@@ -8,12 +8,12 @@ ModelImporter:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: Wall_Groundfbx_DefaultMaterial_BaseMap
-    second: {fileID: 2800000, guid: b57098ff9ed2fb3439f48c8a1074ae0a, type: 3}
+    second: {fileID: 2800000, guid: 679279771f18678429318c31ba9c9ec0, type: 3}
   - first:
       type: UnityEngine:Texture2D
       assembly: UnityEngine.CoreModule
       name: Wall_Groundfbx_DefaultMaterial_Normal
-    second: {fileID: 2800000, guid: 988c4c6d4efa9f6409f87085eca60c0c, type: 3}
+    second: {fileID: 2800000, guid: e25027fc6d6d2d6448a94eca7d38692a, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
