@@ -99,6 +99,7 @@ GameObject:
   - component: {fileID: 6044956673403840519}
   - component: {fileID: 8617868563665944825}
   - component: {fileID: 5869982482188529001}
+  - component: {fileID: 4994754804248166962}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -243,7 +244,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76f351bd61fad6e40a84d6d499c81b15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TopDownPlayerController
-  useCameraRelativeMovement: 1
+  useCameraRelativeMovement: 0
   walkSpeed: 5
   sprintSpeed: 8
   crouchSpeed: 2.5
@@ -663,6 +664,25 @@ MonoBehaviour:
   timeScaleWhileOpen: 0.2
   allowEmptySlot: 1
   scrollThreshold: 0.1
+--- !u!114 &4994754804248166962
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3523246845713457628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7393b3538f1c5a34bb3a166853656043, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerNoiseEmitter
+  walkingNoiseRadius: 5
+  sprintingNoiseRadius: 15
+  shootingNoiseRadius: 35
+  whistlingNoiseRadius: 20
+  throwingNoiseRadius: 10
+  bulletHitWallNoiseRadius: 7
+  showNoiseRanges: 0
 --- !u!1 &4088241774735004752
 GameObject:
   m_ObjectHideFlags: 0

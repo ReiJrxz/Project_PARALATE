@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
 
+
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInput))]
 [RequireComponent(typeof(AudioSource))]
@@ -16,6 +17,7 @@ public class TopDownPlayerController : MonoBehaviour
     public float walkSpeed = 5f;
     public float sprintSpeed = 8f;
     public float crouchSpeed = 2.5f;
+    private float wallHugMoveAmount;
 
     [Header("Rotation Settings")]
     public float rotationSpeed = 15f;
@@ -25,6 +27,10 @@ public class TopDownPlayerController : MonoBehaviour
     public float cameraZoomSpeed = 10f;
     private float normalFOV = 50f;
     private float aimFOV = 40f;
+
+    [Header("Wall Hug")]
+    [SerializeField] private WallHugController wallHug;
+
 
     [Header("Cinemachine Camera")]
     public CinemachineCamera virtualCamera;
@@ -104,6 +110,8 @@ public class TopDownPlayerController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         mainCamera = Camera.main;
         playerInput = GetComponent<PlayerInput>();
+        if (wallHug == null)
+            wallHug = GetComponent<WallHugController>();
 
         if (playerAudio == null) playerAudio = GetComponent<PlayerAudioController>();
 
@@ -261,74 +269,97 @@ public class TopDownPlayerController : MonoBehaviour
 
     void HandleMovement()
     {
-        Vector2 moveInput = Vector2.zero;
-        if (moveAction != null) moveInput = moveAction.ReadValue<Vector2>();
+        Vector2 moveInput = moveAction != null
+            ? moveAction.ReadValue<Vector2>()
+            : Vector2.zero;
 
-        Vector3 direction;
+        Vector3 direction = useCameraRelativeMovement
+            ? GetCameraRelativeDirection(moveInput)
+            : new Vector3(moveInput.x, 0f, moveInput.y).normalized;
 
-        if (useCameraRelativeMovement)
-        {
-            // ★ แก้ไขตรงนี้ — เดิมคำนวณ camForward/camRight ตรงนี้เอง 4 บรรทัด เปลี่ยนมาเรียกฟังก์ชันกลางแทน
-            direction = GetCameraRelativeDirection(moveInput);
-        }
-        else
-        {
-            direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-        }
+        // ตรวจ input ดิบก่อนกรองทิศเดิน:
+        // กดเฉียงเข้าหากำแพงเพื่อพิง หรือกดเดินออกเพื่อปล่อย
+        if (wallHug != null)
+            wallHug.UpdateWallHug(direction);
+
+        if (wallHug != null)
+            direction = wallHug.ConstrainMoveDirection(direction);
+
+        wallHugMoveAmount = wallHug != null && wallHug.IsHugging
+            ? wallHug.GetWallMoveAmount(direction)
+            : 0f;
+
+        animator?.SetBool("isWallHugging", wallHug != null && wallHug.IsHugging);
+        animator?.SetFloat("WallHugMove", wallHugMoveAmount);
+
         isWalking = direction.magnitude >= 0.1f;
+
         float currentSpeed = walkSpeed;
 
-        if (isCrouching) currentSpeed = crouchSpeed;
-        else if (isSprinting && !isSprintLocked) currentSpeed = sprintSpeed;
+        if (isCrouching)
+            currentSpeed = crouchSpeed;
+        else if (isSprinting && !isSprintLocked)
+            currentSpeed = sprintSpeed;
 
         currentSpeed *= movementSpeedMultiplier;
 
-        if (direction.magnitude >= 0.1f)
-        {
-            controller.Move(direction * currentSpeed * Time.deltaTime);
+        Vector3 velocity = direction * currentSpeed;
 
-            if (playerAudio != null)
-            {
-                playerAudio.HandleFootstep(controller.isGrounded, isSprinting, isCrouching, currentSpeed);
-            }
+        // ทำงานแม้ยืนนิ่ง เพื่อรักษาระยะจากกำแพง
+        if (wallHug != null)
+            velocity += wallHug.GetDistanceCorrectionVelocity();
+
+        controller.Move(velocity * Time.deltaTime);
+
+        if (isWalking && playerAudio != null)
+        {
+            playerAudio.HandleFootstep(
+                controller.isGrounded,
+                isSprinting,
+                isCrouching,
+                currentSpeed);
         }
 
-        controller.Move(new Vector3(0, -9.81f * Time.deltaTime, 0));
+        controller.Move(Vector3.down * 9.81f * Time.deltaTime);
     }
 
     void HandleRotation()
     {
         if (isAiming)
         {
+            // ตอนเล็งปืนให้ใช้ทิศเล็งตามเดิม
             if (TryGetCrosshairLookDirection(out Vector3 lookDirection))
             {
-                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                Quaternion aimTargetRotation = Quaternion.LookRotation(lookDirection);
+                transform.rotation = Quaternion.Slerp(
+                    transform.rotation,
+                    aimTargetRotation,
+                    rotationSpeed * Time.deltaTime);
             }
+
+            return;
         }
-        else
-        {
-            Vector2 moveInput = Vector2.zero;
-            if (moveAction != null) moveInput = moveAction.ReadValue<Vector2>();
 
-            Vector3 direction;
+        Vector2 moveInput = moveAction != null
+            ? moveAction.ReadValue<Vector2>()
+            : Vector2.zero;
 
-            if (useCameraRelativeMovement)
-            {
-                // ★ แก้ไขตรงนี้ — เหมือนกับใน HandleMovement เรียกฟังก์ชันกลางเดียวกัน ไม่ต้องเขียนซ้ำ
-                direction = GetCameraRelativeDirection(moveInput);
-            }
-            else
-            {
-                direction = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-            }
+        Vector3 direction = useCameraRelativeMovement
+            ? GetCameraRelativeDirection(moveInput)
+            : new Vector3(moveInput.x, 0f, moveInput.y).normalized;
 
-            if (direction.magnitude >= 0.1f)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-            }
-        }
+        // ตอนพิงให้หันออกจากกำแพง แม้ไม่ได้กำลังกดเดิน
+        if (wallHug != null && wallHug.IsHugging)
+            direction = wallHug.WallFacingDirection;
+
+        if (direction.sqrMagnitude < 0.0001f)
+            return;
+
+        Quaternion moveTargetRotation = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            moveTargetRotation,
+            rotationSpeed * Time.deltaTime);
     }
     public void SetTankControlMode(bool active)
     {
