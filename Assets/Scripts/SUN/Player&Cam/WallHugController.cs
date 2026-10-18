@@ -21,9 +21,11 @@ public class WallHugController : MonoBehaviour
 
     private bool isHugging;
     private Vector3 wallNormal;
+    private int cameraSide = 1;
 
     public bool IsHugging => isHugging;
     public Vector3 WallFacingDirection => wallNormal;
+    public int CameraSide => cameraSide;
 
     // Call once per frame from TopDownPlayerController with the raw world move direction.
     public void UpdateWallHug(Vector3 desiredDirection)
@@ -93,6 +95,10 @@ public class WallHugController : MonoBehaviour
             return;
 
         SetWallNormal(candidateNormal);
+        float rightDot = Vector3.Dot(transform.right, candidateNormal);
+        cameraSide = Mathf.Abs(rightDot) < 0.15f
+            ? (Vector3.Dot(input, transform.right) < 0f ? -1 : 1)
+            : (rightDot > 0f ? 1 : -1);
         isHugging = true;
         Debug.Log("Wall Hug entered", this);
     }
@@ -166,5 +172,3 @@ public class WallHugController : MonoBehaviour
         isHugging = false;
     }
 }
-
-
