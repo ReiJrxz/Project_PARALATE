@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
@@ -84,7 +85,17 @@ public class TopDownPlayerController : MonoBehaviour
     private InputAction whistleAction;
 
     private bool isVaulting = false;
-    private bool isMovementLocked = false;
+    // ล็อกแบบมีเจ้าของ: อ่านโน้ต / รัดคอ / ตาย / ปีนบันได ล็อกด้วย key ของตัวเอง ไม่ปลดล็อกของกันและกัน
+    private readonly HashSet<object> movementLockOwners = new HashSet<object>();
+    private bool isMovementLocked => movementLockOwners.Count > 0;
+
+    private static readonly int IsWallHuggingHash = Animator.StringToHash("isWallHugging");
+    private static readonly int WallHugMoveHash = Animator.StringToHash("WallHugMove");
+    private static readonly int IsClimbingHash = Animator.StringToHash("IsClimbing");
+    private static readonly int ClimbSpeedHash = Animator.StringToHash("ClimbSpeed");
+    private static readonly int ClimbTopExitHash = Animator.StringToHash("ClimbTopExit");
+    private static readonly int IsWalkHash = Animator.StringToHash("isWalk");
+    private static readonly int IsSneakHash = Animator.StringToHash("isSneak");
     private bool isClimbing = false;
     private float movementSpeedMultiplier = 1f;
     private bool isSprintLocked = false;
@@ -210,14 +221,31 @@ public class TopDownPlayerController : MonoBehaviour
         }
 
         HandleCrouchPhysicality();
-        HandleMovement();
-        HandleRotation();
+
+        // อ่าน input และคำนวณทิศทางครั้งเดียวต่อเฟรม แล้วส่งให้ทั้งการเดินและการหมุน
+        Vector3 rawDirection = GetRawMoveDirection();
+        HandleMovement(rawDirection);
+        HandleRotation(rawDirection);
         PlayAnima();
     }
 
-    public void SetMovementLocked(bool locked)
+    public void SetMovementLocked(object owner, bool locked)
     {
-        isMovementLocked = locked;
+        if (owner == null)
+            return;
+
+        if (locked)
+        {
+            movementLockOwners.Add(owner);
+
+            // หยุดแอนิเมชันเดินค้าง ตอนถูกล็อก (Update จะ return ก่อนถึง PlayAnima)
+            isWalking = false;
+            PlayAnima();
+        }
+        else
+        {
+            movementLockOwners.Remove(owner);
+        }
     }
 
     public void SetMovementSpeedMultiplier(float multiplier)
@@ -251,8 +279,25 @@ public class TopDownPlayerController : MonoBehaviour
     }
 
     // ★ แก้ไขตรงนี้ — เพิ่มฟังก์ชันใหม่ทั้งหมด ใช้แทนการคำนวณ direction ที่เคยเขียนซ้ำสองจุด (HandleMovement กับ HandleRotation)
+    Vector3 GetRawMoveDirection()
+    {
+        Vector2 moveInput = moveAction != null
+            ? moveAction.ReadValue<Vector2>()
+            : Vector2.zero;
+
+        return useCameraRelativeMovement
+            ? GetCameraRelativeDirection(moveInput)
+            : new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+    }
+
     Vector3 GetCameraRelativeDirection(Vector2 moveInput)
     {
+        if (mainCamera == null)
+            mainCamera = Camera.main;
+
+        if (mainCamera == null)
+            return new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+
         Vector3 camForward = mainCamera.transform.forward;
         Vector3 camUp = mainCamera.transform.up;
         Vector3 camRight = mainCamera.transform.right;
@@ -267,15 +312,9 @@ public class TopDownPlayerController : MonoBehaviour
         return (forwardOnPlane.normalized * moveInput.y + camRight.normalized * moveInput.x).normalized;
     }
 
-    void HandleMovement()
+    void HandleMovement(Vector3 rawDirection)
     {
-        Vector2 moveInput = moveAction != null
-            ? moveAction.ReadValue<Vector2>()
-            : Vector2.zero;
-
-        Vector3 direction = useCameraRelativeMovement
-            ? GetCameraRelativeDirection(moveInput)
-            : new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+        Vector3 direction = rawDirection;
 
         // ตรวจ input ดิบก่อนกรองทิศเดิน:
         // กดเฉียงเข้าหากำแพงเพื่อพิง หรือกดเดินออกเพื่อปล่อย
@@ -289,8 +328,11 @@ public class TopDownPlayerController : MonoBehaviour
             ? wallHug.GetWallMoveAmount(direction)
             : 0f;
 
-        animator?.SetBool("isWallHugging", wallHug != null && wallHug.IsHugging);
-        animator?.SetFloat("WallHugMove", wallHugMoveAmount);
+        if (animator != null)
+        {
+            animator.SetBool(IsWallHuggingHash, wallHug != null && wallHug.IsHugging);
+            animator.SetFloat(WallHugMoveHash, wallHugMoveAmount);
+        }
 
         isWalking = direction.magnitude >= 0.1f;
 
@@ -323,7 +365,7 @@ public class TopDownPlayerController : MonoBehaviour
         controller.Move(Vector3.down * 9.81f * Time.deltaTime);
     }
 
-    void HandleRotation()
+    void HandleRotation(Vector3 rawDirection)
     {
         if (isAiming)
         {
@@ -340,13 +382,7 @@ public class TopDownPlayerController : MonoBehaviour
             return;
         }
 
-        Vector2 moveInput = moveAction != null
-            ? moveAction.ReadValue<Vector2>()
-            : Vector2.zero;
-
-        Vector3 direction = useCameraRelativeMovement
-            ? GetCameraRelativeDirection(moveInput)
-            : new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+        Vector3 direction = rawDirection;
 
         // ตอนพิงให้หันออกจากกำแพง แม้ไม่ได้กำลังกดเดิน
         if (wallHug != null && wallHug.IsHugging)
@@ -451,7 +487,6 @@ public class TopDownPlayerController : MonoBehaviour
 
         bool hitLow = Physics.Raycast(lowRayOrigin, horizontalForward, out RaycastHit hit, raycastDistance, hurdleLayer);
         bool hitHigh = Physics.Raycast(highRayOrigin, horizontalForward, raycastDistance, hurdleLayer);
-        Debug.Log($"hitLow: {hitLow}, hitHigh: {hitHigh}");
 
         if (hitLow && !hitHigh)
         {
@@ -463,7 +498,6 @@ public class TopDownPlayerController : MonoBehaviour
             Vector3 landingRayOrigin = landingSpot + (Vector3.up * highRayHeight);
 
             bool hitThickWall = Physics.Raycast(landingRayOrigin, Vector3.down, highRayHeight, hurdleLayer);
-            Debug.Log($"hitThickWall: {hitThickWall}");
             if (!hitThickWall)
             {
                 transform.rotation = Quaternion.LookRotation(vaultDirection);
@@ -515,13 +549,13 @@ public class TopDownPlayerController : MonoBehaviour
         isClimbing = true;
         transform.rotation = Quaternion.LookRotation(lookDirection);
 
-        if (animator != null) animator.SetBool("IsClimbing", true);
+        if (animator != null) animator.SetBool(IsClimbingHash, true);
         if (startPoint != null) StartCoroutine(SmoothClimbEntryRoutine(startPoint.position));
     }
 
     IEnumerator SmoothClimbEntryRoutine(Vector3 targetPos)
     {
-        isMovementLocked = true;
+        SetMovementLocked(this, true);
 
         Vector3 startPos = transform.position;
         float timePassed = 0f;
@@ -539,7 +573,7 @@ public class TopDownPlayerController : MonoBehaviour
         Vector3 finalDelta = targetPos - transform.position;
         controller.Move(finalDelta);
 
-        isMovementLocked = false;
+        SetMovementLocked(this, false);
     }
 
     void HandleClimbing()
@@ -552,7 +586,7 @@ public class TopDownPlayerController : MonoBehaviour
 
         controller.Move(climbDirection * currentClimbSpeed * Time.deltaTime);
 
-        if (animator != null) animator.SetFloat("ClimbSpeed", moveInput.y);
+        if (animator != null) animator.SetFloat(ClimbSpeedHash, moveInput.y);
 
         CheckLadderExit(moveInput.y, moveInput.x);
     }
@@ -586,15 +620,15 @@ public class TopDownPlayerController : MonoBehaviour
         climbCooldown = 0.5f;
         if (animator != null)
         {
-            animator.SetBool("IsClimbing", false);
-            animator.SetFloat("ClimbSpeed", 0f);
+            animator.SetBool(IsClimbingHash, false);
+            animator.SetFloat(ClimbSpeedHash, 0f);
         }
     }
 
     IEnumerator LadderTopExitRoutine()
     {
-        isMovementLocked = true;
-        if (animator != null) animator.SetTrigger("ClimbTopExit");
+        SetMovementLocked(this, true);
+        if (animator != null) animator.SetTrigger(ClimbTopExitHash);
 
         Vector3 startPos = transform.position;
         Vector3 targetPos = transform.position + (Vector3.up * 1.2f) + (transform.forward * topExitOffset);
@@ -614,16 +648,19 @@ public class TopDownPlayerController : MonoBehaviour
         controller.Move(finalDelta);
 
         StopClimbing();
-        isMovementLocked = false;
+        SetMovementLocked(this, false);
     }
 
     private void PlayAnima()
     {
-        animator?.SetBool("isWalk", isWalking);
-        animator?.SetBool("isSneak", isCrouching);
+        if (animator == null)
+            return;
+
+        animator.SetBool(IsWalkHash, isWalking);
+        animator.SetBool(IsSneakHash, isCrouching);
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         Vector3 horizontalForward = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
 

@@ -4,7 +4,7 @@ public class KnifeAction : MonoBehaviour
 {
     [Header("Knife Settings")]
     public float damage = 25f;
-    public float attackRange = 50f;
+    public float attackRange = 2f; // ระยะมีด (หน่วยเมตร) ถ้า prefab เคย override ไว้ต้องแก้ใน Inspector ด้วย
     public float attackRate = .5f;
 
     [Header("Raycast Settings")]
@@ -20,6 +20,7 @@ public class KnifeAction : MonoBehaviour
     public Transform playerTransform;
 
     private float nextAttackTime;
+    private TopDownPlayerController ownerController;
     private PlayerInput playerInput;
     private InputAction resolvedAttackAction;
     private void Awake()
@@ -49,12 +50,24 @@ public class KnifeAction : MonoBehaviour
     // ฟังก์ชันนี้จะถูกเรียกเฉพาะตอนกดปุ่มโจมตีเท่านั้น ไม่ได้วนลูปทุกเฟรม
     private void OnAttackPerformed(InputAction.CallbackContext context)
     {
-        if (isHeld && Time.time >= nextAttackTime)
+        if (isHeld && Time.time >= nextAttackTime && !IsOwnerLocked())
         {
             nextAttackTime = Time.time + attackRate;
             Attack();
-            Debug.Log("Attack");
         }
+    }
+
+    // กำลังถูกล็อก (อ่านโน้ต, รัดคอ, ตาย ฯลฯ) ห้ามฟัน
+    private bool IsOwnerLocked()
+    {
+        if (ownerController == null)
+        {
+            ownerController = playerTransform != null
+                ? playerTransform.GetComponent<TopDownPlayerController>()
+                : GetComponentInParent<TopDownPlayerController>();
+        }
+
+        return ownerController != null && ownerController.IsMovementLocked;
     }
 
     void ResolveAttackAction()
@@ -85,22 +98,11 @@ public class KnifeAction : MonoBehaviour
 
         Debug.DrawRay(attackOrigin, attackDirection * attackRange, Color.red, 2f);
 
-        RaycastHit hit;
-        if(Physics.Raycast(attackOrigin, attackDirection, out hit, attackRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(attackOrigin, attackDirection, out RaycastHit hit, attackRange, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
-            Debug.Log("<color=cyan>มีดฟันไปโดน: " + hit.collider.name + "</color>");
-
             EnemyHealth enemy = hit.collider.GetComponentInParent<EnemyHealth>();
             if (enemy != null)
-            {
                 enemy.TakeDamage(damage);
-                Debug.Log("ฟันปกติเข้าที่ศัตรู!");
-            }
         }
-        else
-        {
-            Debug.Log("Raycast ไม่ชนอะไรเลยในระยะ");
-        }
-
     }
 }

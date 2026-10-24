@@ -22,6 +22,13 @@ public class FieldOfView : MonoBehaviour
     [Range(3, 120)]
     public int coneSegments = 40;
 
+    [Tooltip("ความถี่ในการอัปเดตรูปทรงกรวยสายตา (วินาที) ยิ่งมากยิ่งประหยัด CPU")]
+    public float coneUpdateInterval = 0.03f;
+
+    private static readonly Collider[] rangeBuffer = new Collider[16];
+
+    private EnemyHealth enemyHealth;
+    private float nextConeUpdateTime;
     private GameObject coneVisual;
     private Mesh coneMesh;
     private MeshRenderer coneRenderer;
@@ -32,12 +39,18 @@ public class FieldOfView : MonoBehaviour
     void Start()
     {
         playerRef = GameObject.FindGameObjectWithTag("Player");
+        enemyHealth = GetComponent<EnemyHealth>();
         CreateConeVisual();
         StartCoroutine(FOVRoutine());
     }
 
     void LateUpdate()
     {
+        // รูปทรงกรวยเป็น child ของศัตรู จึงหมุนตามเองทุกเฟรม ส่วนการยิง raycast สร้าง mesh ใหม่ทำเป็นช่วงๆ พอ
+        if (Time.time < nextConeUpdateTime)
+            return;
+
+        nextConeUpdateTime = Time.time + coneUpdateInterval;
         UpdateConeVisual();
     }
 
@@ -53,6 +66,10 @@ public class FieldOfView : MonoBehaviour
     private IEnumerator FOVRoutine()
     {
         WaitForSeconds wait = new WaitForSeconds(0.2f);
+
+        // สุ่มเวลาเริ่ม เพื่อไม่ให้ศัตรูทุกตัวตรวจสายตาในเฟรมเดียวกัน
+        yield return new WaitForSeconds(Random.Range(0f, 0.2f));
+
         while (true)
         {
             yield return wait;
@@ -63,15 +80,13 @@ public class FieldOfView : MonoBehaviour
     {
         canSeePlayer = false;
 
-        EnemyHealth enemyHealth = GetComponent<EnemyHealth>();
         if (enemyHealth != null && (enemyHealth.IsStunned || enemyHealth.IsDead))
             return;
 
-        Collider[] rangeChecks = Physics.OverlapSphere(transform.position, radius, targetMask);
-        for (int i = 0; i < rangeChecks.Length; i++)
+        int count = Physics.OverlapSphereNonAlloc(transform.position, radius, rangeBuffer, targetMask);
+        for (int i = 0; i < count; i++)
         {
-
-            if (IsTargetInVisionCone(rangeChecks[i].transform))
+            if (IsTargetInVisionCone(rangeBuffer[i].transform))
             {
                 canSeePlayer = true;
                 return;
@@ -150,6 +165,28 @@ public class FieldOfView : MonoBehaviour
             coneVertices[i + 1] = localDirection * vertexDistance + Vector3.up * coneHeightOffset;
         }
 
+        // triangle/normal ถูกตั้งไว้แล้วใน EnsureMeshArrays จึงอัปเดตเฉพาะตำแหน่งจุด
+        coneMesh.vertices = coneVertices;
+        coneMesh.RecalculateBounds();
+
+        SetConeColor(canSeePlayer ? spottedColor : searchingColor);
+    }
+    private void EnsureMeshArrays(int segmentCount)
+    {
+        int vertexCount = segmentCount + 2;
+        int triangleCount = segmentCount * 3;
+
+        if (coneVertices != null && coneVertices.Length == vertexCount &&
+            coneTriangles != null && coneTriangles.Length == triangleCount)
+            return;
+
+        coneVertices = new Vector3[vertexCount];
+        coneTriangles = new int[triangleCount];
+        Vector3[] normals = new Vector3[vertexCount];
+
+        for (int i = 0; i < vertexCount; i++)
+            normals[i] = Vector3.up;
+
         for (int i = 0; i < segmentCount; i++)
         {
             int triangleIndex = i * 3;
@@ -161,21 +198,7 @@ public class FieldOfView : MonoBehaviour
         coneMesh.Clear();
         coneMesh.vertices = coneVertices;
         coneMesh.triangles = coneTriangles;
-        coneMesh.RecalculateNormals();
-        coneMesh.RecalculateBounds();
-
-        SetConeColor(canSeePlayer ? spottedColor : searchingColor);
-    }
-    private void EnsureMeshArrays(int segmentCount)
-    {
-        int vertexCount = segmentCount + 2;
-        int triangleCount = segmentCount * 3;
-
-        if (coneVertices == null || coneVertices.Length != vertexCount)
-            coneVertices = new Vector3[vertexCount];
-
-        if (coneTriangles == null || coneTriangles.Length != triangleCount)
-            coneTriangles = new int[triangleCount];
+        coneMesh.normals = normals;
     }
     private void SetConeColor(Color color)
     {

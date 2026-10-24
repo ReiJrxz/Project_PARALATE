@@ -18,7 +18,7 @@ public class InteractableObject : MonoBehaviour
 
     void Update()
     {
-        if (canInteract && interactAction.action.WasPressedThisFrame())
+        if (canInteract && interactAction != null && interactAction.action.WasPressedThisFrame())
         {
             onInteract.Invoke();
         }

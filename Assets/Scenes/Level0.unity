@@ -75266,6 +75266,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3523246845713457628, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1997763154}
+    - targetCorrespondingSourceObject: {fileID: 3523246845713457628, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1997763155}
   m_SourcePrefab: {fileID: 100100000, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
 --- !u!1 &1103249192
 GameObject:
@@ -132488,6 +132491,40 @@ MonoBehaviour:
   cameraDamping: 0.14
   cameraLookActionName: CameraLook
   activePriority: 1000
+--- !u!114 &1997763155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1997763137}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f53a289320b50a4487ca4ce0a1ba440, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAudioController
+  baseFootstepInterval: 0.4
+  referenceSpeed: 5
+  minFootstepInterval: 0.2
+  surfaceSounds: []
+  defaultFootstepClips:
+  - {fileID: 8300000, guid: c6adaf6028e80aa40959254af1287d9f, type: 3}
+  groundCheckDistance: 1.2
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  whistleClip: {fileID: 8300000, guid: dd1ea513a307dda4bb24fc188c074ba8, type: 3}
+  pitchVariance: 0.08
+  volumeVariance: 0.15
+  footstepBaseVolume: 1
+  footstepInterval: 0.5
+  sprintIntervalMultiplier: 0.7
+  walkNoiseRadius: 7
+  sprintNoiseRadius: 15
+  whistleNoiseRadius: 20
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 2048
 --- !u!1 &1998849843
 GameObject:
   m_ObjectHideFlags: 0

@@ -33,7 +33,7 @@ public class PlayerHealth : MonoBehaviour
     {
         UpdateHealthBar();
 
-        if(!isDead && health <= 0)
+        if (!isDead && health <= 0)
             Die();
     }
 
@@ -63,7 +63,7 @@ public class PlayerHealth : MonoBehaviour
             characterController.enabled = true;
 
         if (movementController != null)
-            movementController.SetMovementLocked(false);
+            movementController.SetMovementLocked(this, false);
 
         if (DeadScene != null)
             DeadScene.gameObject.SetActive(false);
@@ -77,10 +77,14 @@ public class PlayerHealth : MonoBehaviour
         health = 0f;
 
         if (movementController != null)
-            movementController.SetMovementLocked(true);
+            movementController.SetMovementLocked(this, true);
 
         if (DeadScene != null)
             DeadScene.gameObject.SetActive(true);
+
+        // รอบนี้ล้มเหลว: ของที่เก็บมาในรอบนี้ไม่ถูกเก็บถาวร และเล่นเสียงแพ้
+        if (LevelManager.Instance != null)
+            LevelManager.Instance.OnRunFailed();
 
         UpdateHealthBar();
     }

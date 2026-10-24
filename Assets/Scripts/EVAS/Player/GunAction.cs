@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine.InputSystem;
-using TMPro;
 using System;
 
 [RequireComponent(typeof(LineRenderer))]
@@ -42,13 +41,9 @@ public class GunAction : MonoBehaviour
     public bool enableScope = true; //เปิด/ปิด scope
     public float normalFieldOfView = 50f; //มุมกล้องตอนถือปืน
     public float scopedFieldOfView = 25f; //มุมกล้องตอน scope
-    //public float scopeZoomSpeed = 12f; //ความเร็วในการซูม
     public bool hideCrosshairWhileScoped = false; //เปิด/ปิด crosshair
 
     [Header("First Person Scope Camera")]
-    //public bool enableScopeCameraOffset = true; //เปิด/ปิด การขยับกล้อง
-    //// เลื่อนซ้ายขวา (แกน X) + เลื่อนกล้องลง (ค่า Y ติดลบ) + เลื่อนหน้า (แกน Z)
-    //public Vector3 scopedCameraOffset = new Vector3(0f, -2f, 0f);
 
     public bool useFirstPersonScope = true; // ตอนซูมให้กล้องขยับไปมุมมองบุคคลที่หนึ่ง
     public Vector3 firstPersonCameraOffset = new Vector3(0f, 1.55f, 0.15f);
@@ -60,14 +55,7 @@ public class GunAction : MonoBehaviour
     public float minFirstPersonPitch = -70f;
     public float maxFirstPersonPitch = 70f;
 
-    //[Header("Legacy Top-Down Scope Camera Angle")]
-    //public bool enableScopeCameraAngle = true; //เปิด/ปิด การขยับองศากล้อง
-    //public float scopedTiltOffset = 10f; //ปรับองศาบนล่างของกล้องเมื่อซูม (ค่าบวก = เงยขึ้น, ค่าลบ = ก้มลง)
 
-    //[Header("Dynamic Look Ahead (Scope)")]
-    //public bool enableDynamicLook = true; // เปิด/ปิดให้กล้องขยับตามเมาส์เวลาซูม
-    //public float maxLookOffsetX = 5f; // ระยะเลื่อนกล้องสูงสุดแกน X (ซ้าย-ขวา)
-    //public float maxLookOffsetZ = 5f; // ระยะเลื่อนกล้องสูงสุดแกน Z (หน้า-หลัง สำหรับ Top-Down)
 
     private LineRenderer laserLine;
     private float nextFireTime;
@@ -96,18 +84,11 @@ public class GunAction : MonoBehaviour
     public int MagazineSize => magazineSize;
 
     private Camera mainCam;
-    // เปลี่ยนจาก Top Down เป็น First Person Scope Camera
 
-    private CinemachineCamera[] virtualCameras;
-    private CinemachinePositionComposer[] positionComposers;
-    private CinemachineFollow[] followComponents;
-    private Vector3[] baseOffsets;
-    //private float[] baseCameraDistances;
-    private CinemachinePanTilt[] panTiltComponents;
-    private float[] baseTilts;
 
     private bool isScoped;
     private InputAction resolvedAimAction;
+    private InputAction resolvedFireAction;
     private Transform ownerTransform;
     private PlayerNoiseEmitter playerNoiseEmitter;
     private CinemachineCamera firstPersonScopeCamera;
@@ -130,7 +111,6 @@ public class GunAction : MonoBehaviour
         mainCam = Camera.main;
         if (mainCam != null)
             cinemachineBrain = mainCam.GetComponent<CinemachineBrain>();
-        //virtualCameras = FindObjectsByType<CinemachineCamera>(FindObjectsInactive.Include);
         movementController = GetComponentInParent<TopDownPlayerController>();
         ownerTransform = movementController != null ? movementController.transform : transform.root;
         ResolveNoiseEmitter();
@@ -138,12 +118,12 @@ public class GunAction : MonoBehaviour
 
         audioSource = GetComponent<AudioSource>(); // เพิ่มบรรทัดนี้
         audioSource.playOnAwake = false;            // กันไม่ให้เล่นเองตอนเริ่มเกม
+        AudioManager.RouteToSfx(audioSource);
 
         if (mainCam != null)
             normalFieldOfView = mainCam.fieldOfView;
 
         currentAmmo = magazineSize;
-        //CacheCameraOffsets();
     }
     private void OnDisable()
     {
@@ -152,7 +132,6 @@ public class GunAction : MonoBehaviour
         SetMovementAimCameraOverride(false);
         RestoreCinemachineBrainBlend();
         SetCrosshairVisible(false);
-        //Cursor.visible = true;
     }
 
     private void OnDestroy()
@@ -174,16 +153,15 @@ public class GunAction : MonoBehaviour
         OnHeldChanged?.Invoke(held);
 
         if (held)
-        { 
-        UpdateAmmoUI();
-        PlaySound(equipSound, equipVolume);
+        {
+            UpdateAmmoUI();
+            PlaySound(equipSound, equipVolume);
         }
 
         if (!held)
         {
             CancelReload();
             SetScoped(false, true);
-            //Cursor.visible = true;
         }
     }
     void Update()
@@ -192,12 +170,33 @@ public class GunAction : MonoBehaviour
         HandleCrosshair();
         HandleReload();
 
-        if (isHeld && !isReloading && currentAmmo > 0
-            && fireAction.action.IsPressed() && Time.time > nextFireTime)
+        if (isHeld && !isReloading && currentAmmo > 0 && !IsOwnerLocked()
+            && IsFirePressed() && Time.time > nextFireTime)
         {
             nextFireTime = Time.time + fireRate;
             Shoot();
         }
+    }
+
+    // ผู้เล่นถูกล็อก (อ่านโน้ต, รัดคอ, ตาย ฯลฯ) ห้ามยิง/เล็ง/รีโหลด
+    private bool IsOwnerLocked()
+    {
+        return movementController != null && movementController.IsMovementLocked;
+    }
+
+    private bool IsFirePressed()
+    {
+        if (fireAction != null)
+            return fireAction.action.IsPressed();
+
+        if (resolvedFireAction == null)
+        {
+            PlayerInput playerInput = GetComponentInParent<PlayerInput>();
+            if (playerInput != null)
+                resolvedFireAction = playerInput.actions["Fire"];
+        }
+
+        return resolvedFireAction != null && resolvedFireAction.IsPressed();
     }
 
     private void LateUpdate()
@@ -208,7 +207,7 @@ public class GunAction : MonoBehaviour
 
     void HandleReload()
     {
-        if (!isHeld || isReloading)
+        if (!isHeld || isReloading || IsOwnerLocked())
             return;
 
         if (currentAmmo >= magazineSize)
@@ -321,7 +320,6 @@ public class GunAction : MonoBehaviour
             }
             else
             {
-                //Cursor.visible = true; // โชว์เมาส์ปกติเมื่อเก็บปืน
             }
         }
     }
@@ -330,7 +328,7 @@ public class GunAction : MonoBehaviour
     {
         ResolveAimAction();
 
-        bool shouldScope = enableScope && isHeld && resolvedAimAction != null && resolvedAimAction.IsPressed();
+        bool shouldScope = enableScope && isHeld && !IsOwnerLocked() && resolvedAimAction != null && resolvedAimAction.IsPressed();
         SetScoped(shouldScope, false);
     }
     // ฟังก์ชันนี้ใช้เพื่อหาค่า InputAction ของการเล็ง (Scope) จาก InputActionReference หรือจาก PlayerInput
@@ -369,141 +367,8 @@ public class GunAction : MonoBehaviour
 
         SetMovementAimCameraOverride(false);
         RestoreFirstPersonCursorState();
-        //SetTopDownScoped(scoped, instant);
     }
 
-    void SetScoped(bool scoped)
-    {
-        SetScoped(scoped, false);
-    }
-
-    // ปิด First Person Scope ได้จาก Inspector ด้วย useFirstPersonScope = false
-    // ถ้าปิดแล้วระบบจะกลับมาใช้มุมกล้อง Top-Down Scope เดิมด้านล่าง
-
-    // ฟังก์ชันนี้ใช้ปรับมุมกล้องและตำแหน่งกล้องเมื่อเล็ง (Scope) หรือไม่เล็ง
-    //void SetTopDownScoped(bool scoped, bool instant)
-    //{
-    //    isScoped = scoped;
-
-    //    if (virtualCameras == null || baseOffsets == null || baseTilts == null)
-    //        return;
-
-    //    float targetFieldOfView = scoped ? scopedFieldOfView : normalFieldOfView;
-    //    float lerpAmount = instant ? 1f : Time.deltaTime * scopeZoomSpeed;
-
-    //    if (virtualCameras != null)
-    //    {
-    //        for (int i = 0; i < virtualCameras.Length; i++)
-    //        {
-    //            if (virtualCameras[i] == null)
-    //                continue;
-
-    //            if (enableScopeCameraOffset)
-    //            {
-    //                // --- ส่วนที่เพิ่มเข้ามาใหม่: คำนวณการขยับกล้องตามเมาส์ ---
-    //                Vector3 dynamicLookOffset = Vector3.zero;
-
-    //                if (scoped && enableDynamicLook)
-    //                {
-    //                    // 1. ดึงตำแหน่งเมาส์บนจอ
-    //                    Vector2 mouseScreenPos = pointerAction.action.ReadValue<Vector2>();
-
-    //                    // 2. หาจุดกึ่งกลางหน้าจอ
-    //                    Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
-
-    //                    // 3. หาว่าเมาส์อยู่ห่างจากตรงกลางกี่เปอร์เซ็นต์ (ได้ค่า -1 ถึง 1)
-    //                    float normalizedX = (mouseScreenPos.x - screenCenter.x) / screenCenter.x;
-    //                    float normalizedY = (mouseScreenPos.y - screenCenter.y) / screenCenter.y;
-
-    //                    // 4. จำกัดขอบเขตกันเมาส์หลุดจอ
-    //                    normalizedX = Mathf.Clamp(normalizedX, -1f, 1f);
-    //                    normalizedY = Mathf.Clamp(normalizedY, -1f, 1f);
-
-    //                    // 5. แปลงเป็นระยะทางในโลก 3D (แกน X ซ้ายขวา, แกน Z หน้าหลัง)
-    //                    dynamicLookOffset = new Vector3(normalizedX * maxLookOffsetX, 0f, normalizedY * maxLookOffsetZ);
-    //                }
-
-    //                Vector3 desiredOffset = baseOffsets[i] + (scoped ? scopedCameraOffset : Vector3.zero) + dynamicLookOffset;
-    //                // --------------------------------------------------
-
-    //                float desiredTilt = baseTilts[i] + (scoped ? scopedTiltOffset : 0f);
-
-    //                if (positionComposers[i] != null)
-    //                {
-    //                    positionComposers[i].TargetOffset =
-    //                        Vector3.Lerp(positionComposers[i].TargetOffset, desiredOffset, lerpAmount);
-    //                }
-    //                else if (followComponents[i] != null)
-    //                {
-    //                    followComponents[i].FollowOffset =
-    //                        Vector3.Lerp(followComponents[i].FollowOffset, desiredOffset, lerpAmount);
-    //                }
-    //                else
-    //                {
-    //                    virtualCameras[i].transform.localPosition =
-    //                        Vector3.Lerp(virtualCameras[i].transform.localPosition, desiredOffset, lerpAmount);
-    //                }
-
-    //                if (panTiltComponents[i] != null)
-    //                {
-    //                    var panTilt = panTiltComponents[i];
-    //                    var tiltAxis = panTilt.TiltAxis;
-    //                    tiltAxis.Value = Mathf.Lerp(tiltAxis.Value, desiredTilt, lerpAmount);
-    //                    panTilt.TiltAxis = tiltAxis;
-    //                }
-    //                else
-    //                {
-    //                    Vector3 euler = virtualCameras[i].transform.localEulerAngles;
-    //                    euler.x = Mathf.LerpAngle(euler.x, desiredTilt, lerpAmount);
-    //                    virtualCameras[i].transform.localEulerAngles = euler;
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    if (mainCam != null)
-    //        mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, targetFieldOfView, lerpAmount);
-    //}
-
-    // ฟังก์ชันนี้ใช้เก็บค่า offset และ tilt ของกล้องแต่ละตัวไว้เป็นฐาน เพื่อให้สามารถปรับเปลี่ยนได้โดยไม่ทับค่าที่ตั้งไว้ใน Inspector
-    //void CacheCameraOffsets()
-    //{
-    //    if (virtualCameras == null) return;
-
-    //    int count = virtualCameras.Length;
-    //    positionComposers = new CinemachinePositionComposer[count];
-    //    followComponents = new CinemachineFollow[count];
-    //    baseOffsets = new Vector3[count];
-
-    //    panTiltComponents = new CinemachinePanTilt[count];
-    //    baseTilts = new float[count];
-
-    //    for (int i = 0; i < count; i++)
-    //    {
-    //        if (virtualCameras[i] == null) continue;
-
-    //        var composer = virtualCameras[i].GetComponent<CinemachinePositionComposer>();
-    //        var follow = virtualCameras[i].GetComponent<CinemachineFollow>();
-    //        var panTilt = virtualCameras[i].GetComponent<CinemachinePanTilt>();
-
-    //        positionComposers[i] = composer;
-    //        followComponents[i] = follow;
-    //        panTiltComponents[i] = panTilt;
-
-    //        // เก็บค่า offset เดิมไว้เป็นฐาน จะได้ไม่ทับค่าที่ตั้งไว้ใน Inspector
-    //        if (composer != null)
-    //            baseOffsets[i] = composer.TargetOffset;
-    //        else if (follow != null)
-    //            baseOffsets[i] = follow.FollowOffset;
-    //        else
-    //            baseOffsets[i] = virtualCameras[i].transform.localPosition;
-
-    //        if (panTilt != null)
-    //            baseTilts[i] = panTilt.TiltAxis.Value;
-    //        else
-    //            baseTilts[i] = virtualCameras[i].transform.localEulerAngles.x;
-    //    }
-    //}
     // ฟังก์ชันนี้ใช้เปิด/ปิด UI เป้าเล็ง
     void SetCrosshairVisible(bool visible)
     {
@@ -520,7 +385,9 @@ public class GunAction : MonoBehaviour
 
         // เล่นเสียงยิงปืนและปล่อยเสียงให้ AI ได้ยิน
         PlaySound(fireSound, fireVolume);
-        ResolveNoiseEmitter()?.EmitShooting(firePoint.position);
+        PlayerNoiseEmitter noiseEmitter = ResolveNoiseEmitter();
+        if (noiseEmitter != null)
+            noiseEmitter.EmitShooting(firePoint.position);
 
         if (showDebugLine) StartCoroutine(ShotEffect());
 
@@ -532,13 +399,14 @@ public class GunAction : MonoBehaviour
 
         if (Physics.Raycast(firePoint.position, shootDirection, out hit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
         {
-            Debug.Log("Hit: " + hit.collider.name);
             laserLine.SetPosition(1, hit.point);
 
-            if (hit.collider.TryGetComponent<EnemyHealth>(out var enemy))
+            // ใช้ GetComponentInParent เหมือนมีด เผื่อ collider อยู่บน child ของศัตรู
+            EnemyHealth enemy = hit.collider.GetComponentInParent<EnemyHealth>();
+            if (enemy != null)
                 enemy.TakeDamage(damage);
-            else
-                ResolveNoiseEmitter()?.EmitBulletHitWall(hit.point);
+            else if (noiseEmitter != null)
+                noiseEmitter.EmitBulletHitWall(hit.point);
 
         }
         else

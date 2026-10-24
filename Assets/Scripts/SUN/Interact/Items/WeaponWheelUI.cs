@@ -55,7 +55,8 @@ public class WeaponWheelUI : MonoBehaviour
     {
         if (wheelAction == null) return;
 
-        if (wheelAction.WasPressedThisFrame())
+        if (wheelAction.WasPressedThisFrame() && !isOpen &&
+            (pickupSystem == null || pickupSystem.CanChangeWeapon))
             OpenWheel();
 
         if (isOpen)

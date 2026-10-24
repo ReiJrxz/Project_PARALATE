@@ -100,7 +100,6 @@ public class WallHugController : MonoBehaviour
             ? (Vector3.Dot(input, transform.right) < 0f ? -1 : 1)
             : (rightDot > 0f ? 1 : -1);
         isHugging = true;
-        Debug.Log("Wall Hug entered", this);
     }
     private bool HasWallInFrontOfBack(out RaycastHit hit)
     {
@@ -127,7 +126,6 @@ public class WallHugController : MonoBehaviour
             return;
 
         isHugging = false;
-        Debug.Log($"Wall Hug exited: {reason}", this);
     }
 
     public Vector3 ConstrainMoveDirection(Vector3 direction)

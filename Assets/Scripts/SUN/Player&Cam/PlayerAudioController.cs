@@ -36,17 +36,8 @@ public class PlayerAudioController : MonoBehaviour
     [Range(0f, 0.3f)] public float volumeVariance = 0.15f;
     [Range(0f, 1f)] public float footstepBaseVolume = 1f;
 
-    [Header("Footstep Timing")]
-    public float footstepInterval = 0.5f;
-    [Tooltip("ตัวคูณ interval ตอนวิ่ง (ยิ่งน้อยยิ่งถี่)")]
-    public float sprintIntervalMultiplier = 0.7f;
-
-    [Header("Noise Radius (สำหรับ Stealth AI)")]
-    public float walkNoiseRadius = 7f;
-    public float sprintNoiseRadius = 15f;
-    public float whistleNoiseRadius = 20f;
-    public LayerMask enemyLayer; // Kept for existing prefab data; detection is now handled by NoiseEmitterSystem.
-
+    // รัศมีเสียงสำหรับ AI ศัตรูตั้งที่ PlayerNoiseEmitter ที่เดียว (แหล่งข้อมูลเดียวกับเสียงปืน)
+    private PlayerNoiseEmitter noiseEmitter;
     private AudioSource audioSource;
     private float nextFootstepTime = 0f;
     private int lastFootstepIndex = -1;
@@ -55,6 +46,12 @@ public class PlayerAudioController : MonoBehaviour
     void Awake()
     {
         audioSource = GetComponent<AudioSource>();
+        AudioManager.RouteToSfx(audioSource);
+
+        noiseEmitter = GetComponent<PlayerNoiseEmitter>();
+        if (noiseEmitter == null)
+            noiseEmitter = gameObject.AddComponent<PlayerNoiseEmitter>();
+
         BuildSurfaceLookup();
     }
 
@@ -84,9 +81,7 @@ public class PlayerAudioController : MonoBehaviour
 
         if (!isCrouching)
         {
-            NoiseEmitterSystem.Emit(gameObject, transform.position,
-                isSprinting ? sprintNoiseRadius : walkNoiseRadius,
-                isSprinting ? NoiseType.Sprinting : NoiseType.Walking);
+            noiseEmitter.EmitFootstep(isSprinting);
 
             AudioClip[] clips = GetClipsForCurrentSurface();
             PlayFootstepSound(clips);
@@ -143,8 +138,7 @@ public class PlayerAudioController : MonoBehaviour
         {
             audioSource.PlayOneShot(whistleClip);
         }
-        NoiseEmitterSystem.Emit(gameObject, transform.position, whistleNoiseRadius, NoiseType.Whistling);
-        Debug.Log("เป่าปากล่อศัตรู! รัศมี: " + whistleNoiseRadius);
-    }
 
+        noiseEmitter.EmitWhistling();
+    }
 }

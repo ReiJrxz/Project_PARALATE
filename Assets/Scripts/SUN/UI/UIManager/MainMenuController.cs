@@ -1,48 +1,49 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // จำเป็นสำหรับการจัดการ Scene
+using UnityEngine.SceneManagement;
 
+/// <summary>
+/// ผูกกับปุ่มใน MainMenu ใช้ LevelManager (เปลี่ยน Scene) ส่วนหน้า Options โหลดแบบ Additive
+/// ชื่อ Scene Options อยู่ใน SceneNames.Options (ต้องอยู่ใน Build Settings)
+/// </summary>
 public class MainMenuController : MonoBehaviour
 {
-    [Header("Scene Settings")]
-    [Tooltip("ชื่อ Scene ที่ใช้สำหรับ Options")]
-    public string optionsSceneName = "OptionsMenu";
+    private bool isOptionsLoading;
 
     public void OnNewGamePressed()
     {
-        // โหลดเกมด่านแรก (index 0) 
         // อนาคตถ้ามีการ New Game ควรจะเคลียร์ Save Data ก่อน
-        LevelManager.Instance.LoadLevel(0);
+        //LoadLevel(0);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(SceneNames.Tutorial);
+    }
+
+    // สำหรับปุ่มเลือกด่าน: ใส่ index ที่ OnClick (0 = Level1, 1 = Level2, ...)
+    public void OnSelectLevelPressed(int levelIndex)
+    {
+        LoadLevel(levelIndex);
     }
 
     public void OnLoadGamePressed()
     {
         // โครงสร้างเผื่อระบบ Save/Load ในอนาคต
-        // สมมติว่าในอนาคตคุณสร้าง SaveSystem ขึ้นมาจัดการ
-        /*
-        if (SaveSystem.HasSaveData()) 
-        {
-            int savedLevelIndex = SaveSystem.GetSavedLevelIndex();
-            // อาจจะมีการดึงข้อมูล Player Stats (เลือด, ปืน, อัปเกรด) มาด้วย
-            LevelManager.Instance.LoadLevel(savedLevelIndex);
-        }
-        else
-        {
-            Debug.LogWarning("No save data found!");
-            // อาจจะเด้ง UI แจ้งเตือนผู้เล่นว่าไม่มีเซฟ
-        }
-        */
-
+        // เช่น: if (SaveSystem.HasSaveData()) LoadLevel(SaveSystem.GetSavedLevelIndex());
         Debug.Log("Load Game Button Pressed - Ready for SaveSystem hook.");
     }
 
     public void OnOptionPressed()
     {
-        // เช็คก่อนว่า Scene Option ถูกโหลดซ้อนขึ้นมาหรือยัง เพื่อกันผู้เล่นกดเบิ้ล
-        if (!SceneManager.GetSceneByName(optionsSceneName).isLoaded)
-        {
-            // โหลด Scene ทับซ้อนขึ้นมา โดยไม่ลบ Scene MainMenu ทิ้ง
-            SceneManager.LoadSceneAsync(optionsSceneName, LoadSceneMode.Additive);
-        }
+        // กันผู้เล่นกดเบิ้ล ทั้งตอนกำลังโหลดและตอนโหลดเสร็จแล้ว
+        if (isOptionsLoading || SceneManager.GetSceneByName(SceneNames.Options).isLoaded)
+            return;
+
+        // โหลด Scene ซ้อนขึ้นมา โดยไม่ลบ Scene MainMenu ทิ้ง
+        AsyncOperation operation = SceneManager.LoadSceneAsync(SceneNames.Options, LoadSceneMode.Additive);
+
+        // null = หา Scene ไม่เจอ (ยังไม่ได้ใส่ใน Build Settings) Unity จะแจ้ง error ให้เอง
+        if (operation == null)
+            return;
+
+        isOptionsLoading = true;
+        operation.completed += _ => isOptionsLoading = false;
     }
 
     public void OnExitPressed()
@@ -52,5 +53,16 @@ public class MainMenuController : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+
+    private static void LoadLevel(int levelIndex)
+    {
+        if (LevelManager.Instance == null)
+        {
+            Debug.LogError("ไม่พบ LevelManager");
+            return;
+        }
+
+        LevelManager.Instance.LoadLevel(levelIndex);
     }
 }

@@ -9,9 +9,11 @@ public class OptionsMenuController : MonoBehaviour
     public GameObject videoPanel;
     public GameObject controllerPanel;
 
+    private bool isClosing;
+
     private void Start()
     {
-        // ตอนเปิดหน้า Option ขึ้นมา ให้โชว์หน้า Game (หรือ Video) เป็นหน้าแรก
+        // ตอนเปิดหน้า Option ขึ้นมา ให้โชว์หน้า Game เป็นหน้าแรก
         OpenTab(gamePanel);
     }
 
@@ -23,22 +25,25 @@ public class OptionsMenuController : MonoBehaviour
 
     private void OpenTab(GameObject activePanel)
     {
-        // ปิด Panel ทั้งหมดก่อน
         if (gamePanel != null) gamePanel.SetActive(false);
         if (soundPanel != null) soundPanel.SetActive(false);
         if (videoPanel != null) videoPanel.SetActive(false);
         if (controllerPanel != null) controllerPanel.SetActive(false);
 
-        // เปิดเฉพาะ Panel ที่ถูกเลือก
         if (activePanel != null)
-        {
             activePanel.SetActive(true);
-        }
     }
 
     public void OnCloseOptionsPressed()
     {
-        // สั่ง Unload Scene ตัวเองทิ้ง เพื่อกลับไปใช้ MainMenu (หรือหน้า Pause เกม)
-        SceneManager.UnloadSceneAsync(gameObject.scene.name);
+        // กันกดปุ่มปิดซ้ำระหว่างที่ Scene กำลัง Unload
+        if (isClosing)
+            return;
+
+        isClosing = true;
+
+        // Unload Scene ตัวเองทิ้ง เพื่อกลับไปใช้ MainMenu (หรือหน้า Pause เกม)
+        // ตอน Scene ถูกทำลาย AudioSettingsController.OnDisable จะบันทึกค่าเสียงให้เอง
+        SceneManager.UnloadSceneAsync(gameObject.scene);
     }
 }

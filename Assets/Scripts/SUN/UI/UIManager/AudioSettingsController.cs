@@ -1,34 +1,61 @@
 using UnityEngine;
-using UnityEngine.Audio;
+using UnityEngine.UI;
 
-namespace ZiddikJari
-{
+/// <summary>
+/// ตัวกลางระหว่าง Slider ในหน้า Option กับ AudioManager
+/// ผูก Slider.OnValueChanged (Dynamic float) เข้ากับ SetXxxVolume และ (ไม่บังคับ) ลาก Slider มาใส่ช่องด้านล่าง
+/// เพื่อให้ค่าเริ่มต้นของแถบตรงกับค่าที่บันทึกไว้
+/// </summary>
 public class AudioSettingsController : MonoBehaviour
+{
+    [Header("Sliders (ไม่บังคับ — ใช้ตั้งค่าเริ่มต้นตอนเปิดหน้า Option)")]
+    [SerializeField] private Slider masterSlider;
+    [SerializeField] private Slider musicSlider;
+    [SerializeField] private Slider sfxSlider;
+    [SerializeField] private Slider uiSlider;
+
+    void OnEnable()
     {
-        [SerializeField] private AudioMixer mixer;
+        AudioManager audio = AudioManager.Instance;
+        if (audio == null)
+            return;
 
-        public void SetMasterVolume(float value)
-        {
-            SetVolume("MasterVolume", value);
-        }
+        SetSlider(masterSlider, audio.MasterVolume);
+        SetSlider(musicSlider, audio.MusicVolume);
+        SetSlider(sfxSlider, audio.SfxVolume);
+        SetSlider(uiSlider, audio.UIVolume);
+    }
 
-        public void SetMusicVolume(float value)
-        {
-            SetVolume("MusicVolume", value);
-        }
+    // ปิดหน้า Option = บันทึกค่า (ไม่ต้อง Save ทุกครั้งที่ลาก Slider)
+    void OnDisable()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.SaveSettings();
+    }
 
-        public void SetSFXVolume(float value)
-        {
-            SetVolume("SFXVolume", value);
-        }
+    public void SetMasterVolume(float value)
+    {
+        if (AudioManager.Instance != null) AudioManager.Instance.SetMasterVolume(value);
+    }
 
-        private void SetVolume(string parameter, float value)
-        {
-            float dB = value <= 0.0001f
-                ? -80f
-                : Mathf.Log10(value) * 20f;
+    public void SetMusicVolume(float value)
+    {
+        if (AudioManager.Instance != null) AudioManager.Instance.SetMusicVolume(value);
+    }
 
-            mixer.SetFloat(parameter, dB);
-        }
+    public void SetSFXVolume(float value)
+    {
+        if (AudioManager.Instance != null) AudioManager.Instance.SetSfxVolume(value);
+    }
+
+    public void SetUIVolume(float value)
+    {
+        if (AudioManager.Instance != null) AudioManager.Instance.SetUIVolume(value);
+    }
+
+    private static void SetSlider(Slider slider, float value)
+    {
+        if (slider != null)
+            slider.SetValueWithoutNotify(value);
     }
 }

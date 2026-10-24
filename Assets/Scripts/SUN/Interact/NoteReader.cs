@@ -26,7 +26,7 @@ public class NoteReader : MonoBehaviour, IInteractable
         currentReader = interactor;
 
         TopDownPlayerController player = interactor.GetComponent<TopDownPlayerController>();
-        if (player != null) player.SetMovementLocked(true);
+        if (player != null) player.SetMovementLocked(this, true);
 
         NoteUIManager.Instance.ShowNote(noteText);
     }
@@ -38,7 +38,7 @@ public class NoteReader : MonoBehaviour, IInteractable
         if (currentReader != null)
         {
             TopDownPlayerController player = currentReader.GetComponent<TopDownPlayerController>();
-            if (player != null) player.SetMovementLocked(false);
+            if (player != null) player.SetMovementLocked(this, false);
         }
 
         currentReader = null;

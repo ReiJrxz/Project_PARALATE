@@ -41,7 +41,7 @@ public class EnemyReflexSystem : MonoBehaviour
             return;
 
         enemyController.StartChase();
-        enemyController.SetMovementLocked(true);
+        enemyController.SetMovementLocked(this, true);
         isReflexing = true;
     }
 
@@ -49,7 +49,7 @@ public class EnemyReflexSystem : MonoBehaviour
     {
         if (!IsReflexTargetValid())
         {
-            EndReflex(true);
+            EndReflex();
             return;
         }
 
@@ -61,16 +61,17 @@ public class EnemyReflexSystem : MonoBehaviour
             Vector3.Angle(transform.forward, directionToPlayer) > fireAngleTolerance)
             return;
 
-        if (enemyShooting != null && enemyShooting.TryStartReflexShot())
-            EndReflex(false);
-        else
-            EndReflex(true);
+        // EnemyShooting ล็อกการเคลื่อนไหวด้วย key ของตัวเองอยู่แล้ว ระบบนี้ปลดแค่ key ของตัวเอง
+        enemyShooting.TryStartReflexShot();
+        EndReflex();
     }
 
     private bool CanStartReflex()
     {
+        // ถ้ามีระบบอื่นล็อกศัตรูอยู่ (ถูกรัดคอ/สลบ/กำลังยิง) ไม่ต้องทำ reflex
         return Time.time >= nextReflexTime &&
                enemyShooting != null &&
+               !enemyController.IsMovementLocked &&
                IsReflexTargetValid();
     }
 
@@ -87,13 +88,19 @@ public class EnemyReflexSystem : MonoBehaviour
         return offset.sqrMagnitude <= reflexRadius * reflexRadius;
     }
 
-    private void EndReflex(bool releaseMovementLock)
+    private void EndReflex()
     {
         isReflexing = false;
         nextReflexTime = Time.time + reflexCooldown;
 
-        if (releaseMovementLock && enemyController != null)
-            enemyController.SetMovementLocked(false);
+        if (enemyController != null)
+            enemyController.SetMovementLocked(this, false);
+    }
+
+    private void OnDisable()
+    {
+        if (isReflexing)
+            EndReflex();
     }
 
     private void CachePlayer()

@@ -43,6 +43,11 @@ public class EnemyShooting : MonoBehaviour
     private int combinedLineOfSightMask;
     private Coroutine shootRoutine;
 
+    private static readonly RaycastHit[] lineOfSightHits = new RaycastHit[16];
+
+    private Transform cachedAimTarget;
+    private Collider cachedPlayerCollider;
+
     private IObjectPool<PooledBullet> bulletPool;
 
     private void Awake()
@@ -58,7 +63,7 @@ public class EnemyShooting : MonoBehaviour
 
         if (bulletPrefab == null)
         {
-            Debug.Log($"[{nameof(EnemyShooting)}] {name}: bulletPrefab is not assigned. Disabling component.", this);
+            Debug.LogWarning($"[{nameof(EnemyShooting)}] {name}: bulletPrefab is not assigned. Disabling component.", this);
 
             enabled = false;
             return;
@@ -115,15 +120,15 @@ public class EnemyShooting : MonoBehaviour
         if (playerTransform == null || isShootingRoutineRunning)
             return;
 
-        if(Time.time < lastFireTime + fireCooldown)
+        if (Time.time < lastFireTime + fireCooldown)
             return;
-        
+
         float sqrDistanceToPlayer = (transform.position - playerTransform.position).sqrMagnitude;
 
         if (sqrDistanceToPlayer > shootingRangeSqr)
             return;
 
-        if (enemyController == null || !enemyController.IsChasing)
+        if (enemyController == null || !enemyController.IsChasing || enemyController.IsMovementLocked)
             return;
 
         if (CanSeeTarget())
@@ -151,10 +156,10 @@ public class EnemyShooting : MonoBehaviour
     {
         isShootingRoutineRunning = true;
 
-        enemyController.SetMovementLocked(true);
+        enemyController.SetMovementLocked(this, true);
 
         float timer = 0f;
-        while(timer < aimDelay)
+        while (timer < aimDelay)
         {
             if (playerTransform != null && enemyController != null)
                 enemyController.RotateYawTowards(playerTransform.position, rotationSpeed);
@@ -169,8 +174,8 @@ public class EnemyShooting : MonoBehaviour
 
         yield return new WaitForSeconds(postShootDelay);
 
-        if (enemyController != null && isActiveAndEnabled)
-            enemyController.SetMovementLocked(false);
+        if (enemyController != null)
+            enemyController.SetMovementLocked(this, false);
 
         isShootingRoutineRunning = false;
         shootRoutine = null;
@@ -181,18 +186,18 @@ public class EnemyShooting : MonoBehaviour
             return false;
 
         float distance = Vector3.Distance(origin, aimPoint);
-        RaycastHit[] hits = Physics.RaycastAll(origin, direction, distance, combinedLineOfSightMask, QueryTriggerInteraction.Ignore);
-        if (hits.Length == 0)
+        int hitCount = Physics.RaycastNonAlloc(origin, direction, lineOfSightHits, distance, combinedLineOfSightMask, QueryTriggerInteraction.Ignore);
+        if (hitCount == 0)
             return true;
 
-        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        System.Array.Sort(lineOfSightHits, 0, hitCount, RaycastHitDistanceComparer.Instance);
 
-        for (int i = 0; i < hits.Length; i++)
+        for (int i = 0; i < hitCount; i++)
         {
-            if (hits[i].transform != null && hits[i].transform.IsChildOf(transform))
+            if (lineOfSightHits[i].transform != null && lineOfSightHits[i].transform.IsChildOf(transform))
                 continue;
 
-            return hits[i].collider.CompareTag(playerTag);
+            return lineOfSightHits[i].collider.CompareTag(playerTag);
         }
 
         return true;
@@ -205,7 +210,8 @@ public class EnemyShooting : MonoBehaviour
 
         PooledBullet bullet = bulletPool.Get();
         bullet.Launch(spawnPos, Quaternion.LookRotation(fireDirection), fireDirection * bulletSpeed, transform);
-        enemyAudio?.PlayFireSound();
+        if (enemyAudio != null)
+            enemyAudio.PlayFireSound();
     }
 
     private bool TryGetMuzzleAim(out Vector3 spawnPos, out Vector3 fireDirection, out Vector3 aimPoint)
@@ -230,13 +236,15 @@ public class EnemyShooting : MonoBehaviour
 
     private Vector3 GetPlayerAimPoint()
     {
-        Collider playerCollider = playerTransform.GetComponent<Collider>();
-        if (playerCollider != null)
-            return playerCollider.bounds.center;
+        // CharacterController สืบทอดมาจาก Collider จึงครอบคลุมทั้งสองกรณี
+        if (cachedAimTarget != playerTransform)
+        {
+            cachedAimTarget = playerTransform;
+            cachedPlayerCollider = playerTransform.GetComponent<Collider>();
+        }
 
-        CharacterController characterController = playerTransform.GetComponent<CharacterController>();
-        if (characterController != null)
-            return characterController.bounds.center;
+        if (cachedPlayerCollider != null)
+            return cachedPlayerCollider.bounds.center;
 
         return playerTransform.position + Vector3.up * aimHeightOffset;
     }
@@ -258,7 +266,7 @@ public class EnemyShooting : MonoBehaviour
             return;
         }
 
-        if(Time.time < lastPlayerSearchTime + playerSearchInterval)
+        if (Time.time < lastPlayerSearchTime + playerSearchInterval)
             return;
 
         lastPlayerSearchTime = Time.time;
@@ -277,8 +285,8 @@ public class EnemyShooting : MonoBehaviour
 
         isShootingRoutineRunning = false;
 
-        if (enemyController != null && gameObject.activeInHierarchy)
-            enemyController.SetMovementLocked(false);
+        if (enemyController != null)
+            enemyController.SetMovementLocked(this, false);
     }
     private void OnDestroy()
     {
@@ -290,9 +298,9 @@ public class EnemyShooting : MonoBehaviour
         combinedLineOfSightMask = obstructionMask.value | playerLayerMask.value;
     }
 
-    //private void ()
-    //{
-    //    Gizmos.color = Color.red;
-    //    Gizmos.DrawWireSphere(transform.position, shootingRange);
-    //}
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, shootingRange);
+    }
 }

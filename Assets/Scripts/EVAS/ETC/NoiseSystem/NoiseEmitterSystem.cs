@@ -15,6 +15,7 @@ public class NoiseEmitterSystem : MonoBehaviour
     private const int MAX_LISTENERS = 32;
     private static readonly Collider[] hitColliders = new Collider[MAX_LISTENERS];
     private static readonly HashSet<INoiseListener> listeners = new HashSet<INoiseListener>();
+    private static readonly List<INoiseListener> listenerSnapshot = new List<INoiseListener>(64);
 
     private void Awake()
     {
@@ -54,8 +55,16 @@ public class NoiseEmitterSystem : MonoBehaviour
 
     private void EmitNoise(NoiseData noise)
     {
-        foreach (INoiseListener listener in listeners)
-            NotifyIfAudible(listener, noise);
+        // ทำสำเนาก่อนวน: OnNoiseHeard อาจทำให้ listener ลงทะเบียน/ถอนตัวระหว่างวนได้
+        listenerSnapshot.Clear();
+        listenerSnapshot.AddRange(listeners);
+
+        for (int i = 0; i < listenerSnapshot.Count; i++)
+            NotifyIfAudible(listenerSnapshot[i], noise);
+
+        // ไม่ได้ตั้ง Listener Layers = ไม่มี listener ที่ไม่ได้ลงทะเบียน จึงไม่ต้อง overlap
+        if (listenerLayers.value == 0)
+            return;
 
         int count = Physics.OverlapSphereNonAlloc(noise.Position, noise.Radius, hitColliders, listenerLayers, QueryTriggerInteraction.Ignore);
 
@@ -86,12 +95,18 @@ public class NoiseEmitterSystem : MonoBehaviour
             return;
 
         Vector3 targetPosition = listenerComponent.transform.position + Vector3.up;
+        float sqrDistance = (targetPosition - noise.Position).sqrMagnitude;
+
+        // ไกลเกินรัศมีเต็มแล้ว (กำแพงมีแต่ลดรัศมี) ไม่ต้องเสียเวลา Linecast
+        if (sqrDistance > noise.Radius * noise.Radius)
+            return;
+
         float effectiveRadius = noise.Radius;
 
         if (obstacleLayers.value != 0 && Physics.Linecast(noise.Position, targetPosition, obstacleLayers, QueryTriggerInteraction.Ignore))
             effectiveRadius *= 1f - wallDampening;
 
-        if ((targetPosition - noise.Position).sqrMagnitude <= effectiveRadius * effectiveRadius)
+        if (sqrDistance <= effectiveRadius * effectiveRadius)
             listener.OnNoiseHeard(noise);
     }
 }

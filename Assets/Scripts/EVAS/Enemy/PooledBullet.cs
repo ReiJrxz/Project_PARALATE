@@ -13,18 +13,20 @@ public class PooledBullet : MonoBehaviour
 
     private Rigidbody rb;
     private SphereCollider bulletCollider;
+    private MeshRenderer meshRenderer;
     private IObjectPool<PooledBullet> pool;
     private Transform owner;
+    private Transform cachedOwner;
+    private Collider[] ownerColliders;
     private Vector3 previousPosition;
     private float lifeTimer;
     private bool isReturned;
-
-    public PlayerHealth pHealth;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         bulletCollider = GetComponent<SphereCollider>();
+        meshRenderer = GetComponent<MeshRenderer>();
         rb.useGravity = false;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
@@ -47,6 +49,9 @@ public class PooledBullet : MonoBehaviour
         if (!gameObject.activeSelf)
             gameObject.SetActive(true);
 
+        if (meshRenderer != null)
+            meshRenderer.enabled = !meshDisable;
+
         rb.position = position;
         rb.rotation = rotation;
         rb.linearVelocity = velocity;
@@ -62,8 +67,6 @@ public class PooledBullet : MonoBehaviour
         lifeTimer -= Time.deltaTime;
         if (lifeTimer <= 0f)
             ReturnToPool();
-
-        DisableMesh();
     }
 
     private void FixedUpdate()
@@ -142,14 +145,10 @@ public class PooledBullet : MonoBehaviour
 
         if (other.CompareTag("Player"))
         {
-            Debug.Log($"[{nameof(PooledBullet)}] {name}: Hit player. Dealing {damage} damage.", this);
             PlayerHealth playerHealth = other.GetComponentInParent<PlayerHealth>();
             if (playerHealth != null)
                 playerHealth.TakeDamage(damage);
         }
-            
-        else
-            Debug.Log($"[{nameof(PooledBullet)}] {name}: Hit {other.name}.", this);
 
         ReturnToPool();
     }
@@ -190,7 +189,13 @@ public class PooledBullet : MonoBehaviour
         if (owner == null || bulletCollider == null)
             return;
 
-        Collider[] ownerColliders = owner.GetComponentsInChildren<Collider>(true);
+        // เก็บ collider ของเจ้าของไว้ใช้ซ้ำ (pool หนึ่งชุดมีเจ้าของคนเดียว) แทนการ GetComponentsInChildren ทุกนัด
+        if (ownerColliders == null || cachedOwner != owner)
+        {
+            cachedOwner = owner;
+            ownerColliders = owner.GetComponentsInChildren<Collider>(true);
+        }
+
         for (int i = 0; i < ownerColliders.Length; i++)
         {
             if (ownerColliders[i] == null || ownerColliders[i] == bulletCollider)
@@ -198,12 +203,5 @@ public class PooledBullet : MonoBehaviour
 
             Physics.IgnoreCollision(bulletCollider, ownerColliders[i], ignore);
         }
-    }
-    private void DisableMesh()
-    {
-        if (meshDisable)
-            GetComponent<MeshRenderer>().enabled = false;
-        else
-            GetComponent<MeshRenderer>().enabled = true;
     }
 }

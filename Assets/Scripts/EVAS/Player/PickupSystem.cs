@@ -9,8 +9,6 @@ public class PickupSystem : MonoBehaviour
 
     [Header("Pickup Settings")]
     public Transform PickUp;
-    public float pickupRange = 3f;
-    public LayerMask itemLayer;
 
     public Vector3 holdPositionOffset;
     public Vector3 holdRotationOffset;
@@ -35,6 +33,11 @@ public class PickupSystem : MonoBehaviour
     public bool HasEquippedWeapon => heldItem != null;
     public bool HasKnifeEquipped => heldItem != null && heldItem.GetComponent<KnifeAction>() != null;
 
+    /// <summary>เปลี่ยนอาวุธได้หรือไม่ (ห้ามตอนถูกล็อก/กำลังรัดคอ)</summary>
+    public bool CanChangeWeapon =>
+        (movementController == null || !movementController.IsMovementLocked) &&
+        (knockoutSystem == null || !knockoutSystem.IsKnockout);
+
     void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
@@ -51,7 +54,7 @@ public class PickupSystem : MonoBehaviour
         if (knockoutSystem != null && knockoutSystem.IsKnockout)
             return;
 
-        if (interactAction.WasPressedThisFrame())
+        if (pickupDetector != null && interactAction.WasPressedThisFrame())
             pickupDetector.TryInteract();
 
         if (movementController != null && movementController.IsMovementLocked)
@@ -68,28 +71,23 @@ public class PickupSystem : MonoBehaviour
             UnequipWeapon();
     }
 
-    public void PickUpObject(GameObject item)
+    /// <summary>คืน true ถ้าเก็บสำเร็จ (false = เก็บไม่ได้ เช่น มีอาวุธชนิดนี้อยู่แล้ว)</summary>
+    public bool PickUpObject(GameObject item)
     {
         if (item == null)
-            return;
+            return false;
 
         GunAction gun = item.GetComponent<GunAction>();
         KnifeAction knife = item.GetComponent<KnifeAction>();
 
         if (gun == null && knife == null)
-            return;
+            return false;
 
         if (gun != null && gunItem != null)
-        {
-            Debug.Log("Already have gun");
-            return;
-        }
+            return false;
 
         if (knife != null && knifeItem != null)
-        {
-            Debug.Log("Already have knife");
-            return;
-        }
+            return false;
 
         Rigidbody rb = item.GetComponent<Rigidbody>();
         if (rb != null)
@@ -114,20 +112,7 @@ public class PickupSystem : MonoBehaviour
 
 
         EquipWeapon(item);
-        Debug.Log("Equipped: " + item.name);
-    }
-
-    GameObject GetWeaponRoot(GameObject item)
-    {
-        GunAction gun = item.GetComponentInParent<GunAction>();
-        if (gun != null)
-            return gun.gameObject;
-
-        KnifeAction knife = item.GetComponentInParent<KnifeAction>();
-        if (knife != null)
-            return knife.gameObject;
-
-        return item;
+        return true;
     }
 
     void SwitchWeapon()
@@ -163,6 +148,10 @@ public class PickupSystem : MonoBehaviour
         if (item == null)
             return;
 
+        // ถือชิ้นนี้อยู่แล้ว ไม่ต้องปิด/เปิดใหม่ (กัน reload ถูกยกเลิกและเสียง equip เล่นซ้ำ)
+        if (item == heldItem && item.activeSelf)
+            return;
+
         SetWeaponHeld(gunItem, false);
         SetWeaponHeld(knifeItem, false);
 
@@ -171,7 +160,7 @@ public class PickupSystem : MonoBehaviour
         SetWeaponHeld(heldItem, true);
 
         if (ammoUIManager != null)
-            ammoUIManager.SetActiveWeapon(heldItem); // เพิ่มบรรทัดนี้
+            ammoUIManager.SetActiveWeapon(heldItem);
     }
     void UnequipWeapon()
     {
@@ -180,7 +169,7 @@ public class PickupSystem : MonoBehaviour
         heldItem = null;
 
         if (ammoUIManager != null)
-            ammoUIManager.SetActiveWeapon(null); // เปลี่ยนจาก SetActiveGun(null)
+            ammoUIManager.SetActiveWeapon(null);
     }
 
     void SetWeaponHeld(GameObject item, bool held)

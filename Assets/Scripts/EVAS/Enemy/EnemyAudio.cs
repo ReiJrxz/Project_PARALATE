@@ -31,6 +31,7 @@ public class EnemyAudioController : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         audioSource.playOnAwake = false;
+        AudioManager.RouteToSfx(audioSource);
     }
 
     /// <summary>เรียกทุกเฟรมพร้อมความเร็วปัจจุบันของ agent จัดการ cooldown ให้เอง</summary>

@@ -28,6 +28,9 @@ public class RunInventory : MonoBehaviour
 
     public void Add(ResourceData data, int amount)
     {
+        if (data == null)
+            return;
+
         if (!collected.ContainsKey(data))
             collected[data] = 0;
         collected[data] += amount;
@@ -41,8 +44,16 @@ public class RunInventory : MonoBehaviour
         collected.Clear();
     }
 
+    /// <summary>ย้ายของที่เก็บในรอบนี้เข้าคลังถาวร (เรียกเมื่อจบด่านสำเร็จเท่านั้น)</summary>
     public void CommitToPersistent()
     {
+        if (PersistentInventory.Instance == null)
+        {
+            // ไม่ล้างของในรอบนี้ เพื่อไม่ให้ของหายถ้าคลังถาวรยังไม่พร้อม
+            Debug.LogError("PersistentInventory.Instance is null — cannot commit run inventory.");
+            return;
+        }
+
         foreach (var pair in collected)
             PersistentInventory.Instance.Add(pair.Key, pair.Value);
 

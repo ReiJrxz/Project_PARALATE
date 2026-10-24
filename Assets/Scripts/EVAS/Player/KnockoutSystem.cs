@@ -32,6 +32,8 @@ public class KnockoutSystem : MonoBehaviour
     [Header("Knockout Stun Duration")]
     public float knockoutStunDuration = 10f;
 
+    private static readonly RaycastHit[] actionHits = new RaycastHit[16];
+
     private PlayerInput playerInput;
     private InputAction killAction;
     private InputAction knockOutAction;
@@ -126,11 +128,12 @@ public class KnockoutSystem : MonoBehaviour
     {
         if (knockoutTarget != null)
         {
+            // EnemyHealth ล็อกศัตรูด้วย key ของตัวเองตอนสลบ จึงปลดเฉพาะล็อกของระบบนี้ได้เลย
             knockoutTarget.KnockOut(knockoutStunDuration);
             Debug.Log(GetKnockoutSuccessMessage(currentKnockoutType));
         }
 
-        ResetKnockoutHold(false);
+        ResetKnockoutHold(true);
     }
 
     void CancelKnockoutHold(string reason)
@@ -204,22 +207,23 @@ public class KnockoutSystem : MonoBehaviour
             return enemy != null;
         }
 
-        RaycastHit[] hits = Physics.SphereCastAll(
+        int hitCount = Physics.SphereCastNonAlloc(
             origin,
             actionRadius,
             direction,
+            actionHits,
             actionRange,
             targetMask,
             QueryTriggerInteraction.Ignore);
 
-        if (hits.Length == 0)
+        if (hitCount == 0)
             return false;
 
-        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        System.Array.Sort(actionHits, 0, hitCount, RaycastHitDistanceComparer.Instance);
 
-        for (int i = 0; i < hits.Length; i++)
+        for (int i = 0; i < hitCount; i++)
         {
-            Collider hitCollider = hits[i].collider;
+            Collider hitCollider = actionHits[i].collider;
 
             if (hitCollider == null || hitCollider.transform.IsChildOf(transform))
                 continue;
@@ -261,8 +265,8 @@ public class KnockoutSystem : MonoBehaviour
             Debug.Log(GetKillSuccessMessage(actionType));
         }
 
-        if (enemy != null && !enemy.IsDead)
-            SetEnemyMovementLocked(enemy, false);
+        // ปลดเฉพาะล็อกของระบบนี้ ถ้าศัตรูตายแล้ว EnemyHealth จะยังล็อกไว้เอง
+        SetEnemyMovementLocked(enemy, false);
 
         SetPlayerMovementLocked(false);
         isPerformingAction = false;
@@ -302,17 +306,17 @@ public class KnockoutSystem : MonoBehaviour
             movementController = GetComponent<TopDownPlayerController>();
 
         if (movementController != null)
-            movementController.SetMovementLocked(locked);
+            movementController.SetMovementLocked(this, locked);
     }
 
-    static void SetEnemyMovementLocked(EnemyHealth enemy, bool locked)
+    void SetEnemyMovementLocked(EnemyHealth enemy, bool locked)
     {
         if (enemy == null)
             return;
 
         EnemyController enemyController = enemy.GetComponent<EnemyController>();
         if (enemyController != null)
-            enemyController.SetMovementLocked(locked);
+            enemyController.SetMovementLocked(this, locked);
     }
 
     static void StartEnemyChase(EnemyHealth enemy, float minimumChaseTime)

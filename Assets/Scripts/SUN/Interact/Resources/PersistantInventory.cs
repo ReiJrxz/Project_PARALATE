@@ -9,8 +9,8 @@ public class PersistentInventory : MonoBehaviour
     static void EnsureExists()
     {
         if (Instance != null) return;
-        GameObject go = new GameObject("RunInventory (Auto)");
-        go.AddComponent<RunInventory>();
+        GameObject go = new GameObject("PersistentInventory (Auto)");
+        go.AddComponent<PersistentInventory>();
     }
     private Dictionary<ResourceData, int> owned = new Dictionary<ResourceData, int>();
 
@@ -27,6 +27,9 @@ public class PersistentInventory : MonoBehaviour
 
     public void Add(ResourceData data, int amount)
     {
+        if (data == null)
+            return;
+
         if (!owned.ContainsKey(data))
             owned[data] = 0;
         owned[data] += amount;

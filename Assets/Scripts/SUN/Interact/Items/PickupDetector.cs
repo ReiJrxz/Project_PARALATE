@@ -1,15 +1,17 @@
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PickupDetector : MonoBehaviour
 {
+    private static readonly Collider[] overlapBuffer = new Collider[32];
+
     public float detectRadius = 3f;
     public LayerMask itemLayer;
-    public TMP_Text promptUI; // หรือ TMP_Text ถ้าใช้ TextMeshPro
+    public TMP_Text promptUI;
 
     private IInteractable currentTarget;
+    private IInteractable lastPromptTarget;
+    private string lastPromptText;
 
     void Update()
     {
@@ -19,19 +21,20 @@ public class PickupDetector : MonoBehaviour
 
     void FindNearestInteractable()
     {
-        Collider[] hits = Physics.OverlapSphere(transform.position, detectRadius, itemLayer);
-        float closestDist = float.MaxValue;
+        int count = Physics.OverlapSphereNonAlloc(transform.position, detectRadius, overlapBuffer, itemLayer);
+        float closestSqrDist = float.MaxValue;
         IInteractable closest = null;
 
-        foreach (var hit in hits)
+        for (int i = 0; i < count; i++)
         {
+            Collider hit = overlapBuffer[i];
             IInteractable interactable = hit.GetComponentInParent<IInteractable>();
             if (interactable == null) continue;
 
-            float dist = Vector3.Distance(transform.position, hit.transform.position);
-            if (dist < closestDist)
+            float sqrDist = (transform.position - hit.transform.position).sqrMagnitude;
+            if (sqrDist < closestSqrDist)
             {
-                closestDist = dist;
+                closestSqrDist = sqrDist;
                 closest = interactable;
             }
         }
@@ -42,10 +45,39 @@ public class PickupDetector : MonoBehaviour
     void UpdatePromptUI()
     {
         if (promptUI == null) return;
-        promptUI.gameObject.SetActive(currentTarget != null);
-        if (currentTarget != null)
-            promptUI.text = currentTarget.PromptText;
+
+        bool hasTarget = currentTarget != null;
+        if (promptUI.gameObject.activeSelf != hasTarget)
+            promptUI.gameObject.SetActive(hasTarget);
+
+        if (!hasTarget)
+        {
+            lastPromptTarget = null;
+            return;
+        }
+
+        // อัปเดตข้อความเมื่อเปลี่ยนเป้าหมายหรือข้อความเปลี่ยนจริงเท่านั้น (NoteReader เปลี่ยนข้อความได้)
+        string text = currentTarget.PromptText;
+        if (lastPromptTarget != currentTarget || lastPromptText != text)
+        {
+            promptUI.text = text;
+            lastPromptTarget = currentTarget;
+            lastPromptText = text;
+        }
     }
 
-    public void TryInteract() => currentTarget?.Interact(gameObject);
+    public void TryInteract()
+    {
+        if (currentTarget == null)
+            return;
+
+        // เป้าหมายอาจถูก Destroy ไปแล้ว (เช่น ResourcePickup) ซึ่ง interface ตรวจ null แบบ Unity ไม่ได้
+        if (currentTarget is Object unityObject && unityObject == null)
+        {
+            currentTarget = null;
+            return;
+        }
+
+        currentTarget.Interact(gameObject);
+    }
 }

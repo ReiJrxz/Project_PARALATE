@@ -26,6 +26,6 @@ public class WeaponSlotUI : MonoBehaviour
     public void SetSelected(bool selected)
     {
         if (backgroundImage != null)
-            backgroundImage.color = selected ? normalColor : selectedColor;
+            backgroundImage.color = selected ? selectedColor : normalColor;
     }
 }

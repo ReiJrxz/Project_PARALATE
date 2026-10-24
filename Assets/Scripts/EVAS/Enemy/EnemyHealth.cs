@@ -1,6 +1,6 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class EnemyHealth : MonoBehaviour
 {
@@ -22,23 +22,37 @@ public class EnemyHealth : MonoBehaviour
     private Quaternion standingRotation;
     private Coroutine knockOutRoutine;
     private EnemyController enemyController;
+    private Camera mainCamera;
 
     public bool IsDead => isDead;
     public bool IsStunned => isStunned;
 
-    private void Start()
+    private void Awake()
     {
         enemyController = GetComponent<EnemyController>();
+    }
+
+    private void Start()
+    {
         currentHealth = maxHealth;
         UpdateHealthBar();
     }
+
     private void LateUpdate()
     {
-        if(healthCanvas != null && Camera.main != null)
-        {
-            healthCanvas.LookAt(healthCanvas.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
-        }
+        if (healthCanvas == null || !healthCanvas.gameObject.activeInHierarchy)
+            return;
+
+        if (mainCamera == null)
+            mainCamera = Camera.main;
+
+        if (mainCamera == null)
+            return;
+
+        // Billboard: หมุนให้ตรงกับกล้องพอดี
+        healthCanvas.rotation = mainCamera.transform.rotation;
     }
+
     public void KnockOut(float stunDuration)
     {
         if (isDead || isStunned)
@@ -50,7 +64,7 @@ public class EnemyHealth : MonoBehaviour
         knockOutRoutine = StartCoroutine(KnockOutRoutine(stunDuration));
     }
 
-    IEnumerator KnockOutRoutine(float stunDuration)
+    private IEnumerator KnockOutRoutine(float stunDuration)
     {
         isStunned = true;
         SetMovementLocked(true);
@@ -77,31 +91,23 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
-        if (isDead || isStunned) return;
+        if (isDead || isStunned)
+            return;
 
-        Debug.Log("<color=yellow>รับดาเมจมา: " + amount + " เลือดก่อนโดนฟันคือ: " + currentHealth + "</color>");
-
-        currentHealth -= amount;
-
-        if (currentHealth < 0) currentHealth = 0;
-
-        Debug.Log("<color=green>เลือดหลังโดนฟันเหลือ: " + currentHealth + "</color>");
-
+        currentHealth = Mathf.Max(currentHealth - amount, 0f);
         UpdateHealthBar();
 
-        if (currentHealth == 0)
-        {
+        if (currentHealth <= 0f)
             Die();
-        }
     }
+
     private void UpdateHealthBar()
     {
-        if (healthBarFill != null)
-        {
-            // Fill Amount รับค่าตั้งแต่ 0 ถึง 1 เท่านั้น เลยต้องเอา เลือดปัจจุบัน / เลือดสูงสุด
+        // fillAmount รับค่า 0-1 เท่านั้น จึงต้องหารด้วยเลือดสูงสุด
+        if (healthBarFill != null && maxHealth > 0f)
             healthBarFill.fillAmount = currentHealth / maxHealth;
-        }
     }
+
     private void Die()
     {
         isDead = true;
@@ -110,25 +116,23 @@ public class EnemyHealth : MonoBehaviour
         switch (onDeath)
         {
             case DeathAction.Destroy:
-                // ทำให้หายไปจากฉาก
                 Destroy(gameObject);
                 break;
 
             case DeathAction.FallOver:
-                // หมุน Capsule ให้นอนลง 90 องศาแนวแกน X
+                // หมุนให้นอนลง 90 องศาแนวแกน X และปิดหลอดเลือด
                 transform.rotation = Quaternion.Euler(90f, transform.eulerAngles.y, transform.eulerAngles.z);
 
-                // ปิดหลอดเลือด
-                if (healthCanvas != null) healthCanvas.gameObject.SetActive(false);
+                if (healthCanvas != null)
+                    healthCanvas.gameObject.SetActive(false);
                 break;
 
             case DeathAction.Revive:
-                // ชุบชีวิต กลับมาเลือดเต็ม 100 เหมือนเดิม
+                // ชุบชีวิต กลับมาเลือดเต็ม
                 isDead = false;
                 SetMovementLocked(false);
                 currentHealth = maxHealth;
                 UpdateHealthBar();
-                Debug.Log("Enemy Revived!");
                 break;
         }
     }
@@ -139,6 +143,6 @@ public class EnemyHealth : MonoBehaviour
             enemyController = GetComponent<EnemyController>();
 
         if (enemyController != null)
-            enemyController.SetMovementLocked(locked);
+            enemyController.SetMovementLocked(this, locked);
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerNoiseEmitter : MonoBehaviour
 {
     [Header("Noise Settings")]
-    [SerializeField] private float walkingNoiseRadius = 5f;
+    [SerializeField] private float walkingNoiseRadius = 7f;
     [SerializeField] private float sprintingNoiseRadius = 15f;
     [SerializeField] private float shootingNoiseRadius = 35f;
     [SerializeField] private float whistlingNoiseRadius = 20f;
@@ -14,22 +14,14 @@ public class PlayerNoiseEmitter : MonoBehaviour
     [SerializeField] private bool showNoiseRanges = false;
     private float lastEmittedNoiseRadius;
     private Vector3 lastEmittedPostion;
-    private float gizmosDisplayTime;
-
-    private void Update()
-    {
-        if(gizmosDisplayTime > 0f)
-        {
-            gizmosDisplayTime -= Time.deltaTime;
-        }
-    }
+    private float gizmosDisplayUntil;
 
     #region Action Methods
 
     //เสียงเดิน/วิ่ง
     public void EmitFootstep(bool isSprinting)
     {
-        if(isSprinting)
+        if (isSprinting)
         {
             EmitNoise(transform.position, sprintingNoiseRadius, NoiseType.Sprinting);
         }
@@ -67,16 +59,16 @@ public class PlayerNoiseEmitter : MonoBehaviour
     {
         NoiseEmitterSystem.Emit(gameObject, origin, radius, type);
 
-        if(showNoiseRanges)
+        if (showNoiseRanges)
         {
             lastEmittedNoiseRadius = radius;
             lastEmittedPostion = origin;
-            gizmosDisplayTime = 0.5f;
+            gizmosDisplayUntil = Time.time + 0.5f;
         }
     }
     private void OnDrawGizmos()
     {
-        if(!showNoiseRanges || gizmosDisplayTime <= 0f)
+        if (!showNoiseRanges || Time.time > gizmosDisplayUntil)
             return;
 
         Gizmos.color = Color.yellow;

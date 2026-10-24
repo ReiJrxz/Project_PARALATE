@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
@@ -45,6 +46,12 @@ public class EnemyController : MonoBehaviour
     private float minimumChaseTimer;
     private bool updateRotationBeforeManualTurn;
 
+    // ล็อกแบบมีเจ้าของ: แต่ละระบบ (ถูกรัดคอ, ยิง, reflex, สลบ) ล็อก/ปลดด้วย key ของตัวเอง
+    // ศัตรูจะขยับได้อีกครั้งก็ต่อเมื่อไม่เหลือใครล็อกอยู่เลย
+    private readonly HashSet<object> movementLockOwners = new HashSet<object>();
+
+    public bool IsMovementLocked => movementLockOwners.Count > 0;
+
     private bool HasWaypoints => waypoints != null && waypoints.Length > 0;
 
     public bool IsChasing =>
@@ -69,7 +76,7 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
-        if (enemyAudio != null && CanUseAgent()) // เพิ่มบล็อกนี้
+        if (enemyAudio != null && CanUseAgent())
             enemyAudio.HandleFootstep(agent.velocity.magnitude);
 
         if (currentState == EnemyState.Locked)
@@ -111,15 +118,24 @@ public class EnemyController : MonoBehaviour
         SetAgentDestination(chaseTarget.position);
     }
 
-    public void SetMovementLocked(bool locked)
+    public void SetMovementLocked(object owner, bool locked)
     {
-        if (locked)
-        {
-            EnterLocked();
+        if (owner == null)
             return;
-        }
 
-        ExitLocked();
+        bool wasLocked = movementLockOwners.Count > 0;
+
+        if (locked)
+            movementLockOwners.Add(owner);
+        else
+            movementLockOwners.Remove(owner);
+
+        bool isLocked = movementLockOwners.Count > 0;
+
+        if (!wasLocked && isLocked)
+            EnterLocked();
+        else if (wasLocked && !isLocked)
+            ExitLocked();
     }
 
     public void RotateYawTowards(Vector3 worldPosition, float turnSpeed)

@@ -1,4 +1,6 @@
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -64,17 +66,8 @@ public class AlertState : MonoBehaviour
     private Vector3 lastKnownPlayerPosition;
     private AlertAIState currentState;
 
-    //public float NeutralPoint => neutralPoint;
-    //public float SuspiciousPoint => suspiciousPoint;
     public float CurrentTotalPoint => neutralPoint + suspiciousPoint;
-    //public float NeutralToSuspiciousPoint => neutralToSuspiciousPoint;
-    //public float SuspiciousToAlertPoint => suspiciousToAlertPoint;
-    //public Vector3 LastKnownPlayerPosition => lastKnownPlayerPosition;
     public AlertAIState CurrentState => currentState;
-    //public AlertDistanceZone CurrentDistanceZone => currentDistanceZone;
-    //public float CurrentDistanceToPlayer => currentDistanceToPlayer;
-    //public float CurrentAlertGainPerSecond => currentAlertGainPerSecond;
-    //public bool IsCountingAlertPoint => isCountingAlertPoint;
     public bool IsAlert => currentState == AlertAIState.Alert || currentState == AlertAIState.Chasing;
 
     private void Awake()
@@ -92,7 +85,7 @@ public class AlertState : MonoBehaviour
         if (fieldOfView.canSeePlayer)
         {
             lastKnownPlayerPosition = fieldOfView.playerRef.transform.position;
-            AddSeenPlayerPoint(GetAlertGainPerSecond() * Time.deltaTime);
+            AddSeenPlayerPoint(currentAlertGainPerSecond * Time.deltaTime);
             returnDecreaseTimer = 0f;
             return;
         }
@@ -236,8 +229,8 @@ public class AlertState : MonoBehaviour
             AlertAIState previousState = currentState;
             ResetAlert();
 
-            if (previousState == AlertAIState.Chasing)
-                enemyController?.StopChase();
+            if (previousState == AlertAIState.Chasing && enemyController != null)
+                enemyController.StopChase();
 
             return;
         }
@@ -245,7 +238,9 @@ public class AlertState : MonoBehaviour
         if (currentState == AlertAIState.Chasing && suspiciousPoint < suspiciousToAlertPoint)
         {
             SetState(AlertAIState.Suspicious);
-            enemyController?.StopChase();
+
+            if (enemyController != null)
+                enemyController.StopChase();
         }
     }
 
@@ -260,7 +255,9 @@ public class AlertState : MonoBehaviour
     private void EnterAlert()
     {
         SetState(AlertAIState.Alert);
-        enemyAudio?.PlayAlertSound();
+
+        if (enemyAudio != null)
+            enemyAudio.PlayAlertSound();
 
         if (fieldOfView != null && fieldOfView.canSeePlayer)
             EnterChasing();
@@ -274,20 +271,6 @@ public class AlertState : MonoBehaviour
 
         if (enemyController != null)
             enemyController.StartChase();
-    }
-
-    private float GetAlertGainPerSecond()
-    {
-        if (currentDistanceZone == AlertDistanceZone.Close)
-            return closeAlertPerSecond;
-
-        if (currentDistanceZone == AlertDistanceZone.Middle)
-            return middleAlertPerSecond;
-
-        if (currentDistanceZone == AlertDistanceZone.Far)
-            return farAlertPerSecond;
-
-        return 0f;
     }
 
     private void UpdateRuntimeDebugValues()
