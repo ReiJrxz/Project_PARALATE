@@ -2226,8 +2226,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZiddikJari.UIButtonHoverEffect
   buttonBackground: {fileID: 593324006}
   buttonText: {fileID: 1875744672}
-  bgHoverColor: {r: 1, g: 1, b: 1, a: 0.5}
-  textHoverColor: {r: 0, g: 0, b: 0, a: 1}
+  bgHoverColor: {r: 1, g: 0.91517913, b: 0, a: 0.5}
+  textHoverColor: {r: 1, g: 1, b: 1, a: 1}
   bgNormalColor: {r: 1, g: 1, b: 1, a: 0}
   textNormalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &649430247
@@ -2378,8 +2378,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZiddikJari.UIButtonHoverEffect
   buttonBackground: {fileID: 649430250}
   buttonText: {fileID: 1554580458}
-  bgHoverColor: {r: 1, g: 1, b: 1, a: 0.5}
-  textHoverColor: {r: 0, g: 0, b: 0, a: 1}
+  bgHoverColor: {r: 1, g: 0.91764706, b: 0, a: 0.5}
+  textHoverColor: {r: 1, g: 1, b: 1, a: 1}
   bgNormalColor: {r: 1, g: 1, b: 1, a: 0}
   textNormalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &739765012
@@ -3629,7 +3629,7 @@ MonoBehaviour:
   audioMixer: {fileID: 24100000, guid: b13fe9efd3c30e7408fea4e2175f9b81, type: 2}
   masterVolumeParameter: MasterVolume
   musicVolumeParameter: MusicVolume
-  sfxMasterVolumeParameter: SfxMasterVolume
+  sfxMasterVolumeParameter: SFXMasterVolume
   sfxVolumeParameter: SFXVolume
   uiVolumeParameter: UIVolume
   sfxSource: {fileID: 1221237274}
@@ -4224,7 +4224,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1228066117}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b1b5783cf12f00419a64d8497bbbea1, type: 3}
   m_Name: 
@@ -4380,8 +4380,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZiddikJari.UIButtonHoverEffect
   buttonBackground: {fileID: 1235127220}
   buttonText: {fileID: 1269034995}
-  bgHoverColor: {r: 1, g: 1, b: 1, a: 0.5}
-  textHoverColor: {r: 0, g: 0, b: 0, a: 1}
+  bgHoverColor: {r: 1, g: 0.91764706, b: 0, a: 0.5}
+  textHoverColor: {r: 1, g: 1, b: 1, a: 1}
   bgNormalColor: {r: 1, g: 1, b: 1, a: 0}
   textNormalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1269034993
@@ -5379,8 +5379,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZiddikJari.UIButtonHoverEffect
   buttonBackground: {fileID: 1608062769}
   buttonText: {fileID: 340688225}
-  bgHoverColor: {r: 1, g: 1, b: 1, a: 0.5}
-  textHoverColor: {r: 0, g: 0, b: 0, a: 1}
+  bgHoverColor: {r: 1, g: 0.91764706, b: 0, a: 0.5}
+  textHoverColor: {r: 1, g: 1, b: 1, a: 1}
   bgNormalColor: {r: 1, g: 1, b: 1, a: 0}
   textNormalColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1624829200
