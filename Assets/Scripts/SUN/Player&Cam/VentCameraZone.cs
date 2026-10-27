@@ -12,12 +12,22 @@ public class VentCameraZone : CameraZone
     {
         if (virtualCamera == null) return;
 
+        ApplyBlend();
+
         virtualCamera.Priority.Value = VENT_PRIORITY;
 
         if (player != null)
             player.SetTankControlMode(true);
 
         Debug.Log($"{name}: เปิดกล้อง Vent {virtualCamera.name}, Priority = {VENT_PRIORITY}");
+    }
+
+    protected override void ForceExit()
+    {
+        base.ForceExit();
+
+        if (player != null)
+            player.SetTankControlMode(false);
     }
 
     protected override void OnTriggerExit(Collider other)

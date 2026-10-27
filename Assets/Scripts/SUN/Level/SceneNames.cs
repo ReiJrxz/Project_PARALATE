@@ -6,7 +6,7 @@ public static class SceneNames
 {
     public const string MainMenu = "MainMenu";
     public const string Base = "Base";
-    public const string Tutorial = "Level0";
+    public const string Tutorial = "Simulation 1";
 
     /// <summary>Scene หน้า Options ที่โหลดแบบ Additive ซ้อนทับ MainMenu</summary>
     public const string Options = "OptionsMenu";

@@ -7,6 +7,8 @@ public class PickupDetector : MonoBehaviour
 
     public float detectRadius = 3f;
     public LayerMask itemLayer;
+    [Tooltip("ข้อความ prompt แบบเดิม ใช้เฉพาะเมื่อใน Scene ไม่มี InteractUIManager " +
+             "(ถ้ามี InteractUIManager จะใช้ข้อความตัวเดียวกันกับบันไดและประตูแทน)")]
     public TMP_Text promptUI;
 
     private IInteractable currentTarget;
@@ -42,11 +44,38 @@ public class PickupDetector : MonoBehaviour
         currentTarget = closest;
     }
 
+    void OnDisable()
+    {
+        currentTarget = null;
+
+        if (InteractUIManager.Instance != null)
+            InteractUIManager.Instance.HideInteract(this);
+    }
+
     void UpdatePromptUI()
     {
+        // มี InteractUIManager = ใช้ข้อความตัวเดียวของทั้งเกม (ร่วมกับบันได/ประตู)
+        InteractUIManager sharedUI = InteractUIManager.Instance;
+        if (sharedUI != null)
+        {
+            // ข้อความแบบเดิมไม่ใช้แล้ว (ยกเว้นเป็นตัวเดียวกับที่ InteractUIManager ใช้ ห้ามปิดเด็ดขาด)
+            if (promptUI != null && promptUI != sharedUI.interactText && promptUI.gameObject.activeSelf)
+                promptUI.gameObject.SetActive(false);
+
+            // ข้อความว่าง = เป้าหมายขอซ่อนป้าย (เช่น หน้าเลือกด่านกำลังเปิดอยู่)
+            string sharedText = currentTarget != null ? currentTarget.PromptText : null;
+
+            if (!string.IsNullOrEmpty(sharedText))
+                sharedUI.ShowInteract(this, sharedText);
+            else
+                sharedUI.HideInteract(this);
+
+            return;
+        }
+
         if (promptUI == null) return;
 
-        bool hasTarget = currentTarget != null;
+        bool hasTarget = currentTarget != null && !string.IsNullOrEmpty(currentTarget.PromptText);
         if (promptUI.gameObject.activeSelf != hasTarget)
             promptUI.gameObject.SetActive(hasTarget);
 

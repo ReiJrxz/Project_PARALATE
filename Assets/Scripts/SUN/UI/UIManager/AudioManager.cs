@@ -31,6 +31,8 @@ public sealed class AudioManager : MonoBehaviour
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private string masterVolumeParameter = "MasterVolume";
     [SerializeField] private string musicVolumeParameter = "MusicVolume";
+    [Tooltip("Exposed Parameter ของกลุ่มแม่ที่คุมทั้ง SFX และ UI")]
+    [SerializeField] private string sfxMasterVolumeParameter = "SfxMasterVolume";
     [SerializeField] private string sfxVolumeParameter = "SfxVolume";
     [SerializeField] private string uiVolumeParameter = "UIVolume";
 
@@ -49,11 +51,13 @@ public sealed class AudioManager : MonoBehaviour
 
     private const string MasterPrefsKey = "MasterVolume";
     private const string MusicPrefsKey = "MusicVolume";
+    private const string SfxMasterPrefsKey = "SfxMasterVolume";
     private const string SfxPrefsKey = "SfxVolume";
     private const string UiPrefsKey = "UIVolume";
 
     private float masterVolume = 1f;
     private float musicVolume = 1f;
+    private float sfxMasterVolume = 1f;
     private float sfxVolume = 1f;
     private float uiVolume = 1f;
 
@@ -63,6 +67,7 @@ public sealed class AudioManager : MonoBehaviour
 
     public float MasterVolume => masterVolume;
     public float MusicVolume => musicVolume;
+    public float MasterSfxVolume => sfxMasterVolume;
     public float SfxVolume => sfxVolume;
     public float UIVolume => uiVolume;
 
@@ -98,16 +103,30 @@ public sealed class AudioManager : MonoBehaviour
 
         masterVolume = PlayerPrefs.GetFloat(MasterPrefsKey, 1f);
         musicVolume = PlayerPrefs.GetFloat(MusicPrefsKey, 1f);
+        sfxMasterVolume = PlayerPrefs.GetFloat(SfxMasterPrefsKey, 1f);
         sfxVolume = PlayerPrefs.GetFloat(SfxPrefsKey, 1f);
         uiVolume = PlayerPrefs.GetFloat(UiPrefsKey, 1f);
 
-        ApplyMixerVolume(masterVolumeParameter, masterVolume);
-        ApplyMixerVolume(musicVolumeParameter, musicVolume);
-        ApplyMixerVolume(sfxVolumeParameter, sfxVolume);
-        ApplyMixerVolume(uiVolumeParameter, uiVolume);
+        ApplyAllVolumes();
 
         SceneManager.sceneLoaded += OnSceneLoaded;
         PlayMusicForScene(SceneManager.GetActiveScene().name);
+    }
+
+    private void Start()
+    {
+        // AudioMixer.SetFloat ใน Awake บางครั้งไม่มีผล (Mixer ยังไม่พร้อม) จึงตั้งซ้ำอีกครั้งใน Start
+        if (Instance == this)
+            ApplyAllVolumes();
+    }
+
+    private void ApplyAllVolumes()
+    {
+        ApplyMixerVolume(masterVolumeParameter, masterVolume);
+        ApplyMixerVolume(musicVolumeParameter, musicVolume);
+        ApplyMixerVolume(sfxMasterVolumeParameter, sfxMasterVolume);
+        ApplyMixerVolume(sfxVolumeParameter, sfxVolume);
+        ApplyMixerVolume(uiVolumeParameter, uiVolume);
     }
 
     private void OnDestroy()
@@ -242,6 +261,12 @@ public sealed class AudioManager : MonoBehaviour
     public void SetMusicVolume(float value)
     {
         musicVolume = SetVolume(musicVolumeParameter, MusicPrefsKey, value);
+    }
+
+    /// <summary>Master ของเสียง SFX + UI (กลุ่มแม่ใน Mixer)</summary>
+    public void SetMasterSfxVolume(float value)
+    {
+        sfxMasterVolume = SetVolume(sfxMasterVolumeParameter, SfxMasterPrefsKey, value);
     }
 
     public void SetSfxVolume(float value)

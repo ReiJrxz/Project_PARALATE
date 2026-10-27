@@ -32,6 +32,12 @@ public class KnockoutSystem : MonoBehaviour
     [Header("Knockout Stun Duration")]
     public float knockoutStunDuration = 10f;
 
+    [Header("UI")]
+    [Tooltip("ไม่บังคับ: ถ้าเว้นว่างจะหา KnockoutPromptUI ใน Scene เอง")]
+    public KnockoutPromptUI promptUI;
+    [Tooltip("ความถี่ในการเช็คว่าอยู่ข้างหลังศัตรูหรือไม่ (วินาที)")]
+    public float promptCheckInterval = 0.1f;
+
     private static readonly RaycastHit[] actionHits = new RaycastHit[16];
 
     private PlayerInput playerInput;
@@ -44,6 +50,8 @@ public class KnockoutSystem : MonoBehaviour
     private float knockoutHoldTimer;
     private EnemyHealth knockoutTarget;
     private StealthActionType currentKnockoutType;
+    private float promptCheckTimer;
+    private bool promptShown;
 
     public bool IsKnockout => isPerformingAction || isHoldingKnockout;
 
@@ -56,10 +64,27 @@ public class KnockoutSystem : MonoBehaviour
         pickupSystem = GetComponent<PickupSystem>();
     }
 
+    void Start()
+    {
+        if (promptUI == null)
+            promptUI = FindFirstObjectByType<KnockoutPromptUI>(FindObjectsInactive.Include);
+    }
+
+    void OnDisable()
+    {
+        SetPromptVisible(false);
+
+        if (promptUI != null)
+            promptUI.EndCountdown();
+    }
+
     void Update()
     {
         if (movementController != null && movementController.IsMovementLocked && !isHoldingKnockout)
+        {
+            SetPromptVisible(false);
             return;
+        }
 
         if (isPerformingAction)
             return;
@@ -68,6 +93,36 @@ public class KnockoutSystem : MonoBehaviour
             TryKill();
 
         HandleKnockoutHold();
+        UpdateActionPrompt();
+    }
+
+    // โชว์ "LeftCtrl to mercy / F to kill" เมื่อมีศัตรูที่ลงมือได้อยู่ตรงหน้า (เงื่อนไขเดียวกับตอนกดปุ่มจริง)
+    void UpdateActionPrompt()
+    {
+        if (promptUI == null)
+            return;
+
+        if (IsKnockout)
+        {
+            SetPromptVisible(false);
+            return;
+        }
+
+        promptCheckTimer -= Time.deltaTime;
+        if (promptCheckTimer > 0f)
+            return;
+
+        promptCheckTimer = promptCheckInterval;
+        SetPromptVisible(TryGetTarget(out _));
+    }
+
+    void SetPromptVisible(bool visible)
+    {
+        if (promptUI == null || promptShown == visible)
+            return;
+
+        promptShown = visible;
+        promptUI.SetPromptVisible(visible);
     }
 
     void TryKill()
@@ -100,6 +155,11 @@ public class KnockoutSystem : MonoBehaviour
 
             SetEnemyMovementLocked(knockoutTarget, true);
             SetPlayerMovementLocked(true);
+
+            SetPromptVisible(false);
+            if (promptUI != null)
+                promptUI.BeginCountdown(false, knockoutHoldDuration);
+
             Debug.Log(GetKnockoutHoldStartMessage(currentKnockoutType, knockoutHoldDuration));
         }
 
@@ -120,6 +180,9 @@ public class KnockoutSystem : MonoBehaviour
 
         knockoutHoldTimer += Time.deltaTime;
 
+        if (promptUI != null)
+            promptUI.SetRemaining(knockoutHoldDuration - knockoutHoldTimer);
+
         if (knockoutHoldTimer >= knockoutHoldDuration)
             CompleteKnockout();
     }
@@ -133,6 +196,9 @@ public class KnockoutSystem : MonoBehaviour
             Debug.Log(GetKnockoutSuccessMessage(currentKnockoutType));
         }
 
+        if (promptUI != null)
+            promptUI.EndCountdown();
+
         ResetKnockoutHold(true);
     }
 
@@ -141,6 +207,11 @@ public class KnockoutSystem : MonoBehaviour
         EnemyHealth failedTarget = knockoutTarget;
 
         Debug.Log(reason);
+
+        // ปล่อยก่อนเสร็จ: หลอดค่อยๆ เพิ่มกลับจนเต็มแล้วซ่อน
+        if (promptUI != null)
+            promptUI.ReleaseEarly();
+
         ResetKnockoutHold(true);
         StartEnemyChase(failedTarget, 3f);
     }
@@ -164,8 +235,6 @@ public class KnockoutSystem : MonoBehaviour
                                + (transform.right * actionRaycastOffset.x)
                                + (transform.up * actionRaycastOffset.y)
                                + (transform.forward * actionRaycastOffset.z);
-
-        Debug.DrawRay(attackOrigin, transform.forward * actionRange, Color.magenta, 2f);
 
         if (!TryFindEnemyInActionArc(attackOrigin, transform.forward, out enemy))
             return false;
@@ -248,6 +317,7 @@ public class KnockoutSystem : MonoBehaviour
     IEnumerator KillSequence(EnemyHealth enemy, StealthActionType actionType)
     {
         isPerformingAction = true;
+        SetPromptVisible(false);
         SetPlayerMovementLocked(true);
         SetEnemyMovementLocked(enemy, true);
 
@@ -257,7 +327,23 @@ public class KnockoutSystem : MonoBehaviour
 
         Debug.Log(GetKillStartMessage(actionType, delay));
 
-        yield return new WaitForSeconds(delay);
+        // นับถอยหลังพร้อมอัปเดตหลอด (เวลารวมเท่าเดิมกับ WaitForSeconds(delay))
+        if (promptUI != null)
+            promptUI.BeginCountdown(true, delay);
+
+        float remaining = delay;
+        while (remaining > 0f)
+        {
+            remaining -= Time.deltaTime;
+
+            if (promptUI != null)
+                promptUI.SetRemaining(Mathf.Max(0f, remaining));
+
+            yield return null;
+        }
+
+        if (promptUI != null)
+            promptUI.EndCountdown();
 
         if (enemy != null)
         {

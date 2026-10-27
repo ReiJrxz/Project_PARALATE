@@ -89,12 +89,9 @@ GameObject:
   - component: {fileID: 1308704703181722196}
   - component: {fileID: 7229898400743049072}
   - component: {fileID: 7717890220541595206}
-  - component: {fileID: 8672259171821128312}
   - component: {fileID: 6344518851335881470}
   - component: {fileID: 8951187399617778230}
   - component: {fileID: 184613564265374035}
-  - component: {fileID: 5350436961949451085}
-  - component: {fileID: 7944954573667976441}
   - component: {fileID: 2849337750918315522}
   - component: {fileID: 6044956673403840519}
   - component: {fileID: 8617868563665944825}
@@ -251,6 +248,7 @@ MonoBehaviour:
   rotationSpeed: 15
   isArmed: 0
   cameraZoomSpeed: 10
+  wallHug: {fileID: 0}
   virtualCamera: {fileID: 0}
   vaultDistance: 2
   vaultHeight: 1.2
@@ -275,41 +273,7 @@ MonoBehaviour:
   isInVentMode: 0
   ventMoveSpeed: 2.5
   ventTurnSpeed: 90
-  playerAudio: {fileID: 8672259171821128312}
---- !u!114 &8672259171821128312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3523246845713457628}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f46f14bdb555303429e5b7fdfbddd099, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerAudioController
-  baseFootstepInterval: 0.4
-  referenceSpeed: 5
-  minFootstepInterval: 0.2
-  surfaceSounds: []
-  defaultFootstepClips:
-  - {fileID: 8300000, guid: c6adaf6028e80aa40959254af1287d9f, type: 3}
-  groundCheckDistance: 1.2
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 31735
-  whistleClip: {fileID: 8300000, guid: dd1ea513a307dda4bb24fc188c074ba8, type: 3}
-  pitchVariance: 0.08
-  volumeVariance: 0.15
-  footstepBaseVolume: 1
-  footstepInterval: 0.35
-  sprintIntervalMultiplier: 0.7
-  walkNoiseRadius: 7
-  sprintNoiseRadius: 15
-  whistleNoiseRadius: 20
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 2048
+  playerAudio: {fileID: 0}
 --- !u!114 &6344518851335881470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -393,7 +357,7 @@ MonoBehaviour:
     m_ActionName: 'Player/Whistle[/Keyboard/v]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5350436961949451085}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
         m_MethodName: OnWallLean
         m_Mode: 0
@@ -423,6 +387,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 25807322-cd3d-44ba-a9f5-207df6b91cdb
     m_ActionName: 'Player/ScrollWeapon[/Mouse/scroll/y]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f5036698-8142-45b0-aa03-db2ce069bd86
+    m_ActionName: 'Player/CameraLook[/Mouse/delta]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -441,10 +409,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PickupSystem
   PickUp: {fileID: 348967990992679904}
-  pickupRange: 3
-  itemLayer:
-    serializedVersion: 2
-    m_Bits: 4096
   holdPositionOffset: {x: 0, y: 0, z: 0}
   holdRotationOffset: {x: 0, y: 90, z: 0}
   ammoUIManager: {fileID: 0}
@@ -472,47 +436,8 @@ MonoBehaviour:
   killDelayWithKnife: 1.5
   knockoutHoldDuration: 3
   knockoutStunDuration: 60
---- !u!114 &5350436961949451085
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3523246845713457628}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c848b77dfd36ff941a921bdde442449e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  actionCamera: {fileID: 7944954573667976441}
-  wallCheckDistance: 1
-  wallExitDistance: 1.5
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 512
-  maxFacingAngle: 120
---- !u!114 &7944954573667976441
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3523246845713457628}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f55d55cf6ce5e14dad9ed9167ae9c67, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ActionCameraController
-  wallLeanCamera: {fileID: 0}
-  cameraDistance: 3.5
-  cameraHeight: 1.6
-  lookAtHeight: 1.5
-  sideOffsetAngle: 30
-  screenSideOffset: 0.5
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 512
-  transitionSpeed: 5
+  promptUI: {fileID: 0}
+  promptCheckInterval: 0.1
 --- !u!114 &2849337750918315522
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1975,7 +1975,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 220, y: 131}
+  m_AnchoredPosition: {x: 213.6, y: 49.2}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &575157422
@@ -2025,8 +2025,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 38
+  m_fontSizeBase: 38
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2161,7 +2161,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 593324006}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 424566690}
+        m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
+        m_MethodName: OnLoadGamePressed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &593324006
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2973,7 +2985,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &881310423
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3144,7 +3156,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &979612820
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3617,6 +3629,7 @@ MonoBehaviour:
   audioMixer: {fileID: 24100000, guid: b13fe9efd3c30e7408fea4e2175f9b81, type: 2}
   masterVolumeParameter: MasterVolume
   musicVolumeParameter: MusicVolume
+  sfxMasterVolumeParameter: SfxMasterVolume
   sfxVolumeParameter: SFXVolume
   uiVolumeParameter: UIVolume
   sfxSource: {fileID: 1221237274}
@@ -4176,6 +4189,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7389c01adb071ca4da2b6013a0f24734, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
+  fadeOutDuration: 0.4
+  fadeInDuration: 0.5
+  minLoadingTime: 0.5
+  teleportBlackHoldTime: 0.2
 --- !u!114 &1228066120
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4522,7 +4539,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1374391529
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4535,6 +4552,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7389c01adb071ca4da2b6013a0f24734, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
+  fadeOutDuration: 0.4
+  fadeInDuration: 0.5
+  minLoadingTime: 0.5
+  teleportBlackHoldTime: 0.2
 --- !u!4 &1374391530
 Transform:
   m_ObjectHideFlags: 0
@@ -5379,7 +5400,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1624829201
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5396,7 +5417,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 179, y: 75}
+  m_AnchoredPosition: {x: 235.70006, y: 76.90001}
   m_SizeDelta: {x: 233.4589, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1624829202
@@ -5419,7 +5440,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: The Casual Stealth game
+  m_text: MythG Game
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5452,9 +5473,9 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1

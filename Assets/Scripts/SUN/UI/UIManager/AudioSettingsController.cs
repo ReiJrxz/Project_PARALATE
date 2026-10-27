@@ -11,6 +11,8 @@ public class AudioSettingsController : MonoBehaviour
     [Header("Sliders (ไม่บังคับ — ใช้ตั้งค่าเริ่มต้นตอนเปิดหน้า Option)")]
     [SerializeField] private Slider masterSlider;
     [SerializeField] private Slider musicSlider;
+    [Tooltip("Master ของ SFX + UI")]
+    [SerializeField] private Slider mastersfxSlider;
     [SerializeField] private Slider sfxSlider;
     [SerializeField] private Slider uiSlider;
 
@@ -22,6 +24,7 @@ public class AudioSettingsController : MonoBehaviour
 
         SetSlider(masterSlider, audio.MasterVolume);
         SetSlider(musicSlider, audio.MusicVolume);
+        SetSlider(mastersfxSlider, audio.MasterSfxVolume);
         SetSlider(sfxSlider, audio.SfxVolume);
         SetSlider(uiSlider, audio.UIVolume);
     }
@@ -41,6 +44,12 @@ public class AudioSettingsController : MonoBehaviour
     public void SetMusicVolume(float value)
     {
         if (AudioManager.Instance != null) AudioManager.Instance.SetMusicVolume(value);
+    }
+
+    // ผูกกับ Slider "Master SFX" (คุม SFX + UI พร้อมกัน)
+    public void SetMasterSFXVolume(float value)
+    {
+        if (AudioManager.Instance != null) AudioManager.Instance.SetMasterSfxVolume(value);
     }
 
     public void SetSFXVolume(float value)

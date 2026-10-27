@@ -82,6 +82,10 @@ public class PlayerHealth : MonoBehaviour
         if (DeadScene != null)
             DeadScene.gameObject.SetActive(true);
 
+        // หน้า Game Over ต้องคลิกปุ่มได้: คืนเมาส์ให้ (โหลดใหม่แล้ว TopDownPlayerController.Start ซ่อนอีกครั้ง)
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
         // รอบนี้ล้มเหลว: ของที่เก็บมาในรอบนี้ไม่ถูกเก็บถาวร และเล่นเสียงแพ้
         if (LevelManager.Instance != null)
             LevelManager.Instance.OnRunFailed();
