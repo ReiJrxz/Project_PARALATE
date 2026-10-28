@@ -26,6 +26,7 @@ public class EnemyHealth : MonoBehaviour
 
     public bool IsDead => isDead;
     public bool IsStunned => isStunned;
+    public float HealthPercent => maxHealth <= 0f ? 0f : currentHealth / maxHealth;
 
     private void Awake()
     {

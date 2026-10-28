@@ -45,6 +45,7 @@ public class EnemyController : MonoBehaviour
     private float lostSightTimer;
     private float minimumChaseTimer;
     private bool updateRotationBeforeManualTurn;
+    private bool goapControlActive;
 
     // ล็อกแบบมีเจ้าของ: แต่ละระบบ (ถูกรัดคอ, ยิง, reflex, สลบ) ล็อก/ปลดด้วย key ของตัวเอง
     // ศัตรูจะขยับได้อีกครั้งก็ต่อเมื่อไม่เหลือใครล็อกอยู่เลย
@@ -56,6 +57,7 @@ public class EnemyController : MonoBehaviour
 
     public bool IsChasing =>
         currentState == EnemyState.Chase || (currentState == EnemyState.Locked && stateBeforeLock == EnemyState.Chase);
+    public bool IsGoapControlled => goapControlActive;
 
     private void Awake()
     {
@@ -80,6 +82,9 @@ public class EnemyController : MonoBehaviour
             enemyAudio.HandleFootstep(agent.velocity.magnitude);
 
         if (currentState == EnemyState.Locked)
+            return;
+
+        if (goapControlActive)
             return;
 
         if (currentState != EnemyState.Chase && ShouldStartChaseTarget())
@@ -221,6 +226,27 @@ public class EnemyController : MonoBehaviour
             return;
 
         EnterPatrol(true);
+    }
+
+    public void SetGoapControl(bool active)
+    {
+        if (goapControlActive == active)
+            return;
+
+        goapControlActive = active;
+        if (active || currentState == EnemyState.Locked)
+            return;
+
+        EnterPatrol(true);
+    }
+
+    public void MoveToCombatPoint(Vector3 point)
+    {
+        if (currentState == EnemyState.Locked) return;
+        agent.speed = chaseSpeed;
+        SetAgentStopped(false);
+        agent.updateRotation = true;
+        SetAgentDestination(point);
     }
 
     private void EnterPatrol(bool useNearestWaypoint)

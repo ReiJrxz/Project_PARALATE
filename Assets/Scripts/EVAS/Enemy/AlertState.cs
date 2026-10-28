@@ -1,6 +1,3 @@
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -46,6 +43,12 @@ public class AlertState : MonoBehaviour
     [SerializeField] private float returnPointDecrease = 1f; //แต้มลดลง ต่อ ระยะเวลากลับ
     [SerializeField] private float returnDecreaseInterval = 2f; //ระยะเวลาในการลดแต้มกลับ
 
+    [Header("Paranoid System")]
+    [SerializeField, Min(0)] private int paranoidLevel;
+    [SerializeField, Min(1f)] private float paranoidGainMultiplier = 1.5f;
+    [SerializeField, Min(1)] private int instantAlertThreshold = 3;
+    [SerializeField, Min(0f)] private float paranoidReturnSlowdownPerLevel = 0.25f;
+
     [Header("Debug")]
     [SerializeField] private bool showDebugGizmos = true;
     [SerializeField] private bool showDebugLabel = true;
@@ -66,8 +69,18 @@ public class AlertState : MonoBehaviour
     private Vector3 lastKnownPlayerPosition;
     private AlertAIState currentState;
 
+    //public float NeutralPoint => neutralPoint;
+    //public float SuspiciousPoint => suspiciousPoint;
     public float CurrentTotalPoint => neutralPoint + suspiciousPoint;
+    //public float NeutralToSuspiciousPoint => neutralToSuspiciousPoint;
+    //public float SuspiciousToAlertPoint => suspiciousToAlertPoint;
+    //public Vector3 LastKnownPlayerPosition => lastKnownPlayerPosition;
     public AlertAIState CurrentState => currentState;
+    public Vector3 LastKnownPlayerPosition => lastKnownPlayerPosition;
+    //public AlertDistanceZone CurrentDistanceZone => currentDistanceZone;
+    //public float CurrentDistanceToPlayer => currentDistanceToPlayer;
+    //public float CurrentAlertGainPerSecond => currentAlertGainPerSecond;
+    //public bool IsCountingAlertPoint => isCountingAlertPoint;
     public bool IsAlert => currentState == AlertAIState.Alert || currentState == AlertAIState.Chasing;
 
     private void Awake()
@@ -85,7 +98,7 @@ public class AlertState : MonoBehaviour
         if (fieldOfView.canSeePlayer)
         {
             lastKnownPlayerPosition = fieldOfView.playerRef.transform.position;
-            AddSeenPlayerPoint(currentAlertGainPerSecond * Time.deltaTime);
+            AddSeenPlayerPoint(GetAlertGainPerSecond() * Time.deltaTime);
             returnDecreaseTimer = 0f;
             return;
         }
@@ -131,6 +144,7 @@ public class AlertState : MonoBehaviour
         suspiciousPoint = 0f;
         returnDecreaseTimer = 0f;
         SetState(AlertAIState.Neutral);
+        GetComponent<GoapAgent>()?.SetCombatActive(false);
     }
 
     public void AddSuspiciousPoint(Vector3 sourcePosition, float amount)
@@ -140,7 +154,19 @@ public class AlertState : MonoBehaviour
 
         lastKnownPlayerPosition = sourcePosition;
 
-        AddStatePoint(amount);
+        if (paranoidLevel >= instantAlertThreshold)
+        {
+            EnterAlert();
+            return;
+        }
+
+        AddStatePoint(amount * Mathf.Pow(paranoidGainMultiplier, paranoidLevel));
+    }
+
+    public void ReceiveReinforcement(Vector3 sourcePosition)
+    {
+        lastKnownPlayerPosition = sourcePosition;
+        if (!IsAlert) EnterAlert();
     }
 
     public void EnterReturnState()
@@ -150,6 +176,16 @@ public class AlertState : MonoBehaviour
 
         SetState(AlertAIState.Return);
         returnDecreaseTimer = 0f;
+    }
+
+    public void BeginLostTargetSearch()
+    {
+        if (!IsAlert)
+            return;
+
+        SetState(AlertAIState.Suspicious);
+        enemyController?.StopChase();
+        enemyController?.MoveToInvestigationPoint(lastKnownPlayerPosition);
     }
 
     private void AddSeenPlayerPoint(float amount)
@@ -197,7 +233,8 @@ public class AlertState : MonoBehaviour
     {
         returnDecreaseTimer += Time.deltaTime;
 
-        if (returnDecreaseTimer < returnDecreaseInterval)
+        float adjustedInterval = returnDecreaseInterval * (1f + paranoidLevel * paranoidReturnSlowdownPerLevel);
+        if (returnDecreaseTimer < adjustedInterval)
             return;
 
         returnDecreaseTimer = 0f;
@@ -229,8 +266,8 @@ public class AlertState : MonoBehaviour
             AlertAIState previousState = currentState;
             ResetAlert();
 
-            if (previousState == AlertAIState.Chasing && enemyController != null)
-                enemyController.StopChase();
+            if (previousState == AlertAIState.Chasing)
+                enemyController?.StopChase();
 
             return;
         }
@@ -238,9 +275,7 @@ public class AlertState : MonoBehaviour
         if (currentState == AlertAIState.Chasing && suspiciousPoint < suspiciousToAlertPoint)
         {
             SetState(AlertAIState.Suspicious);
-
-            if (enemyController != null)
-                enemyController.StopChase();
+            enemyController?.StopChase();
         }
     }
 
@@ -255,9 +290,9 @@ public class AlertState : MonoBehaviour
     private void EnterAlert()
     {
         SetState(AlertAIState.Alert);
-
-        if (enemyAudio != null)
-            enemyAudio.PlayAlertSound();
+        paranoidLevel++;
+        enemyAudio?.PlayAlertSound();
+        GetComponent<GoapAgent>()?.SetCombatActive(true);
 
         if (fieldOfView != null && fieldOfView.canSeePlayer)
             EnterChasing();
@@ -271,6 +306,22 @@ public class AlertState : MonoBehaviour
 
         if (enemyController != null)
             enemyController.StartChase();
+
+        GetComponent<GoapAgent>()?.SetCombatActive(true);
+    }
+
+    private float GetAlertGainPerSecond()
+    {
+        if (currentDistanceZone == AlertDistanceZone.Close)
+            return closeAlertPerSecond;
+
+        if (currentDistanceZone == AlertDistanceZone.Middle)
+            return middleAlertPerSecond;
+
+        if (currentDistanceZone == AlertDistanceZone.Far)
+            return farAlertPerSecond;
+
+        return 0f;
     }
 
     private void UpdateRuntimeDebugValues()
@@ -354,6 +405,9 @@ public class AlertState : MonoBehaviour
 
         if (logStateChanges)
             Debug.Log($"{name} Alert State: {previousState} -> {currentState}", this);
+
+        if (state != AlertAIState.Alert && state != AlertAIState.Chasing)
+            GetComponent<GoapAgent>()?.SetCombatActive(false);
     }
 
 #if UNITY_EDITOR
@@ -366,7 +420,7 @@ public class AlertState : MonoBehaviour
             $"Counting: {isCountingAlertPoint} | Gain: {currentAlertGainPerSecond:0.0}/s\n" +
             $"Point: {CurrentTotalPoint:0.0}/{neutralToSuspiciousPoint + suspiciousToAlertPoint:0.0}";
 
-        Handles.Label(transform.position + Vector3.up * 2f, labelText);
+        UnityEditor.Handles.Label(transform.position + Vector3.up * 2f, labelText);
     }
 
 #endif
