@@ -9,6 +9,15 @@ public class EnemyNoiseSensor : MonoBehaviour, INoiseListener
 
     [Header("Memory Settings")]
     [SerializeField] private float memoryDuration = 5f;
+
+    [Header("Noise Response Settings")]
+    [SerializeField] private NoiseSetting walkingSetting = new NoiseSetting(1, 1f);
+    [SerializeField] private NoiseSetting sprintingSetting = new NoiseSetting(3, 4f);
+    [SerializeField] private NoiseSetting shootingSetting = new NoiseSetting(4, 6f);
+    [SerializeField] private NoiseSetting whistlingSetting = new NoiseSetting(2, 2f);
+    [SerializeField] private NoiseSetting throwingSetting = new NoiseSetting(2, 2f);
+    [SerializeField] private NoiseSetting bulletHitWallSetting = new NoiseSetting(2, 4f);
+
     private float memoryTimer = 0f;
     private bool isInvestigating = false;
     private NoiseType currentTargetNoiseType;
@@ -65,50 +74,33 @@ public class EnemyNoiseSensor : MonoBehaviour, INoiseListener
         }
     }
 
-    private float GetAlertPoints(NoiseType type)
+    [System.Serializable]
+    public struct NoiseSetting
+    {
+        public int priority;
+        public float alertPoints;
+        public NoiseSetting(int priority, float alertPoints)
+        {
+            this.priority = priority;
+            this.alertPoints = alertPoints;
+        }
+    }
+    private NoiseSetting GetSetting(NoiseType type)
     {
         return type switch
         {
-            NoiseType.Shooting => 6f,
-            NoiseType.Sprinting => 4f,
-            NoiseType.BulletHitWall => 4f,
-            NoiseType.Whistling => 2f,
-            NoiseType.Throwing => 2f,
-            NoiseType.Walking => 1f,
-            _ => 0f
+            NoiseType.Shooting => shootingSetting,
+            NoiseType.Sprinting => sprintingSetting,
+            NoiseType.BulletHitWall => bulletHitWallSetting,
+            NoiseType.Whistling => whistlingSetting,
+            NoiseType.Throwing => throwingSetting,
+            NoiseType.Walking => walkingSetting,
+            _ => default
         };
     }
 
-    //private void ApplyBehaviorByNoiseType(NoiseType type)
-    //{
-    //    switch (type)
-    //    {
-    //        case NoiseType.Shooting:
-    //            break;
-
-    //        case NoiseType.Sprinting:
-    //            break;
-
-    //        case NoiseType.Whistling:
-    //        case NoiseType.Throwing:
-    //        case NoiseType.Walking:
-    //        default:
-    //            break;
-    //    }
-    //}
-    private int GetNoisePriority(NoiseType type)
-    {
-        return type switch
-        {
-            NoiseType.Shooting => 4,
-            NoiseType.Sprinting => 3,
-            NoiseType.BulletHitWall => 2,
-            NoiseType.Whistling => 2,
-            NoiseType.Throwing => 2,
-            NoiseType.Walking => 1,
-            _ => 0
-        };
-    }
+    private float GetAlertPoints(NoiseType type) => GetSetting(type).alertPoints;
+    private int GetNoisePriority(NoiseType type) => GetSetting(type).priority;
 
     private void OnDrawGizmosSelected()
     {
