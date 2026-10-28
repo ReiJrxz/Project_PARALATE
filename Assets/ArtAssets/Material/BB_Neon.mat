@@ -179,7 +179,7 @@ Material:
     - _DstBlend: 0
     - _DstBlend2: 0
     - _EdgeWidth: 0.0368
-    - _EmissionStrength: 16.09
+    - _EmissionStrength: 0.8
     - _EmissiveColorMode: 1
     - _EmissiveExposureWeight: 1
     - _EmissiveIntensity: 1
@@ -191,8 +191,8 @@ Material:
     - _FresnelPower: 3
     - _FresnelWidth: 0.25
     - _GridScale: 1
-    - _GridStrength: 1
-    - _GridWidth: 0.0202
+    - _GridStrength: 0.2
+    - _GridWidth: 0.006
     - _HeightAmplitude: 0.02
     - _HeightCenter: 0.5
     - _HeightMapParametrization: 0
@@ -274,7 +274,7 @@ Material:
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissiveColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissiveColorLDR: {r: 0, g: 0, b: 0, a: 1}
-    - _GridColor: {r: 0.02, g: 0.25, b: 0.42, a: 1}
+    - _GridColor: {r: 0, g: 0, b: 0.019607844, a: 1}
     - _InvPrimScale: {r: 1, g: 1, b: 0, a: 0}
     - _IridescenceThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}

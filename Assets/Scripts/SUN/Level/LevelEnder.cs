@@ -29,16 +29,49 @@ public class LevelExitTrigger : MonoBehaviour
     [Tooltip("ใช้ได้ครั้งเดียว (ใช้กับโหมดวาร์ปในด่านเท่านั้น โหมดโหลด Scene จะใช้ครั้งเดียวอยู่แล้ว)")]
     public bool oneShot = true;
 
+    [Tooltip("เปิดเพื่อดู Console ว่าทำไมวาร์ปถึงทำงาน/ไม่ทำงาน")]
+    public bool debugLog = false;
+
     private bool busy;
 
     void OnTriggerEnter(Collider other)
     {
-        if (busy || !other.CompareTag("Player"))
+        if (!other.CompareTag("Player"))
+        {
+            if (debugLog)
+                Debug.Log($"[{name}] ถูกชนโดย '{other.name}' แต่ Tag = '{other.tag}' ไม่ใช่ Player", this);
+
             return;
+        }
+
+        if (busy)
+        {
+            if (debugLog)
+                Debug.Log($"[{name}] ผู้เล่นเข้าโซน แต่วาร์ปนี้ใช้ไปแล้ว (One Shot)", this);
+
+            return;
+        }
 
         LevelManager manager = LevelManager.Instance;
-        if (manager == null || manager.IsTransitioning)
+
+        if (manager == null)
+        {
+            if (debugLog)
+                Debug.LogWarning($"[{name}] ผู้เล่นเข้าโซน แต่ไม่พบ LevelManager (Instance เป็น null)", this);
+
             return;
+        }
+
+        if (manager.IsTransitioning)
+        {
+            if (debugLog)
+                Debug.LogWarning($"[{name}] ผู้เล่นเข้าโซน แต่ LevelManager กำลังเปลี่ยน Scene/วาร์ปอยู่ (IsTransitioning = true)", this);
+
+            return;
+        }
+
+        if (debugLog)
+            Debug.Log($"[{name}] ผู้เล่นเข้าโซน โหมด: {mode}", this);
 
         switch (mode)
         {

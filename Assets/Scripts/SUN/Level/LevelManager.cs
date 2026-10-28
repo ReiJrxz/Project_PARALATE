@@ -26,7 +26,34 @@ public class LevelManager : MonoBehaviour
     /// <summary>จุดเกิดที่ผู้เล่นจะกลับมาเกิดเมื่อ Retry (null = ใช้จุดเริ่มต้นของด่าน)</summary>
     public string CheckpointSpawnId { get; private set; }
 
-    public bool IsTransitioning { get; private set; }
+    [Tooltip("ถ้าการเปลี่ยน Scene/วาร์ปค้างเกินเวลานี้ (วินาที) จะปลดล็อกให้อัตโนมัติ กันวาร์ปใช้ไม่ได้ตลอดไป")]
+    [SerializeField] private float transitionTimeout = 20f;
+
+    private bool transitioning;
+    private float transitionStartedAt;
+
+    public bool IsTransitioning
+    {
+        get
+        {
+            if (transitioning && Time.realtimeSinceStartup - transitionStartedAt > transitionTimeout)
+            {
+                Debug.LogWarning("LevelManager: การเปลี่ยน Scene/วาร์ปค้างนานเกินกำหนด จึงปลดล็อกให้อัตโนมัติ", this);
+                transitioning = false;
+                CameraZone.ForceCut = false;
+            }
+
+            return transitioning;
+        }
+    }
+
+    private void SetTransitioning(bool value)
+    {
+        transitioning = value;
+
+        if (value)
+            transitionStartedAt = Time.realtimeSinceStartup;
+    }
 
     private string pendingSpawnId;
 
@@ -44,11 +71,22 @@ public class LevelManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            // ซ้ำกับตัวที่ค้างมาจาก Scene ก่อนหน้า (เช่น MainMenu) ลบเฉพาะคอมโพเนนต์นี้
+            // ถ้ายังมีคอมโพเนนต์อื่น/ลูกอยู่บนวัตถุเดียวกัน จะไม่ลบทิ้งทั้งวัตถุ
+            if (GetComponents<Component>().Length <= 2 && transform.childCount == 0)
+                Destroy(gameObject);
+            else
+                Destroy(this);
+
             return;
         }
 
         Instance = this;
+
+        // DontDestroyOnLoad ใช้ได้เฉพาะวัตถุระดับบนสุด ถ้าซ้อนอยู่ใต้วัตถุอื่นให้แยกออกมาก่อน
+        if (transform.parent != null)
+            transform.SetParent(null);
+
         DontDestroyOnLoad(gameObject);
 
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -146,7 +184,7 @@ public class LevelManager : MonoBehaviour
 
     private IEnumerator SceneTransitionRoutine(string sceneName, string spawnId)
     {
-        IsTransitioning = true;
+        SetTransitioning(true);
         pendingSpawnId = spawnId;
 
         SceneFader fader = SceneFader.Instance;
@@ -167,7 +205,7 @@ public class LevelManager : MonoBehaviour
             SceneManager.LoadScene(sceneName);
         }
 
-        IsTransitioning = false;
+        SetTransitioning(false);
     }
 
     // ------------------------------------------------------------ จุดเกิด / Checkpoint
@@ -240,7 +278,7 @@ public class LevelManager : MonoBehaviour
 
     private IEnumerator TeleportRoutine(SpawnPoint target, Action onFinished)
     {
-        IsTransitioning = true;
+        SetTransitioning(true);
 
         TopDownPlayerController player = FindFirstObjectByType<TopDownPlayerController>();
         if (player != null)
@@ -278,7 +316,7 @@ public class LevelManager : MonoBehaviour
         if (player != null)
             player.SetMovementLocked(this, false);
 
-        IsTransitioning = false;
+        SetTransitioning(false);
         onFinished?.Invoke();
     }
 

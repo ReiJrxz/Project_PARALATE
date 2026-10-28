@@ -14,6 +14,13 @@ public class GunAction : MonoBehaviour
     public float damage = 10f;
     public float fireRate = 0.1f;
 
+    [Header("Hit Detection")]
+    [Tooltip("เลเยอร์ที่กระสุนชนได้ (ค่าเริ่มต้น = ทุกเลเยอร์ยกเว้น Ignore Raycast) " +
+             "ถ้ามี Collider ล่องหนที่ขวางกระสุน ให้ย้ายไปเลเยอร์ Ignore Raycast หรือเอาเลเยอร์นั้นออกจากช่องนี้")]
+    public LayerMask hitMask = ~(1 << 2);
+    [Tooltip("เปิดเพื่อดู Console ว่ากระสุนแต่ละนัดชนอะไร (ใช้หาว่าอะไรขวางกระสุนอยู่)")]
+    public bool logShotHits = false;
+
     [Header("Ammo & Reload")]
     public int magazineSize = 30;
     public float reloadDuration = 5f;
@@ -395,11 +402,13 @@ public class GunAction : MonoBehaviour
 
         Vector3 shootDirection = isScoped ? GetScopedShootDirection() : GetForwardShootDirection();
 
-        RaycastHit hit;
-
-        if (Physics.Raycast(firePoint.position, shootDirection, out hit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        if (TryRaycastShot(firePoint.position, shootDirection, out RaycastHit hit))
         {
             laserLine.SetPosition(1, hit.point);
+
+            if (logShotHits)
+                Debug.Log($"[{name}] กระสุนชน '{hit.collider.name}' (layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)}) " +
+                          $"ที่ระยะ {hit.distance:0.0} ม.", hit.collider);
 
             // ใช้ GetComponentInParent เหมือนมีด เผื่อ collider อยู่บน child ของศัตรู
             EnemyHealth enemy = hit.collider.GetComponentInParent<EnemyHealth>();
@@ -416,6 +425,42 @@ public class GunAction : MonoBehaviour
 
         if (currentAmmo <= 0 && autoReloadWhenEmpty)
             StartReload();
+    }
+
+    private static readonly RaycastHit[] shotHits = new RaycastHit[64];
+
+    // ยิง Raycast หาสิ่งแรกที่ขวางกระสุน โดยข้าม Trigger, Collider ของตัวผู้เล่นเอง และตัวปืนเอง
+    // (เดิมสิ่งแรกที่ชนถือเป็นเป้าหมายเลย ถ้ามี Collider ของผู้เล่นอยู่ข้างหน้า กระสุนจะหยุดตรงนั้น)
+    private bool TryRaycastShot(Vector3 origin, Vector3 direction, out RaycastHit result)
+    {
+        int count = Physics.RaycastNonAlloc(origin, direction, shotHits, range, hitMask, QueryTriggerInteraction.Ignore);
+        System.Array.Sort(shotHits, 0, count, RaycastHitDistanceComparer.Instance);
+
+        Transform ownerRoot = ownerTransform != null
+            ? ownerTransform
+            : (movementController != null ? movementController.transform : null);
+
+        for (int i = 0; i < count; i++)
+        {
+            Collider collider = shotHits[i].collider;
+
+            bool isOwn = collider.transform.IsChildOf(transform) ||
+                         (ownerRoot != null && collider.transform.IsChildOf(ownerRoot));
+
+            if (isOwn)
+            {
+                if (logShotHits)
+                    Debug.Log($"[{name}] ข้าม Collider ของตัวเอง '{collider.name}'", collider);
+
+                continue;
+            }
+
+            result = shotHits[i];
+            return true;
+        }
+
+        result = default;
+        return false;
     }
 
     private PlayerNoiseEmitter ResolveNoiseEmitter()
