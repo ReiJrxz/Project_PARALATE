@@ -11,7 +11,46 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class LevelManager : MonoBehaviour
 {
-    public static LevelManager Instance { get; private set; }
+    private static LevelManager instance;
+    private static bool applicationQuitting;
+
+    /// <summary>
+    /// LevelManager ตัวเดียวของเกม ถ้าเรียกตอนไม่มี (เช่น ถูกทำลายตอนเปลี่ยน Scene) จะสร้างใหม่ให้อัตโนมัติ
+    /// จึงไม่เป็น null ระหว่างเล่น (ตัวที่สร้างใหม่จะเริ่มใหม่ เช่น Checkpoint ล่าสุดหาย)
+    /// </summary>
+    public static LevelManager Instance
+    {
+        get
+        {
+            if (instance == null && Application.isPlaying && !applicationQuitting)
+            {
+                Debug.LogWarning("LevelManager: ไม่พบตัวที่ใช้งานอยู่ (อาจถูกทำลายตอนเปลี่ยน Scene) จึงสร้างใหม่อัตโนมัติ " +
+                                 "ตรวจว่า LevelManager ใน MainMenu เป็นวัตถุระดับบนสุดของ Hierarchy ไม่ได้อยู่ใต้วัตถุอื่น");
+                CreateAuto();
+            }
+
+            return instance;
+        }
+    }
+
+    /// <summary>ตอนนี้มี LevelManager อยู่ไหม (ไม่สร้างใหม่ให้)</summary>
+    public static bool Exists => instance != null;
+
+    /// <summary>กำลังเปลี่ยน Scene/วาร์ปอยู่ไหม (ไม่สร้าง LevelManager ใหม่ให้)</summary>
+    public static bool IsTransitionRunning => instance != null && instance.IsTransitioning;
+
+    private static void CreateAuto()
+    {
+        new GameObject("LevelManager (Auto)").AddComponent<LevelManager>();
+    }
+
+    // ล้างค่า static ตอนเริ่มเล่น (กรณีปิด Domain Reload ใน Enter Play Mode Options)
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics()
+    {
+        instance = null;
+        applicationQuitting = false;
+    }
 
     [Header("Transition")]
     [SerializeField] private float fadeOutDuration = 0.4f;
@@ -61,15 +100,15 @@ public class LevelManager : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void EnsureExists()
     {
-        if (Instance != null)
+        if (instance != null)
             return;
 
-        new GameObject("LevelManager (Auto)").AddComponent<LevelManager>();
+        CreateAuto();
     }
 
     void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (instance != null && instance != this)
         {
             // ซ้ำกับตัวที่ค้างมาจาก Scene ก่อนหน้า (เช่น MainMenu) ลบเฉพาะคอมโพเนนต์นี้
             // ถ้ายังมีคอมโพเนนต์อื่น/ลูกอยู่บนวัตถุเดียวกัน จะไม่ลบทิ้งทั้งวัตถุ
@@ -81,7 +120,7 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        Instance = this;
+        instance = this;
 
         // DontDestroyOnLoad ใช้ได้เฉพาะวัตถุระดับบนสุด ถ้าซ้อนอยู่ใต้วัตถุอื่นให้แยกออกมาก่อน
         if (transform.parent != null)
@@ -94,13 +133,18 @@ public class LevelManager : MonoBehaviour
         RegisterStartingCheckpoint(SceneManager.GetActiveScene());
     }
 
+    void OnApplicationQuit()
+    {
+        applicationQuitting = true;
+    }
+
     void OnDestroy()
     {
-        if (Instance != this)
+        if (instance != this)
             return;
 
         SceneManager.sceneLoaded -= OnSceneLoaded;
-        Instance = null;
+        instance = null;
     }
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)

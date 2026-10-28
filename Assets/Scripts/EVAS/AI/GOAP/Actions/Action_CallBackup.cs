@@ -36,7 +36,7 @@ public sealed class Action_CallBackup : GoapAction
             isChanneling = true;
             channelStartTime = Time.time;
             lockedController = agent.Controller;
-            lockedController?.SetMovementLocked(true);
+            lockedController?.SetMovementLocked(this, true);
         }
 
         if (Time.time < channelStartTime + radioChannelDuration)
@@ -55,7 +55,7 @@ public sealed class Action_CallBackup : GoapAction
     public override void ResetAction()
     {
         base.ResetAction();
-        lockedController?.SetMovementLocked(false);
+        lockedController?.SetMovementLocked(this, false);
         lockedController = null;
         isChanneling = false;
         notifiedEnemies.Clear();
@@ -74,3 +74,4 @@ public sealed class Action_CallBackup : GoapAction
         }
     }
 }
+

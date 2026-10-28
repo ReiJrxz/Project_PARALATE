@@ -82,12 +82,36 @@ public class SceneFader : MonoBehaviour
 
         BuildUI();
         SetAlpha(0f);
+
+        SceneManager.sceneLoaded += OnSceneLoadedRecover;
     }
 
     private void OnDestroy()
     {
         if (Instance == this)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoadedRecover;
             Instance = null;
+        }
+    }
+
+    // กันจอดำค้าง: ถ้าโหลด Scene เสร็จแล้วแต่จอยังดำและไม่มี LevelManager ทำงานอยู่ (เช่น ถูกทำลายตอนเปลี่ยน Scene)
+    // จะเปิดจอให้เองหลังรอ 3 วินาที
+    private void OnSceneLoadedRecover(Scene scene, LoadSceneMode mode)
+    {
+        if (mode != LoadSceneMode.Additive)
+            StartCoroutine(RecoverIfStuck());
+    }
+
+    private IEnumerator RecoverIfStuck()
+    {
+        yield return new WaitForSecondsRealtime(3f);
+
+        if (!previewLoading && group != null && group.alpha > 0.99f && !LevelManager.IsTransitionRunning)
+        {
+            Debug.LogWarning("SceneFader: จอดำค้างโดยไม่มีการเปลี่ยน Scene ที่ทำงานอยู่ จึงเปิดจอให้อัตโนมัติ");
+            yield return Fade(0f, 0.4f);
+        }
     }
 
     // แก้ค่าใน Inspector ตอนกำลัง Play: ขอให้สร้างหน้า Loading ใหม่ (ทำใน Update เพราะห้ามสร้างวัตถุใน OnValidate)
