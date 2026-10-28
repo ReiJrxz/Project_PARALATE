@@ -3637,8 +3637,8 @@ MonoBehaviour:
   victorySfx: {fileID: 0}
   loseSfx: {fileID: 0}
   itemPickupSfx: {fileID: 0}
-  uiHoverSfx: {fileID: 0}
-  uiClickSfx: {fileID: 0}
+  uiHoverSfx: {fileID: 8300000, guid: 894e3d9e9b514f748b5a058f464bfb3e, type: 3}
+  uiClickSfx: {fileID: 8300000, guid: 00acc5a4b980da4418072f2648fa3145, type: 3}
 --- !u!4 &1087202247
 Transform:
   m_ObjectHideFlags: 0
