@@ -21,6 +21,10 @@ GameObject:
   - component: {fileID: 8759545451457315333}
   - component: {fileID: 5804630930658200605}
   - component: {fileID: 638612901475893421}
+  - component: {fileID: 803360551297202405}
+  - component: {fileID: 5085763741366664558}
+  - component: {fileID: 7224967869095855874}
+  - component: {fileID: 3744861728583840570}
   m_Layer: 11
   m_Name: EnemyAK47
   m_TagString: Untagged
@@ -192,6 +196,10 @@ MonoBehaviour:
   closeAlertPerSecond: 4
   returnPointDecrease: 1
   returnDecreaseInterval: 2
+  paranoidLevel: 0
+  paranoidGainMultiplier: 1.5
+  instantAlertThreshold: 3
+  paranoidReturnSlowdownPerLevel: 0.25
   showDebugGizmos: 1
   showDebugLabel: 1
   logStateChanges: 0
@@ -367,6 +375,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyNoiseSensor
   memoryDuration: 5
+  walkingSetting:
+    priority: 1
+    alertPoints: 1
+  sprintingSetting:
+    priority: 3
+    alertPoints: 4
+  shootingSetting:
+    priority: 4
+    alertPoints: 6
+  whistlingSetting:
+    priority: 2
+    alertPoints: 2
+  throwingSetting:
+    priority: 2
+    alertPoints: 2
+  bulletHitWallSetting:
+    priority: 2
+    alertPoints: 4
 --- !u!114 &638612901475893421
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -383,6 +409,62 @@ MonoBehaviour:
   reflexTurnSpeed: 720
   fireAngleTolerance: 4
   reflexCooldown: 1
+--- !u!114 &803360551297202405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3961821848214297913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48b803d19fba44d46b44cc2aea7ac3a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Action_CallBackup
+  baseCost: 1
+  radioChannelDuration: 0.8
+  fallbackRadius: 15
+--- !u!114 &5085763741366664558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3961821848214297913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5799820de21eb094e8359a1cee96537d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Action_AttackTarget
+  baseCost: 1
+--- !u!114 &7224967869095855874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3961821848214297913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 001331ea3be94684a9400f18a4d92298, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Action_ChaseTarget
+  baseCost: 1
+--- !u!114 &3744861728583840570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3961821848214297913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c23241c2722441644b91b288afc33436, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GoapAgent
+  replanInterval: 0.2
+  lowHealthThreshold: 0.35
+  debugPlans: 0
 --- !u!1001 &8306863609969524368
 PrefabInstance:
   m_ObjectHideFlags: 0
