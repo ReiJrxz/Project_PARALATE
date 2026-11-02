@@ -18409,6 +18409,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 324333781}
   inactivePriority: 0
   activePriority: 40
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &201790119
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -21037,6 +21041,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 1910968314}
   inactivePriority: 0
   activePriority: 20
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &242329357
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -27298,6 +27306,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5830545856493785984, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830545856493785984, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5943740366450546338, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
       propertyPath: target
       value: 
@@ -31515,6 +31531,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 931726192}
   inactivePriority: 0
   activePriority: 20
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!1 &385814523
 GameObject:
   m_ObjectHideFlags: 0
@@ -41435,6 +41455,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 2134087637}
   inactivePriority: 0
   activePriority: 30
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &567228323
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -56085,6 +56109,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 1638820006}
   inactivePriority: 0
   activePriority: 20
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &759756423
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -88504,6 +88532,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 1743673672}
   inactivePriority: 0
   activePriority: 30
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &1288850623
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -95445,6 +95477,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 1104296914}
   inactivePriority: 0
   activePriority: 30
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &1383361081
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -96227,6 +96263,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 954260975}
   inactivePriority: 0
   activePriority: 2000
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &1416399477
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -97009,6 +97049,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 1913486191}
   inactivePriority: 0
   activePriority: 20
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &1429607280
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -97488,6 +97532,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 1886469319}
   inactivePriority: 0
   activePriority: 30
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &1441801819
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -104207,6 +104255,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 1325660924}
   inactivePriority: 0
   activePriority: 50
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &1620661932
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -109451,6 +109503,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 899790679}
   inactivePriority: 0
   activePriority: 30
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &1660930314
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -111804,6 +111860,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 192517193}
   inactivePriority: 0
   activePriority: 40
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
   player: {fileID: 977656331}
 --- !u!1001 &1695521647
 PrefabInstance:
@@ -117443,6 +117503,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 2107484253}
   inactivePriority: 0
   activePriority: 30
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &1761973393
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -120249,6 +120313,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 675241183}
   inactivePriority: 0
   activePriority: 40
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &1780707115
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -121498,6 +121566,10 @@ PrefabInstance:
     - target: {fileID: 2648573681215363720, guid: 2b7ee6a33e183234091b53ba8d785751, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3439542103654195770, guid: 2b7ee6a33e183234091b53ba8d785751, type: 3}
+      propertyPath: hitMask.m_Bits
+      value: 32755
       objectReference: {fileID: 0}
     - target: {fileID: 7950042793085795323, guid: 2b7ee6a33e183234091b53ba8d785751, type: 3}
       propertyPath: m_Name
@@ -126587,6 +126659,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 6525280351835815238}
   inactivePriority: 0
   activePriority: 30
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!114 &1886469319 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6525280351598547685, guid: 8a363671342deae4991250a604014701, type: 3}
@@ -137346,6 +137422,10 @@ MonoBehaviour:
   virtualCamera: {fileID: 0}
   inactivePriority: 0
   activePriority: 20
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!65 &2012378545
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -143804,6 +143884,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   wallDampening: 0.5
+  restrictToSameRoom: 1
+  crossRoomDampening: 0.8
 --- !u!4 &2123044100
 Transform:
   m_ObjectHideFlags: 0

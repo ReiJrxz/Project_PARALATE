@@ -241,7 +241,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76f351bd61fad6e40a84d6d499c81b15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TopDownPlayerController
-  useCameraRelativeMovement: 0
+  useCameraRelativeMovement: 1
   walkSpeed: 5
   sprintSpeed: 8
   crouchSpeed: 2.5

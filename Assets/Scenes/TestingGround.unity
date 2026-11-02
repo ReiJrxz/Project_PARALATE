@@ -2551,6 +2551,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyNoiseSensor
   memoryDuration: 5
+  walkingSetting:
+    priority: 1
+    alertPoints: 1
+  sprintingSetting:
+    priority: 3
+    alertPoints: 4
+  shootingSetting:
+    priority: 4
+    alertPoints: 6
+  whistlingSetting:
+    priority: 2
+    alertPoints: 2
+  throwingSetting:
+    priority: 2
+    alertPoints: 2
+  bulletHitWallSetting:
+    priority: 2
+    alertPoints: 4
 --- !u!82 &140547991
 AudioSource:
   m_ObjectHideFlags: 0
@@ -2825,6 +2843,7 @@ MonoBehaviour:
   spottedColor: {r: 1, g: 0, b: 0, a: 0.35}
   coneHeightOffset: 0.05
   coneSegments: 40
+  coneUpdateInterval: 0.03
 --- !u!114 &140547999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3003,6 +3022,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraZone
   virtualCamera: {fileID: 626585361}
   inactivePriority: 8
+  activePriority: 20
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!1 &157207112
 GameObject:
   m_ObjectHideFlags: 0
@@ -5505,6 +5529,7 @@ MonoBehaviour:
   spottedColor: {r: 1, g: 0, b: 0, a: 0.35}
   coneHeightOffset: 0.05
   coneSegments: 40
+  coneUpdateInterval: 0.03
 --- !u!43 &387976327
 Mesh:
   m_ObjectHideFlags: 0
@@ -5829,6 +5854,7 @@ MonoBehaviour:
   spottedColor: {r: 1, g: 0, b: 0, a: 0.35}
   coneHeightOffset: 0.05
   coneSegments: 40
+  coneUpdateInterval: 0.03
 --- !u!114 &418106696
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8051,6 +8077,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraZone
   virtualCamera: {fileID: 344457208}
   inactivePriority: 10
+  activePriority: 20
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!1 &676184443
 GameObject:
   m_ObjectHideFlags: 0
@@ -8142,6 +8173,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraZone
   virtualCamera: {fileID: 1262977317}
   inactivePriority: 9
+  activePriority: 20
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!114 &676411002 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7678648541893415455, guid: 06763626f69097b4eaaa50ca83879dc9, type: 3}
@@ -9101,6 +9137,7 @@ MonoBehaviour:
   spottedColor: {r: 1, g: 0, b: 0, a: 0.35}
   coneHeightOffset: 0.05
   coneSegments: 40
+  coneUpdateInterval: 0.03
 --- !u!1 &776098977
 GameObject:
   m_ObjectHideFlags: 0
@@ -14181,6 +14218,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraZone
   virtualCamera: {fileID: 275725778}
   inactivePriority: 9
+  activePriority: 20
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!43 &966389248
 Mesh:
   m_ObjectHideFlags: 0
@@ -16593,6 +16635,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   wallDampening: 0.5
+  restrictToSameRoom: 1
+  crossRoomDampening: 0.8
 --- !u!4 &1099601637
 Transform:
   m_ObjectHideFlags: 0
@@ -17038,7 +17082,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6588571600985579534, guid: 1caa2d2a1e1b1f748aac3b37299bb1e9, type: 3}
   m_PrefabInstance: {fileID: 824663779657574522}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 437524358}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
@@ -19602,6 +19646,7 @@ MonoBehaviour:
   spottedColor: {r: 1, g: 0, b: 0, a: 0.35}
   coneHeightOffset: 0.05
   coneSegments: 40
+  coneUpdateInterval: 0.03
 --- !u!114 &1344467451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20906,6 +20951,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyNoiseSensor
   memoryDuration: 5
+  walkingSetting:
+    priority: 1
+    alertPoints: 1
+  sprintingSetting:
+    priority: 3
+    alertPoints: 4
+  shootingSetting:
+    priority: 4
+    alertPoints: 6
+  whistlingSetting:
+    priority: 2
+    alertPoints: 2
+  throwingSetting:
+    priority: 2
+    alertPoints: 2
+  bulletHitWallSetting:
+    priority: 2
+    alertPoints: 4
 --- !u!82 &1477175527
 AudioSource:
   m_ObjectHideFlags: 0
@@ -21180,6 +21243,7 @@ MonoBehaviour:
   spottedColor: {r: 1, g: 0, b: 0, a: 0.35}
   coneHeightOffset: 0.05
   coneSegments: 40
+  coneUpdateInterval: 0.03
 --- !u!114 &1477175535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21757,6 +21821,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollowAnchor
   player: {fileID: 4136811918164220977}
+  followX: 1
+  followY: 0
+  followZ: 1
+  followOffset: {x: 0, y: 0, z: 0}
+  fixedY: 2.5
+  useBounds: 0
+  xBounds: {x: -10, y: 10}
+  zBounds: {x: -10, y: 10}
 --- !u!4 &1645251737
 Transform:
   m_ObjectHideFlags: 0
@@ -21852,6 +21924,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraZone
   virtualCamera: {fileID: 2055556374}
   inactivePriority: 0
+  activePriority: 20
+  overrideBlend: 0
+  blendStyle: 1
+  blendTime: 1.5
+  debugLog: 0
 --- !u!43 &1678840960
 Mesh:
   m_ObjectHideFlags: 0
@@ -25232,6 +25309,12 @@ MonoBehaviour:
   slideOffset: {x: 4, y: 0, z: 0}
   slideSpeed: 2
   holdTime: 3
+  requiredKeycardLevel: 0
+  openPrompt: "\u0E01\u0E14 E \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E40\u0E1B\u0E34\u0E14"
+  lockedPrompt: "\u0E15\u0E49\u0E2D\u0E07\u0E43\u0E0A\u0E49 Keycard Lv.{0}"
+  openSound: {fileID: 0}
+  deniedSound: {fileID: 0}
+  interactZones: []
 --- !u!1 &1955354433
 GameObject:
   m_ObjectHideFlags: 0
@@ -25717,6 +25800,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractableObject
   interactMessage: OPEN THE DOOR
   interactAction: {fileID: 5731384896986285384, guid: 3bdf035a2b3eac841b3fdc702c70b4a7, type: 3}
+  promptSource: {fileID: 0}
   onInteract:
     m_PersistentCalls:
       m_Calls:
@@ -25733,6 +25817,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   interactingPlayer: {fileID: 0}
+  debugLog: 0
 --- !u!65 &1988142677
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -25963,6 +26048,7 @@ MonoBehaviour:
   spottedColor: {r: 1, g: 0, b: 0, a: 0.35}
   coneHeightOffset: 0.05
   coneSegments: 40
+  coneUpdateInterval: 0.03
 --- !u!134 &2010526480
 PhysicsMaterial:
   m_ObjectHideFlags: 0
@@ -27914,6 +28000,7 @@ MonoBehaviour:
   spottedColor: {r: 1, g: 0, b: 0, a: 0.35}
   coneHeightOffset: 0.05
   coneSegments: 40
+  coneUpdateInterval: 0.03
 --- !u!1 &3888528758523400155
 GameObject:
   m_ObjectHideFlags: 0
@@ -29074,6 +29161,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyNoiseSensor
   memoryDuration: 5
+  walkingSetting:
+    priority: 1
+    alertPoints: 1
+  sprintingSetting:
+    priority: 3
+    alertPoints: 4
+  shootingSetting:
+    priority: 4
+    alertPoints: 6
+  whistlingSetting:
+    priority: 2
+    alertPoints: 2
+  throwingSetting:
+    priority: 2
+    alertPoints: 2
+  bulletHitWallSetting:
+    priority: 2
+    alertPoints: 4
 --- !u!114 &8848405047762226156
 MonoBehaviour:
   m_ObjectHideFlags: 0

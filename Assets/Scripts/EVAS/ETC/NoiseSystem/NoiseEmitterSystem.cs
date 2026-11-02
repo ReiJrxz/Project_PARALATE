@@ -12,6 +12,13 @@ public class NoiseEmitterSystem : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float wallDampening = 0.5f;
 
+    [Header("Room Scoping Settings")]
+    [Tooltip("If enabled, noise will only be heard by listeners in the same RoomZone.")]
+    [SerializeField] private bool restrictToSameRoom = true;
+    [Tooltip("If restrictToSameRoom is false, dampening applied when noise crosses between different RoomZones.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float crossRoomDampening = 0.8f;
+
     private const int MAX_LISTENERS = 32;
     private static readonly Collider[] hitColliders = new Collider[MAX_LISTENERS];
     private static readonly HashSet<INoiseListener> listeners = new HashSet<INoiseListener>();
@@ -95,13 +102,30 @@ public class NoiseEmitterSystem : MonoBehaviour
             return;
 
         Vector3 targetPosition = listenerComponent.transform.position + Vector3.up;
+
+        // ตรวจสอบ RoomZone
+        RoomZone soundRoom = RoomZone.GetAt(noise.Position);
+        RoomZone listenerRoom = RoomZone.GetFor(listenerComponent) ?? RoomZone.GetAt(targetPosition);
+
+        float roomDampeningFactor = 1f;
+        if (soundRoom != null || listenerRoom != null)
+        {
+            if (soundRoom != listenerRoom)
+            {
+                if (restrictToSameRoom)
+                    return; // อยู่คนละห้อง หรือฝ่ายหนึ่งอยู่ในห้องแต่อีกฝ่ายอยู่นอกห้อง = ไม่ได้ยิน
+
+                roomDampeningFactor = 1f - crossRoomDampening;
+            }
+        }
+
         float sqrDistance = (targetPosition - noise.Position).sqrMagnitude;
 
-        // ไกลเกินรัศมีเต็มแล้ว (กำแพงมีแต่ลดรัศมี) ไม่ต้องเสียเวลา Linecast
+        // ไกลเกินรัศมีเต็มแล้ว ไม่ต้องเสียเวลา Linecast
         if (sqrDistance > noise.Radius * noise.Radius)
             return;
 
-        float effectiveRadius = noise.Radius;
+        float effectiveRadius = noise.Radius * roomDampeningFactor;
 
         if (obstacleLayers.value != 0 && Physics.Linecast(noise.Position, targetPosition, obstacleLayers, QueryTriggerInteraction.Ignore))
             effectiveRadius *= 1f - wallDampening;
