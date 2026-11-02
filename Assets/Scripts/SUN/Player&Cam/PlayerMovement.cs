@@ -329,7 +329,7 @@ public class TopDownPlayerController : MonoBehaviour
             : 0f;
 
         if (animator != null)
-        {
+       {
             animator.SetBool(IsWallHuggingHash, wallHug != null && wallHug.IsHugging);
             animator.SetFloat(WallHugMoveHash, wallHugMoveAmount);
         }
