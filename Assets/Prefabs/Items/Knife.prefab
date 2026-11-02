@@ -159,8 +159,8 @@ MonoBehaviour:
   attackRate: 0.5
   raycastOffset: {x: 0, y: 0, z: 0}
   isHeld: 0
-  attackAction: {fileID: 0}
-  playerTransform: {fileID: 0}
+  attackAction: {fileID: 1120369429361536294, guid: 35845fe01580c41289b024647b1d1c53, type: 3}
+  playerTransform: {fileID: 991248420540372076}
 --- !u!114 &2446299312341099345
 MonoBehaviour:
   m_ObjectHideFlags: 0

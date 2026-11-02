@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ResourceData
   resourceName: Metal
   icon: {fileID: 0}
+  pickupSound: {fileID: 8300000, guid: 7af396ac287f2f64ca929527960c1767, type: 3}
+  promptFormat: '[ E ] to collect
+
+    Take {0} x{1}'

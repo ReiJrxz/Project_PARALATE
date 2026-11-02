@@ -200,8 +200,8 @@ MonoBehaviour:
   paranoidGainMultiplier: 1.5
   instantAlertThreshold: 3
   paranoidReturnSlowdownPerLevel: 0.25
-  showDebugGizmos: 1
-  showDebugLabel: 1
+  showDebugGizmos: 0
+  showDebugLabel: 0
   logStateChanges: 0
   closeDistanceColor: {r: 1, g: 0.2, b: 0.2, a: 0.8}
   middleDistanceColor: {r: 1, g: 0.85, b: 0.1, a: 0.8}
@@ -274,7 +274,7 @@ AudioSource:
   m_GameObject: {fileID: 3961821848214297913}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -6066343643351555005, guid: b13fe9efd3c30e7408fea4e2175f9b81, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
@@ -473,6 +473,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7176063913029227463}
     m_Modifications:
+    - target: {fileID: 134195406436007678, guid: 5baaadd6638dd644f898fd9bb9450618, type: 3}
+      propertyPath: m_Name
+      value: FirePoint
+      objectReference: {fileID: 0}
     - target: {fileID: 312956417844868536, guid: 5baaadd6638dd644f898fd9bb9450618, type: 3}
       propertyPath: m_Layer
       value: 11
@@ -576,6 +580,10 @@ PrefabInstance:
     - target: {fileID: 2552377712273546870, guid: 5baaadd6638dd644f898fd9bb9450618, type: 3}
       propertyPath: m_Layer
       value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 3024396847197941755, guid: 5baaadd6638dd644f898fd9bb9450618, type: 3}
+      propertyPath: m_Name
+      value: Ak47
       objectReference: {fileID: 0}
     - target: {fileID: 3024396847197941755, guid: 5baaadd6638dd644f898fd9bb9450618, type: 3}
       propertyPath: m_Layer
