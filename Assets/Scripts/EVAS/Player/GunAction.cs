@@ -49,6 +49,9 @@ public class GunAction : MonoBehaviour
     public float normalFieldOfView = 50f; //มุมกล้องตอนถือปืน
     public float scopedFieldOfView = 25f; //มุมกล้องตอน scope
     public bool hideCrosshairWhileScoped = false; //เปิด/ปิด crosshair
+    [Header("Movement")]
+    [Range(0f, 1f)]
+    public float scopedMovementSpeedMultiplier = 0.6f;
 
     [Header("First Person Scope Camera")]
 
@@ -365,6 +368,7 @@ public class GunAction : MonoBehaviour
                 return;
 
             isScoped = scoped;
+            SetScopedMovementSpeed(scoped);
             SetFirstPersonScopeCameraActive(scoped);
             return;
         }
@@ -374,6 +378,15 @@ public class GunAction : MonoBehaviour
 
         SetMovementAimCameraOverride(false);
         RestoreFirstPersonCursorState();
+    }
+    void SetScopedMovementSpeed(bool scoped)
+    {
+        if (movementController == null)
+            movementController = GetComponentInParent<TopDownPlayerController>();
+
+        if (movementController != null)
+            movementController.SetMovementSpeedMultiplier(
+                scoped ? scopedMovementSpeedMultiplier : 1f);
     }
 
     // ฟังก์ชันนี้ใช้เปิด/ปิด UI เป้าเล็ง

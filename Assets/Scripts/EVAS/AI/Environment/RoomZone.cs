@@ -7,11 +7,46 @@ public sealed class RoomZone : MonoBehaviour
     private readonly HashSet<AlertState> enemies = new HashSet<AlertState>();
     private readonly HashSet<Transform> players = new HashSet<Transform>();
     private static readonly Dictionary<AlertState, RoomZone> EnemyZones = new Dictionary<AlertState, RoomZone>();
+    private static readonly List<RoomZone> allZones = new List<RoomZone>();
 
     public static RoomZone GetFor(Component member)
     {
         AlertState enemy = member == null ? null : member.GetComponent<AlertState>();
         return enemy != null && EnemyZones.TryGetValue(enemy, out RoomZone zone) ? zone : null;
+    }
+
+    public static RoomZone GetAt(Vector3 position)
+    {
+        for (int i = 0; i < allZones.Count; i++)
+        {
+            RoomZone zone = allZones[i];
+            if (zone == null) continue;
+
+            BoxCollider box = zone.GetComponent<BoxCollider>();
+            if (box == null) continue;
+
+            Vector3 local = zone.transform.InverseTransformPoint(position) - box.center;
+            Vector3 halfExtents = Vector3.Scale(box.size * 0.5f, zone.transform.lossyScale);
+
+            if (Mathf.Abs(local.x) <= Mathf.Abs(halfExtents.x) &&
+                Mathf.Abs(local.y) <= Mathf.Abs(halfExtents.y) &&
+                Mathf.Abs(local.z) <= Mathf.Abs(halfExtents.z))
+            {
+                return zone;
+            }
+        }
+        return null;
+    }
+
+    private void OnEnable()
+    {
+        if (!allZones.Contains(this))
+            allZones.Add(this);
+    }
+
+    private void OnDisable()
+    {
+        allZones.Remove(this);
     }
 
     private void Awake()
