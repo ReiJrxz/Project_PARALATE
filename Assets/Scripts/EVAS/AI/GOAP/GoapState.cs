@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-/// <summary>A small immutable-by-convention bag of facts used by the GOAP planner.</summary>
 [Serializable]
 public sealed class GoapState : IEquatable<GoapState>
 {

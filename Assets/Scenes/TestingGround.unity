@@ -16713,6 +16713,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1984909933}
     - target: {fileID: 7678648541893415455, guid: 06763626f69097b4eaaa50ca83879dc9, type: 3}
+      propertyPath: hitMask.m_Bits
+      value: 32755
+      objectReference: {fileID: 0}
+    - target: {fileID: 7678648541893415455, guid: 06763626f69097b4eaaa50ca83879dc9, type: 3}
       propertyPath: useFirstPersonScope
       value: 1
       objectReference: {fileID: 0}
@@ -27865,6 +27869,10 @@ PrefabInstance:
       propertyPath: target
       value: 
       objectReference: {fileID: 4136811918164220977}
+    - target: {fileID: 4034099875597436941, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 6392972160575318266, guid: be2c44e828d466841bdffc04da3952db, type: 2}
     - target: {fileID: 4386575564388508724, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -27952,6 +27960,18 @@ PrefabInstance:
     - target: {fileID: 6263587560004742178, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
       propertyPath: m_Name
       value: MainHUD
+      objectReference: {fileID: 0}
+    - target: {fileID: 7624113964966975797, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -4372895326341728403, guid: 716009719468350409b314d4d32e0f86, type: 2}
+    - target: {fileID: 7811360549256149639, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 6392972160575318266, guid: be2c44e828d466841bdffc04da3952db, type: 2}
+    - target: {fileID: 8907012810603152172, guid: 1081d1a86b1ab6f43bd238a6f7d31b16, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -28192,25 +28212,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3523246845713457628, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
   m_PrefabInstance: {fileID: 7356783810209024581}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4225818444403733936
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4225818444403733921}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7393b3538f1c5a34bb3a166853656043, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerNoiseEmitter
-  walkingNoiseRadius: 5
-  sprintingNoiseRadius: 15
-  shootingNoiseRadius: 35
-  whistlingNoiseRadius: 20
-  throwingNoiseRadius: 10
-  bulletHitWallNoiseRadius: 7
-  showNoiseRanges: 1
 --- !u!1 &4474043306036034441
 GameObject:
   m_ObjectHideFlags: 0
@@ -28795,10 +28796,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3523246845713457628, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4225818444403733936}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
 --- !u!23 &7492132007619802816
 MeshRenderer:

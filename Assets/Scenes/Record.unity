@@ -702,7 +702,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4994754804248166962, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
       propertyPath: showNoiseRanges
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7229898400743049072, guid: 5bd147dbcd2df744d91cb0a813ec2645, type: 3}
       propertyPath: m_Material
