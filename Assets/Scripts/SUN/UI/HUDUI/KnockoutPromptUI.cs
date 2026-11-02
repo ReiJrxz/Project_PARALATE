@@ -34,7 +34,11 @@ public class KnockoutPromptUI : MonoBehaviour
     public string killLabel = "KILL";
     public string mercyLabel = "MERCY";
 
-    [Tooltip("ความเร็วที่หลอดเพิ่มกลับตอนปล่อย Ctrl ก่อนเสร็จ (สัดส่วนของหลอดต่อวินาที)")]
+    [Tooltip("ปล่อย Ctrl ก่อนเสร็จ: เปิด = ซ่อนหลอดทันที (ข้อความปุ่มกลับมาโดยไม่รก) / " +
+             "ปิด = หลอดค่อยๆ เพิ่มกลับจนเต็มแล้วค่อยซ่อน")]
+    public bool hideBarOnRelease = true;
+
+    [Tooltip("ความเร็วที่หลอดเพิ่มกลับ (ใช้เมื่อปิด Hide Bar On Release) สัดส่วนของหลอดต่อวินาที")]
     public float refillSpeed = 2f;
 
     private float totalSeconds = 1f;
@@ -120,8 +124,16 @@ public class KnockoutPromptUI : MonoBehaviour
     /// <summary>ผู้เล่นปล่อยก่อนเสร็จ: หลอดค่อยๆ เพิ่มกลับจนเต็มแล้วซ่อน</summary>
     public void ReleaseEarly()
     {
-        if (barActive)
-            refilling = true;
+        if (!barActive)
+            return;
+
+        if (hideBarOnRelease)
+        {
+            EndCountdown();
+            return;
+        }
+
+        refilling = true;
     }
 
     /// <summary>เสร็จสิ้นหรือยกเลิกทันที: ซ่อนหลอด</summary>

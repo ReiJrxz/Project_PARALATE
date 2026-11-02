@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c7b38e213e270042a9e4e7f559e81c2, type: 3}
   m_Name: AK47
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  pickupSound: {fileID: 0}
+  pickupSound: {fileID: 8300000, guid: bbe0341c745783c438700041472581f5, type: 3}
   itemName: AK47
   icon: {fileID: 0}
   promptText: Press E to pick up

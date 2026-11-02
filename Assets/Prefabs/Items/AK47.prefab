@@ -27,8 +27,8 @@ Transform:
   m_GameObject: {fileID: 1810623825351543576}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.06799985, y: -0.044999897, z: -0.0069982945}
+  m_LocalScale: {x: 0.648, y: 0.648, z: 0.648}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2147550148209744255}
@@ -214,8 +214,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.81931055, y: 0.43044934, z: 0.24503331}
-  m_Center: {x: -0.0043919883, y: 0.0050319037, z: -0.01044335}
+  m_Size: {x: 0.56458, y: 0.34443197, z: 0.24503331}
+  m_Center: {x: -0.025899807, y: -0.037976783, z: -0.01044335}
 --- !u!54 &4974396184298915530
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -369,6 +369,10 @@ MonoBehaviour:
   range: 100
   damage: 20
   fireRate: 0.7
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 32755
+  logShotHits: 0
   magazineSize: 30
   reloadDuration: 4
   reloadMovementSpeedMultiplier: 0.5
@@ -384,6 +388,7 @@ MonoBehaviour:
   normalFieldOfView: 50
   scopedFieldOfView: 40
   hideCrosshairWhileScoped: 0
+  scopedMovementSpeedMultiplier: 0
   useFirstPersonScope: 1
   firstPersonCameraOffset: {x: 0, y: 1.55, z: 0.15}
   firstPersonCameraPriority: 2000
@@ -393,10 +398,10 @@ MonoBehaviour:
   firstPersonMouseSensitivity: 0.12
   minFirstPersonPitch: -70
   maxFirstPersonPitch: 70
-  fireSound: {fileID: 0}
-  reloadStartSound: {fileID: 0}
+  fireSound: {fileID: 8300000, guid: aaf59da9c828d39409df3671fbbddcaf, type: 3}
+  reloadStartSound: {fileID: 8300000, guid: bbe0341c745783c438700041472581f5, type: 3}
   reloadFinishSound: {fileID: 0}
-  equipSound: {fileID: 0}
+  equipSound: {fileID: 8300000, guid: bbe0341c745783c438700041472581f5, type: 3}
   fireVolume: 1
   reloadVolume: 1
   equipVolume: 1
@@ -428,7 +433,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cc3eb417998b444f957777de8ef24cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponInfo
-  itemData: {fileID: 0}
+  itemData: {fileID: 11400000, guid: 79b5c77364ba1a147af8335f20db5de8, type: 2}
 --- !u!82 &5041806745218822092
 AudioSource:
   m_ObjectHideFlags: 0
@@ -438,7 +443,7 @@ AudioSource:
   m_GameObject: {fileID: 7950042793085795323}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -6066343643351555005, guid: b13fe9efd3c30e7408fea4e2175f9b81, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
@@ -450,7 +455,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
+  MinDistance: 1.0198689
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 0
@@ -553,8 +558,8 @@ Transform:
   m_GameObject: {fileID: 8534259288831299916}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.029099852, y: -0.013899898, z: 0.000101705395}
+  m_LocalScale: {x: 0.648, y: 0.648, z: 0.648}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2147550148209744255}
@@ -643,8 +648,8 @@ Transform:
   m_GameObject: {fileID: 9047711277279765790}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.068, y: -0.045, z: -0.007}
+  m_LocalScale: {x: 0.648, y: 0.648, z: 0.648}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2147550148209744255}
